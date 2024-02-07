@@ -7,16 +7,31 @@
     "start": "expo start",
     "android": "expo start --android",
     "ios": "expo start --ios",
+    "android:local": "expo run:android",
+    "ios:local": "expo run:ios",
     "web": "expo start --web"
   },
   "dependencies": {
+    "@react-native-async-storage/async-storage": "^1.21.0",
+    "@reduxjs/toolkit": "^2.1.0",
+    "@rneui/base": "^4.0.0-rc.7",
+    "@rneui/themed": "^4.0.0-rc.8",
+    "@types/react": "~18.2.45",
+    "dotenv": "^16.4.1",
     "expo": "~50.0.4",
+    "expo-dev-client": "~3.3.7",
+    "expo-location": "~16.5.2",
     "expo-status-bar": "~1.11.1",
     "react": "18.2.0",
     "react-native": "0.73.2",
-    "expo-dev-client": "~3.3.7",
-    "typescript": "^5.3.0",
-    "@types/react": "~18.2.45"
+    "react-native-dotenv": "^3.4.9",
+    "react-native-maps": "^1.10.0",
+    "react-native-vector-icons": "^10.0.3",
+    "react-redux": "^9.1.0",
+    "redux": "^5.0.1",
+    "redux-persist": "^6.0.0",
+    "redux-persist-expo-filesystem": "^2.0.1",
+    "typescript": "^5.3.0"
   },
   "devDependencies": {
     "@babel/core": "^7.20.0"

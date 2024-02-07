@@ -1,0 +1,11 @@
+{
+  "plugins": [
+    [
+      "module:react-native-dotenv",
+      {
+        "path": ".env.local",
+        "moduleName": "@env"
+      }
+    ]
+  ]
+}
