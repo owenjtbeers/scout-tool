@@ -13,7 +13,6 @@ import { store, persistor } from "./src/redux/store";
 import React from "react";
 import "expo-dev-client";
 
-console.log(process.env);
 export default function App() {
   return (
     <Provider store={store}>
