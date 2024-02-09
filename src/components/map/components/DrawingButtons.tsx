@@ -6,11 +6,11 @@ import { Ionicons, Entypo } from "@expo/vector-icons";
 
 // Data
 import { useSelector } from "react-redux";
-import { RootState, useAppDispatch } from "../../redux/store";
+import { RootState, useAppDispatch } from "../../../redux/store";
 import {
   MAP_DRAWING_REDUCER_KEY,
   drawingSlice,
-} from "../../redux/map/drawingSlice";
+} from "../../../redux/map/drawingSlice";
 
 export const DrawingButtons = () => {
   const dispatch = useAppDispatch();

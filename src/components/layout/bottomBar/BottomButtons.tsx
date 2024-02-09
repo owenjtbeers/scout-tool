@@ -1,0 +1,17 @@
+import React from "react";
+import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
+
+type IconProps = {
+  focused: boolean;
+  color: string;
+};
+
+export const MapTabIcon = (props: IconProps) => {
+  return <Ionicons name="map" size={24} color={props.color} />;
+};
+
+export const FieldTabIcon = (props: IconProps) => {
+  return (
+    <MaterialCommunityIcons name="focus-field" size={24} color={props.color} />
+  );
+};

@@ -12,5 +12,6 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
           "Allow Scout-Tool to access your location",
       },
     ],
+    ["expo-router"],
   ],
 });

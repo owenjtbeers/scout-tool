@@ -2,8 +2,9 @@
 import ExpoFileSystemStorage from "redux-persist-expo-filesystem";
 
 // Redux
-import { persistStore, persistReducer } from "redux-persist";
+import { persistStore, persistReducer} from "redux-persist";
 import { configureStore } from "@reduxjs/toolkit";
+import autoMergeLevel2 from "redux-persist/lib/stateReconciler/autoMergeLevel2";
 
 // Root Reducer
 import { rootReducer } from "./rootReducer";
@@ -15,6 +16,7 @@ const persistConfig = {
   key: "root",
   storage: ExpoFileSystemStorage,
   blacklist: [MAP_DRAWING_REDUCER_KEY],
+  reconcile: autoMergeLevel2,
 };
 
 const persistedReducer = persistReducer(persistConfig, rootReducer);
