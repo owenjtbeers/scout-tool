@@ -2,6 +2,11 @@
   "compilerOptions": {
     "strict": true
   },
-  "include": ["./src/**/*"],
+  "include": [
+    "./src/**/*",
+    "./app/**/*",
+    ".expo/types/**/*.ts",
+    "expo-env.d.ts"
+  ],
   "extends": "expo/tsconfig.base"
 }

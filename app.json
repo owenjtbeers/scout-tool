@@ -27,13 +27,18 @@
       "package": "com.owenbeers.scouttool"
     },
     "web": {
-      "favicon": "./assets/favicon.png"
+      "favicon": "./assets/favicon.png",
+      "bundler": "metro"
     },
     "extra": {
       "eas": {
         "projectId": "290dc20f-d344-457c-97f3-941b0c713aeb"
       }
     },
-    "owner": "owenbeers"
+    "owner": "owenbeers",
+    "scheme": "scout-tool",
+    "experiments": {
+      "typedRoutes": true
+    }
   }
 }

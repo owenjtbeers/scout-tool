@@ -5,8 +5,8 @@ import { useSelector } from "react-redux";
 import {
   MAP_DRAWING_REDUCER_KEY,
   drawingSlice,
-} from "../redux/map/drawingSlice";
-import { RootState } from "../redux/store";
+} from "../../redux/map/drawingSlice";
+import { RootState } from "../../redux/store";
 
 const DrawingManager = (props: { mapRef: React.RefObject<MapView> }) => {
   const { mapRef } = props;
@@ -19,12 +19,12 @@ const DrawingManager = (props: { mapRef: React.RefObject<MapView> }) => {
   );
 
   return isDrawing && polygon.length ? (
-      <Polygon
-        coordinates={polygon}
-        fillColor="blue"
-        strokeColor="blue"
-        strokeWidth={5}
-      />
+    <Polygon
+      coordinates={polygon}
+      fillColor="blue"
+      strokeColor="blue"
+      strokeWidth={5}
+    />
   ) : null;
 };
 

@@ -8,7 +8,7 @@ import MapView, {
 // TODO Revisit this on another day
 // import MapBoxGL from "@rnmapbox/maps"
 import { useSelector } from "react-redux";
-import { useAppDispatch } from "../redux/store";
+import { useAppDispatch } from "../../redux/store";
 import * as Location from "expo-location";
 
 // Components
@@ -17,13 +17,14 @@ import { DrawingButtons } from "./components/DrawingButtons";
 import UserLocationButton from "./components/UserLocationButton";
 
 // Data
-import { RootState } from "../redux/store";
+import { RootState } from "../../redux/store";
 
 // Constants and Types
 import {
   MAP_DRAWING_REDUCER_KEY,
   drawingSlice,
-} from "../redux/map/drawingSlice";
+} from "../../redux/map/drawingSlice";
+import AnimatedMapActionButtons from "./components/AnimatedMapActionButtons";
 
 export const MapScreen = () => {
   const mapRef = React.useRef<MapView>(null);
@@ -50,11 +51,12 @@ export const MapScreen = () => {
     PermissionsAndroid.request(
       PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION
     ).then((granted) => {
-      alert(granted); // just to ensure that permissions were granted
       (async () => {
         let { status } = await Location.requestForegroundPermissionsAsync();
         if (status !== "granted") {
-          alert("Permission to access location was denied");
+          alert(
+            "Permission to access location was denied, some features may not work correctly"
+          );
           return;
         }
         let location = await Location.getCurrentPositionAsync({});
@@ -87,7 +89,8 @@ export const MapScreen = () => {
         <MapContentManager mapRef={mapRef} />
       </MapView>
       <UserLocationButton currentLocation={currentLocation} mapRef={mapRef} />
-      {true || isDrawing ? <DrawingButtons /> : null}
+      <AnimatedMapActionButtons />
+      {isDrawing ? <DrawingButtons /> : null}
     </View>
   );
 };
