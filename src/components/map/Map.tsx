@@ -1,9 +1,9 @@
 import React, { useCallback, useEffect } from "react";
-import { View, Text, StyleSheet, PermissionsAndroid } from "react-native";
+import { View, StyleSheet, PermissionsAndroid } from "react-native";
 import MapView, {
   LatLng,
-  MapPressEvent,
   PROVIDER_GOOGLE,
+  Region
 } from "react-native-maps";
 // TODO Revisit this on another day
 // import MapBoxGL from "@rnmapbox/maps"
@@ -13,40 +13,21 @@ import * as Location from "expo-location";
 
 // Components
 import { MapContentManager } from "./MapContentManager";
-import { DrawingButtons } from "./components/DrawingButtons";
 import UserLocationButton from "./components/UserLocationButton";
 
 // Data
 import { RootState } from "../../redux/store";
 
 // Constants and Types
-import {
-  MAP_DRAWING_REDUCER_KEY,
-  drawingSlice,
-} from "../../redux/map/drawingSlice";
+import { mapSlice, MAP_REDUCER_KEY } from "../../redux/map/mapSlice";
 import AnimatedMapActionButtons from "./components/AnimatedMapActionButtons";
+import { defaultRegion } from "../../constants/constants";
 
 export const MapScreen = () => {
   const mapRef = React.useRef<MapView>(null);
   const dispatch = useAppDispatch();
 
   const [currentLocation, setCurrentLocation] = React.useState({} as LatLng);
-  const isDrawing = useSelector(
-    (state: RootState) => state[MAP_DRAWING_REDUCER_KEY].isDrawing
-  );
-
-  const onPress = useCallback(
-    (event: MapPressEvent) => {
-      console.log("Map Pressed");
-      if (isDrawing) {
-        dispatch(
-          drawingSlice.actions.addPointToPolygon(event.nativeEvent.coordinate)
-        );
-      }
-    },
-    [isDrawing]
-  );
-
   const onMapReady = useCallback(() => {
     PermissionsAndroid.request(
       PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION
@@ -65,12 +46,21 @@ export const MapScreen = () => {
     });
   }, []);
 
+  const onRegionChange = useCallback((region: Region) => {
+    dispatch(
+      mapSlice.actions.setRegion(region)
+    );
+  }, [])
+
+  const initialRegion = useSelector((state: RootState) => {
+    return state[MAP_REDUCER_KEY].region;
+  });
+
   return (
     <View style={styles.container}>
       <MapView
         style={styles.map}
         ref={mapRef}
-        onPress={onPress}
         showsUserLocation={true}
         showsCompass={true}
         showsMyLocationButton={false}
@@ -79,18 +69,19 @@ export const MapScreen = () => {
         provider={PROVIDER_GOOGLE}
         mapType="hybrid"
         userLocationUpdateInterval={5000}
-        region={{
-          latitude: currentLocation.latitude || 37.78825,
-          longitude: currentLocation.longitude || -122.4324,
-          latitudeDelta: 0.0922,
-          longitudeDelta: 0.0421,
-        }}
+        initialRegion={
+          initialRegion || {
+            ...defaultRegion,
+            latitude: currentLocation.latitude || defaultRegion.latitude,
+            longitude: currentLocation.longitude || defaultRegion.longitude,
+          }
+        }
+        onRegionChangeComplete={onRegionChange}
       >
         <MapContentManager mapRef={mapRef} />
       </MapView>
       <UserLocationButton currentLocation={currentLocation} mapRef={mapRef} />
       <AnimatedMapActionButtons />
-      {isDrawing ? <DrawingButtons /> : null}
     </View>
   );
 };

@@ -1,21 +1,21 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
+import { Farm, Grower } from "../field-management/types";
+import { Field } from "../fields/types";
 
 const today = new Date();
 
-type MainTab = "Map" | "List" | "Settings";
-
 interface GlobalSelectionsState {
-  grower: string | null;
-  field: string | null;
+  farm: Farm | null;
+  grower: Grower | null;
+  field: Field | null;
   season: string | null;
-  mainTab: MainTab;
 }
 
 const initialState: GlobalSelectionsState = {
   grower: null,
+  farm: null,
   field: null,
   season: today.getFullYear().toString(),
-  mainTab: "Map",
 };
 
 export const GLOBAL_SELECTIONS_REDUCER_KEY = "global-selections";
@@ -23,10 +23,13 @@ export const globalSelectionsSlice = createSlice({
   name: GLOBAL_SELECTIONS_REDUCER_KEY,
   initialState,
   reducers: {
-    setGrower: (state, action: PayloadAction<string>) => {
+    setGrower: (state, action: PayloadAction<Grower>) => {
       state.grower = action.payload;
     },
-    setField: (state, action: PayloadAction<string>) => {
+    setFarm: (state, action: PayloadAction<Farm>) => {
+      state.farm = action.payload;
+    },
+    setField: (state, action: PayloadAction<Field>) => {
       state.field = action.payload;
     },
     setSeason: (state, action: PayloadAction<string>) => {

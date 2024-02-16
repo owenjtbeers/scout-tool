@@ -1,14 +1,20 @@
 // Redux
-import { combineSlices } from "@reduxjs/toolkit"
+import { combineSlices } from "@reduxjs/toolkit";
 
 // Reducer Slices
-import { drawingSlice } from "./map/drawingSlice"
-import { globalSelectionsSlice } from "./globalSelections/globalSelectionsSlice"
-
-
+import { drawingSlice } from "./map/drawingSlice";
+import { mapSlice } from "./map/mapSlice";
+import { userSlice } from "./user/userSlice";
+import { userApi } from "./user/userApi";
+import { authApi } from "./auth/authApi";
+import { globalSelectionsSlice } from "./globalSelections/globalSelectionsSlice";
 
 // ROOT REDUCER
 export const rootReducer = combineSlices(
-    drawingSlice,
-    globalSelectionsSlice
-)
+  drawingSlice,
+  mapSlice,
+  globalSelectionsSlice,
+  userSlice,
+  userApi,
+  authApi
+);

@@ -6,7 +6,7 @@ import {
   SafeAreaView,
   StyleSheet,
 } from "react-native";
-import { colors } from "../../../styles";
+import { colors } from "../../../constants/styles";
 import { useSelector } from "react-redux";
 
 // Data

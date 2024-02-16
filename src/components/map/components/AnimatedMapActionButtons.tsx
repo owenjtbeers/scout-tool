@@ -1,13 +1,18 @@
-import React, { useEffect, useState } from "react";
+import { AntDesign, FontAwesome5, Ionicons } from "@expo/vector-icons";
+import { useRouter, useNavigation, Href } from "expo-router";
+import type { NavigationProp } from "@react-navigation/native";
+import { useDispatch } from "react-redux";
+import React, { useState } from "react";
 import {
-  View,
-  TouchableOpacity,
   Animated,
   StyleSheet,
   Text,
+  TouchableOpacity,
+  View,
 } from "react-native";
-import { Ionicons, AntDesign, FontAwesome5 } from "@expo/vector-icons";
-import { colors } from "../../../styles";
+import { colors } from "../../../constants/styles";
+import { ScreenNames } from "../../../navigation/navigation";
+import { drawingSlice } from "../../../redux/map/drawingSlice";
 
 const BUTTON_HEIGHT = 60;
 const BUTTON_WIDTH = 60;
@@ -15,6 +20,8 @@ const BUTTON_WIDTH = 60;
 const AnimatedMapActionButtons = () => {
   const [isExpanded, setIsExpanded] = useState<boolean>(false);
   const [animation] = useState(new Animated.Value(0));
+  const dispatch = useDispatch();
+  const router = useRouter();
 
   const handleAddButtonPress = () => {
     setIsExpanded(!isExpanded);
@@ -77,7 +84,15 @@ const AnimatedMapActionButtons = () => {
           ]}
         >
           <Text style={styles.text}>Add New Field</Text>
-          <TouchableOpacity style={styles.circle} activeOpacity={0.5}>
+          <TouchableOpacity
+            style={styles.circle}
+            activeOpacity={0.5}
+            onPress={() => {
+              dispatch(drawingSlice.actions.clearPolygon());
+              dispatch(drawingSlice.actions.setOperation("add-field"));
+              router.push("map-draw" as Href<ScreenNames[number]>);
+            }}
+          >
             <FontAwesome5 name="draw-polygon" size={24} color="black" />
           </TouchableOpacity>
         </Animated.View>
