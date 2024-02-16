@@ -4,6 +4,7 @@ import { StyleSheet } from "react-native";
 import MapView, { LatLng } from "react-native-maps";
 
 import * as Location from "expo-location";
+import { defaultRegion } from "../../../constants/constants";
 
 const UserLocationButton = (props: {
   mapRef: React.RefObject<MapView>;
@@ -21,10 +22,9 @@ const UserLocationButton = (props: {
       let location = await Location.getCurrentPositionAsync({});
       setCurrentLocation(location.coords as LatLng);
       props.mapRef.current?.animateToRegion({
+        ...defaultRegion,
         latitude: location.coords.latitude,
         longitude: location.coords.longitude,
-        latitudeDelta: 0.0922,
-        longitudeDelta: 0.0421,
       });
     })();
   };

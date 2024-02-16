@@ -20,3 +20,9 @@ ios `npx expo run:ios`
 
 - Deciding to go with react-native-maps over @rnmapbox/maps for now because it is supported by expo go, and trying to get mapbox up and running is proving to be too confusing for the time being.
 - this is something I will have to circle back to in the future if we want the map experience to be a lot better
+
+
+## TODO - Software Keyboard Layout Mode (keyboard push stuff up when it comes in so you can see)
+[Stack Overflow Link](https://stackoverflow.com/questions/39344140/react-native-how-to-control-what-keyboard-pushes-up) - Look for expo directions
+[React Native Component](https://reactnative.dev/docs/keyboardavoidingview)
+
