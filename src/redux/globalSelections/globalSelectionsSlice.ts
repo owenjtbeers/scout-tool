@@ -23,11 +23,13 @@ export const globalSelectionsSlice = createSlice({
   name: GLOBAL_SELECTIONS_REDUCER_KEY,
   initialState,
   reducers: {
-    setGrower: (state, action: PayloadAction<Grower>) => {
+    setGrower: (state, action: PayloadAction<Grower | null>) => {
       state.grower = action.payload;
+      state.farm = null;
     },
-    setFarm: (state, action: PayloadAction<Farm>) => {
-      state.farm = action.payload;
+    setFarm: (state, action: PayloadAction<{grower: Grower, farm: Farm}>) => {
+      state.farm = action.payload.farm;
+      state.grower = action.payload.grower;
     },
     setField: (state, action: PayloadAction<Field>) => {
       state.field = action.payload;

@@ -10,6 +10,8 @@ import autoMergeLevel2 from "redux-persist/lib/stateReconciler/autoMergeLevel2";
 import { rootReducer } from "./rootReducer";
 import { MAP_DRAWING_REDUCER_KEY } from "./map/drawingSlice";
 import { useDispatch } from "react-redux";
+import { authApi } from "./auth/authApi";
+import { fieldManagementApi } from "./field-management/fieldManagementApi";
 
 // Redux Persist Config
 const persistConfig = {
@@ -24,7 +26,10 @@ const persistedReducer = persistReducer(persistConfig, rootReducer);
 // EXPORTS
 export const store = configureStore({
   reducer: persistedReducer,
-  middleware: (gdm) => gdm({ serializableCheck: false }),
+  middleware: (gdm) => gdm({ serializableCheck: false }).concat(
+    authApi.middleware,
+    fieldManagementApi.middleware,
+  ),
 });
 export type RootState = ReturnType<typeof store.getState>;
 export type AppDispatch = typeof store.dispatch;

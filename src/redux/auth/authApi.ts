@@ -1,22 +1,31 @@
-import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
-import { LOGIN_URL_PATH } from "../../constants/api/server";
+import { createApi } from "@reduxjs/toolkit/query/react";
+import { LOGIN_URL_PATH, ROOT_API_AUTH_PATH } from "../../constants/api/server";
+import { axiosBaseQuery } from "../query";
+import { prepareHeaders } from "../../utils/prepareHeaders";
 
 // Define your API endpoints
 export const authApi = createApi({
   reducerPath: "authApi",
-  baseQuery: fetchBaseQuery({ baseUrl: LOGIN_URL_PATH }),
+  baseQuery: axiosBaseQuery({ baseUrl: ROOT_API_AUTH_PATH, prepareHeaders }),
   endpoints: (builder) => ({
     login: builder.mutation({
-      query: (credentials: { username: string; password: string }) => ({
-        url: "/",
+      query: (credentials: { email: string; password: string }) => ({
+        url: "/login",
         method: "POST",
-        body: credentials,
+        data: credentials,
+        headers: {
+          "Content-Type": "application/json",
+        },
+      }),
+    }),
+    validate: builder.mutation({
+      query: () => ({
+        url: "/validate",
+        method: "GET",
       }),
     }),
   }),
 });
 
 // Export hooks for usage in components
-export const {
-  useLoginMutation,
-} = authApi;
+export const { useLoginMutation, useValidateMutation } = authApi;

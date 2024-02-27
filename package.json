@@ -9,7 +9,9 @@
     "ios": "expo start --ios",
     "android:local": "expo run:android",
     "ios:local": "expo run:ios",
-    "web": "expo start --web"
+    "web": "expo start --web",
+    "android:development:build": "eas build --profile development --platform android",
+    "android:preview:build": "eas build --profile preview --platform android"
   },
   "dependencies": {
     "@react-native-async-storage/async-storage": "^1.21.0",
@@ -20,6 +22,7 @@
     "@turf/area": "^6.5.0",
     "@turf/helpers": "^6.5.0",
     "@types/react": "~18.2.45",
+    "axios": "^1.6.7",
     "dotenv": "^16.4.1",
     "expo": "~50.0.4",
     "expo-constants": "~15.4.5",

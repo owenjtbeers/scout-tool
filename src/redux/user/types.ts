@@ -1,10 +1,9 @@
 export type ScoutingAppUser = {
   id: string;
-  username: string;
   email: string;
-  role: "admin" | "user";
-  team: string;
-  teamId: string;
+  role: "org_admin"| "sys_admin" | "employee";
+  organization: string;
+  organizationId: string;
   createdAt: string;
   updatedAt: string;
   token: string
