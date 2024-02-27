@@ -8,6 +8,7 @@ import { userSlice } from "./user/userSlice";
 import { userApi } from "./user/userApi";
 import { authApi } from "./auth/authApi";
 import { globalSelectionsSlice } from "./globalSelections/globalSelectionsSlice";
+import { fieldManagementApi } from "./field-management/fieldManagementApi";
 
 // ROOT REDUCER
 export const rootReducer = combineSlices(
@@ -16,5 +17,6 @@ export const rootReducer = combineSlices(
   globalSelectionsSlice,
   userSlice,
   userApi,
-  authApi
+  authApi,
+  fieldManagementApi
 );

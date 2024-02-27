@@ -10,24 +10,41 @@ import {
 } from "../src/navigation/screens";
 import { ScoutToolStackNavigation } from "../src/navigation/navigation";
 import { colors } from "../src/constants/styles";
+import { useSelector } from "react-redux";
+import { RootState } from "../src/redux/store";
+import { useValidateMutation } from "../src/redux/auth/authApi";
 
 // Top level Component that will navigate to the correct screen
 export default function App() {
   const router = useRouter();
   const rootNavigation = useRootNavigationState();
 
-  const [isLoggedIn] = useState(true);
+  const [validate] = useValidateMutation();
+  const token = useSelector((state: RootState) => state.user.token);
+
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
 
   useEffect(() => {
-    if (!!rootNavigation.key) {
-      if (!isLoggedIn) {
-        router.push(LOGIN_SCREEN as Href<string>);
-      } else if (isLoggedIn) {
-        console.log("Navigating to map screen");
+    const validateToken = async () => {
+      const result = await validate({});
+      if ("data" in result) {
+        setIsLoggedIn(true);
         router.push(HOME_MAP_SCREEN as Href<string>);
+      } else if ("error" in result) {
+        setIsLoggedIn(false);
+        router.push(LOGIN_SCREEN as Href<string>);
+      }
+    };
+    if (!!rootNavigation.key) {
+      if (!!token) {
+        // TODO: Offline support for auth
+        validateToken();
+      } else {
+        setIsLoggedIn(false);
+        router.push(LOGIN_SCREEN as Href<string>);
       }
     }
-  }, [rootNavigation.key]);
+  }, [token, rootNavigation.key]);
 
   // TODO: loading component should be defined, this should never really render based on the useEffect above
   return (
