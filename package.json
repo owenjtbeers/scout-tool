@@ -11,7 +11,7 @@
     "ios:local": "expo run:ios",
     "web": "expo start --web",
     "android:development:build": "eas build --profile development --platform android",
-    "android:preview:build": "eas build --profile preview --platform android"
+    "android:apk:build": "eas build --profile preview --platform android"
   },
   "dependencies": {
     "@react-native-async-storage/async-storage": "^1.21.0",

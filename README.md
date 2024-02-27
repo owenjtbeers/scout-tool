@@ -6,6 +6,10 @@
 
 Android `eas build --profile development --platform android`
 
+## Creating an Android APK for download ( not on app store)
+- `npm run android:apk:build`
+
+
 ## Using a development Build
 
 Android `npx expo run:android`
