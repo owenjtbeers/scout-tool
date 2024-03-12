@@ -18,7 +18,13 @@ export const useSelectDefaultGlobalSelections = (
     if (growersData?.[0]) {
       dispatch(globalSelectionsSlice.actions.setGrower(growersData[0]));
     } else if (!globalSelections.farm && farmsData?.[0]) {
-      dispatch(globalSelectionsSlice.actions.setFarm(farmsData[0]));
+      const grower = growersData?.find((g) => g.ID === farmsData[0].GrowerId);
+      dispatch(
+        globalSelectionsSlice.actions.setFarm({
+          grower: grower as Grower,
+          farm: farmsData[0],
+        })
+      );
     }
   }
 

@@ -1,14 +1,9 @@
 import React, { useEffect, useState } from "react";
 
-import { Text, ActivityIndicator, View } from "react-native";
+import { ActivityIndicator, View } from "react-native";
 // Navigation
 import { useRouter, useRootNavigationState, Href } from "expo-router";
-import {
-  LOGIN_SCREEN,
-  HOME_MAP_SCREEN,
-  HOME_SCREEN,
-} from "../src/navigation/screens";
-import { ScoutToolStackNavigation } from "../src/navigation/navigation";
+import { LOGIN_SCREEN, HOME_MAP_SCREEN } from "../src/navigation/screens";
 import { colors } from "../src/constants/styles";
 import { useSelector } from "react-redux";
 import { RootState } from "../src/redux/store";
@@ -35,7 +30,7 @@ export default function App() {
         router.push(LOGIN_SCREEN as Href<string>);
       }
     };
-    if (!!rootNavigation.key) {
+    if (!!rootNavigation?.key) {
       if (!!token) {
         // TODO: Offline support for auth
         validateToken();
@@ -44,7 +39,7 @@ export default function App() {
         router.push(LOGIN_SCREEN as Href<string>);
       }
     }
-  }, [token, rootNavigation.key]);
+  }, [token, rootNavigation?.key]);
 
   // TODO: loading component should be defined, this should never really render based on the useEffect above
   return (

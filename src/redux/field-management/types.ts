@@ -1,12 +1,12 @@
 export type Grower = {
-  ID: string;
+  ID: number;
   Name: string;
 };
 
 export type Farm = {
-  ID: string;
+  ID: number;
   Name: string;
-  GrowerId: string;
+  GrowerId: number;
   CreatedAt: string;
   UpdatedAt: string;
 };

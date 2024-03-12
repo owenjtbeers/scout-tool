@@ -1,11 +1,65 @@
 import React, { RefObject } from "react";
+import { Text } from "react-native";
+import { Field } from "../../redux/fields/types";
+import centroid from "@turf/centroid";
+import MapView, { Marker, Polygon, LatLng, Geojson } from "react-native-maps";
+import {
+  FeatureCollection,
+  Polygon as TurfPolygon,
+  Position,
+  Geometry,
+} from "@turf/helpers";
+import { mapCoordinatesToLatLng } from "../../utils/latLngConversions";
 
-import MapView from "react-native-maps";
+type MapContentManagerProps = {
+  mapRef: RefObject<MapView>;
+  fields: Field[] | undefined;
+};
 
-export const MapContentManager = (props: { mapRef: RefObject<MapView> }) => {
+export const MapContentManager = (props: MapContentManagerProps) => {
+  const { fields } = props;
+
   return (
     <>
-      {/* <DrawingManager mapRef={props.mapRef} /> */}
+      {fields &&
+        fields.map((field) => {
+          const featureCollection = field.ActiveBoundary?.Json;
+          if (!featureCollection) {
+            return null;
+          }
+          let centroidOfPolygon = undefined;
+          try {
+            centroidOfPolygon = centroid(
+              featureCollection as FeatureCollection
+            );
+          } catch (e) {
+            console.error("Error calculating centroid", e);
+          }
+          const centroidLatLng = mapCoordinatesToLatLng([
+            centroidOfPolygon?.geometry.coordinates as Position,
+          ]);
+          return (
+            <React.Fragment key={`fragment-${field.ID}`}>
+              {centroidLatLng[0]?.latitude !== undefined && (
+                <Marker
+                  // key={`marker-${field.ID}`}
+                  coordinate={centroidLatLng[0]}
+                  tracksViewChanges={false}
+                >
+                  <Text key={`text-${field.ID}`}>{field.Name}</Text>
+                </Marker>
+              )}
+              {field.ActiveBoundary?.Json && (
+                <Geojson
+                  // @ts-ignore TODO: Figure out how to resolve this between the two libraries
+                  geojson={field.ActiveBoundary?.Json}
+                  strokeColor={"#F00"}
+                  fillColor={"rgba(255,0,0,0.5)"}
+                />
+              )}
+            </React.Fragment>
+          );
+        })}
     </>
   );
 };

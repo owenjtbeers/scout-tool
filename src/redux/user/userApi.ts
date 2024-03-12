@@ -1,25 +1,33 @@
-import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
-import { MAP_REDUCER_KEY } from '../map/mapSlice';
-import { USER_URL_PATH } from '../../constants/api/users';
-import { ScoutingAppUser } from './types';
-import { prepareHeaders } from '../../utils/prepareHeaders';
+import { baseApi } from "../baseApi";
+import { ScoutingAppUser } from "./types";
 
 export const USER_API_REDUCER_KEY = "userApi";
-export const userApi = createApi({
-  reducerPath: USER_API_REDUCER_KEY,
-  baseQuery: fetchBaseQuery({
-    baseUrl: USER_URL_PATH,
-    prepareHeaders,
-  }),
+export const userApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
     getCurrentUser: builder.query<ScoutingAppUser, string>({
-      query: () => `/me`,
+      query: () => ({
+        url: "/me",
+      }),
+      providesTags: ["User"],
       transformResponse: (response: ScoutingAppUser) => {
         return response;
       },
       transformErrorResponse: (response, meta, arg) => {
-        return response.status;
-      }
+        return response;
+      },
+    }),
+    signupUser: builder.mutation<
+      ScoutingAppUser,
+      { email: string; password: string; organizationName: string }
+    >({
+      query: (body) => ({
+        url: "/signup",
+        method: "POST",
+        body,
+      }),
+      invalidatesTags: ["User"],
     }),
   }),
 });
+
+export const { useGetCurrentUserQuery, useSignupUserMutation } = userApi;

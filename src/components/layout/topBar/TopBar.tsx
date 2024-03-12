@@ -19,6 +19,7 @@ import {
   useGetGrowersQuery,
   useGetFarmsQuery,
 } from "../../../redux/field-management/fieldManagementApi";
+import { useGetFieldsQuery } from "../../../redux/fields/fieldsApi";
 import { RootState } from "../../../redux/store";
 import { Grower, Farm } from "../../../redux/field-management/types";
 
@@ -44,6 +45,11 @@ export const TopBar = () => {
     refetchOnReconnect: true,
   });
 
+  // useGetFieldsQuery({
+  //   growerId: selectedGrowerOrFarm?.ID as number,
+  //   farmId: selectedGrowerOrFarm?.ID as number,
+  //   with_boundaries: true,
+  // });
   const growerFarmFieldPickerRef = useRef<Picker<Grower | string>>(null);
   const seasonPickerRef = useRef<Picker<string | null>>(null);
 
@@ -66,7 +72,10 @@ export const TopBar = () => {
                   (g) => g.ID === (itemValue as Farm).GrowerId
                 );
                 dispatch(
-                  globalSelectionsSlice.actions.setFarm({ farm: itemValue as Farm, grower: grower as Grower})
+                  globalSelectionsSlice.actions.setFarm({
+                    farm: itemValue as Farm,
+                    grower: grower as Grower,
+                  })
                 );
               } else {
                 dispatch(

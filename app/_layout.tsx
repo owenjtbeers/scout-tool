@@ -7,13 +7,17 @@ import { Slot } from "expo-router";
 import { Provider } from "react-redux";
 import { PersistGate } from "redux-persist/integration/react";
 import { store, persistor } from "../src/redux/store";
+import { ThemeProvider } from "@rneui/themed";
+import { theme } from "../src/constants/styles";
 
 export default function App() {
   return (
-      <Provider store={store}>
-        <PersistGate loading={null} persistor={persistor}>
+    <Provider store={store}>
+      <PersistGate loading={null} persistor={persistor}>
+        <ThemeProvider theme={theme}>
           <Slot />
-        </PersistGate>
-      </Provider>
-  )
+        </ThemeProvider>
+      </PersistGate>
+    </Provider>
+  );
 }

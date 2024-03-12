@@ -2,11 +2,12 @@ import React from "react";
 
 import { View, StyleSheet, TouchableOpacity } from "react-native";
 import { useRouter, usePathname, Href } from "expo-router";
-import { MapTabIcon, FieldTabIcon } from "./BottomButtons";
+import { MapTabIcon, FieldTabIcon, SettingsTabIcon } from "./BottomButtons";
 import { ScreenNames } from "../../../navigation/navigation";
 import {
   HOME_MAP_SCREEN,
   HOME_SCOUT_REPORT_SCREEN,
+  SETTINGS_SCREEN,
 } from "../../../navigation/screens";
 const FOCUSED_TAB_COLOR = "black";
 const UNFOCUSED_TAB_COLOR = "gray";
@@ -27,6 +28,11 @@ const TABS: Array<TAB> = [
     component: FieldTabIcon,
     path: HOME_SCOUT_REPORT_SCREEN,
     name: HOME_SCOUT_REPORT_SCREEN.split("/")[1],
+  },
+  {
+    component: SettingsTabIcon,
+    path: SETTINGS_SCREEN,
+    name: SETTINGS_SCREEN.split("/")[1],
   },
 ];
 

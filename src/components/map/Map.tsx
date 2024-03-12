@@ -1,10 +1,6 @@
 import React, { useCallback, useEffect } from "react";
 import { View, StyleSheet, PermissionsAndroid } from "react-native";
-import MapView, {
-  LatLng,
-  PROVIDER_GOOGLE,
-  Region
-} from "react-native-maps";
+import MapView, { LatLng, PROVIDER_GOOGLE, Region } from "react-native-maps";
 // TODO Revisit this on another day
 // import MapBoxGL from "@rnmapbox/maps"
 import { useSelector } from "react-redux";
@@ -22,6 +18,8 @@ import { RootState } from "../../redux/store";
 import { mapSlice, MAP_REDUCER_KEY } from "../../redux/map/mapSlice";
 import AnimatedMapActionButtons from "./components/AnimatedMapActionButtons";
 import { defaultRegion } from "../../constants/constants";
+import { useGetFieldsQuery } from "../../redux/fields/fieldsApi";
+import { useSelectedGrowerAndFarm } from "../layout/topBar/selectionHooks";
 
 export const MapScreen = () => {
   const mapRef = React.useRef<MapView>(null);
@@ -47,15 +45,18 @@ export const MapScreen = () => {
   }, []);
 
   const onRegionChange = useCallback((region: Region) => {
-    dispatch(
-      mapSlice.actions.setRegion(region)
-    );
-  }, [])
-
+    dispatch(mapSlice.actions.setRegion(region));
+  }, []);
   const initialRegion = useSelector((state: RootState) => {
     return state[MAP_REDUCER_KEY].region;
   });
 
+  const { selectedGrower, selectedFarm } = useSelectedGrowerAndFarm();
+  const { data: fieldResponse } = useGetFieldsQuery({
+    growerId: selectedGrower?.ID as number,
+    farmId: selectedFarm?.ID as number,
+    withBoundaries: true,
+  });
   return (
     <View style={styles.container}>
       <MapView
@@ -78,7 +79,7 @@ export const MapScreen = () => {
         }
         onRegionChangeComplete={onRegionChange}
       >
-        <MapContentManager mapRef={mapRef} />
+        <MapContentManager mapRef={mapRef} fields={fieldResponse?.data} />
       </MapView>
       <UserLocationButton currentLocation={currentLocation} mapRef={mapRef} />
       <AnimatedMapActionButtons />

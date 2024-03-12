@@ -15,3 +15,7 @@ export const FieldTabIcon = (props: IconProps) => {
     <MaterialCommunityIcons name="focus-field" size={24} color={props.color} />
   );
 };
+
+export const SettingsTabIcon = (props: IconProps) => {
+  return <Ionicons name="settings" size={24} color={props.color} />;
+};

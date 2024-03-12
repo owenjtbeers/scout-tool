@@ -29,5 +29,6 @@ export const RNMapsPolygonArea = (
   if (precision !== undefined) {
     calculatedArea = round(calculatedArea, precision);
   }
+  console.log("Calculated area", calculatedArea);
   return calculatedArea;
 };

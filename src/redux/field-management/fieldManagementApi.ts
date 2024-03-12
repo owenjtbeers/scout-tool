@@ -1,35 +1,24 @@
-import { createApi } from "@reduxjs/toolkit/query/react";
-import { axiosBaseQuery } from "../query";
-import { prepareHeaders } from "../../utils/prepareHeaders";
+import { baseApi } from "../baseApi";
 import type { Farm, Grower } from "./types";
-import { ROOT_API_URL } from "../../constants/api/server";
 
-type ServerResponse = {
-  message: string;
-  data: any;
-};
-
-export const fieldManagementApi = createApi({
-  reducerPath: "fieldManagementApi",
-  baseQuery: axiosBaseQuery({
-    baseUrl: ROOT_API_URL as string,
-    prepareHeaders,
-  }),
+export const fieldManagementApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
     getFarms: builder.query<Farm[], String>({
       query: () => ({
-        url: `api/farms`,
+        url: `/farms`,
         method: "GET",
       }),
       transformResponse: (response: any) => {
         return response.data;
       },
+      providesTags: ["Farms"],
     }),
     getGrowers: builder.query<Grower[], String>({
       query: () => ({
-        url: `api/growers`,
+        url: `/growers`,
         method: "GET",
       }),
+      providesTags: ["Growers"],
       transformResponse: (response: any) => {
         return response.data;
       },

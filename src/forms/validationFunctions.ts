@@ -7,4 +7,10 @@ export const validation = {
       return true
     };
   },
+  isEmail(value: string) {
+    if (!/^\S+@\S+\.\S+$/.test(value)) {
+      return "Please enter a valid email";
+    }
+    return true
+  }
 };

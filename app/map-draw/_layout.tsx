@@ -1,22 +1,17 @@
 import React from "react";
 import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-import { Slot, useLocalSearchParams, useRouter } from "expo-router";
-import type { NativeStackScreenProps } from "@react-navigation/native-stack";
-import { RootStackParamList } from "../../src/navigation/navigation";
+import { Slot, useRouter } from "expo-router";
 import { useSelector } from "react-redux";
 import { RootState } from "../../src/redux/store";
-import { DrawingOperation } from "../../src/redux/map/drawingSlice";
 import { colors } from "../../src/constants/styles";
 
-type Props = NativeStackScreenProps<RootStackParamList, "map-draw">;
-
 const translationMap = {
-  'add-field': "Create New Field",
-  'edit-field': "Edit field: ",
+  "add-field": "Create New Field",
+  "edit-field": "Edit field: ",
 };
 
-const Layout = ({ route, navigation }: Props) => {
+const Layout = () => {
   const router = useRouter();
   const onPressBack = () => {
     router.back();
@@ -25,7 +20,7 @@ const Layout = ({ route, navigation }: Props) => {
   const operation = useSelector(
     (state: RootState) => state["map-drawing"].operation
   );
-  
+
   const translation = operation ? translationMap[operation] : "Drawing";
 
   return (
@@ -59,8 +54,8 @@ const styles = StyleSheet.create({
     color: "white",
   },
   button: {
-    paddingRight: 20
-  }
+    paddingRight: 20,
+  },
 });
 
 export default Layout;

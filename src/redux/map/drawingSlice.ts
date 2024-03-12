@@ -1,7 +1,11 @@
 import { PayloadAction, createSlice } from "@reduxjs/toolkit";
 import { LatLng, Polygon } from "react-native-maps";
 
-export type DrawingOperation = "add-field" | "edit-field" | null;
+export type DrawingOperation =
+  | "add-field"
+  | "edit-field"
+  | "upload-shapefile"
+  | null;
 
 export const MAP_DRAWING_REDUCER_KEY = "map-drawing";
 export const drawingSlice = createSlice({

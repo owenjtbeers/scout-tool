@@ -2,7 +2,7 @@ import React from "react";
 
 // Components
 import { View, TouchableOpacity, Text, StyleSheet } from "react-native";
-import { Ionicons, Entypo } from "@expo/vector-icons";
+import { Ionicons, Entypo, AntDesign } from "@expo/vector-icons";
 
 // Data
 import { useSelector } from "react-redux";
@@ -11,8 +11,13 @@ import {
   MAP_DRAWING_REDUCER_KEY,
   drawingSlice,
 } from "../../redux/map/drawingSlice";
+import { set } from "react-hook-form";
 
-export const DrawingButtons = () => {
+type DrawingButtonsProps = {
+  setModalVisible: (val: boolean) => void;
+};
+export const DrawingButtons = (props: DrawingButtonsProps) => {
+  const { setModalVisible } = props;
   const dispatch = useAppDispatch();
 
   const isDrawing = useSelector(
@@ -27,19 +32,28 @@ export const DrawingButtons = () => {
     dispatch(drawingSlice.actions.setIsDrawing(!isDrawing));
   };
 
+  const spawnFileUploadModal = () => {
+    dispatch(drawingSlice.actions.setOperation("upload-shapefile"));
+    setModalVisible(true);
+  };
+
   return (
     <View style={styles.drawingButtonsContainer}>
       <TouchableOpacity
         onPress={toggleIsDrawing}
-        style={{ ...styles.button, backgroundColor: isDrawing ? "lightblue" : "white" }}
+        style={{
+          ...styles.button,
+          backgroundColor: isDrawing ? "lightblue" : "white",
+        }}
       >
         <Ionicons name="pencil" size={24} color="black" />
         <Text>Draw</Text>
       </TouchableOpacity>
-      <TouchableOpacity
-        onPress={clearPolygon}
-        style={styles.button}
-      >
+      <TouchableOpacity onPress={spawnFileUploadModal} style={styles.button}>
+        <AntDesign name="addfile" size={24} color="black" />
+        <Text>Upload</Text>
+      </TouchableOpacity>
+      <TouchableOpacity onPress={clearPolygon} style={styles.button}>
         <Entypo name="eraser" size={24} color="black" />
         <Text>Clear</Text>
       </TouchableOpacity>
@@ -62,5 +76,5 @@ const styles = StyleSheet.create({
     alignItems: "center",
     borderRadius: 5,
     justifyContent: "space-around",
-  }
+  },
 });

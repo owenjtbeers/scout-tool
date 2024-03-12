@@ -10,12 +10,17 @@ import { drawingSlice } from "../../redux/map/drawingSlice";
 import { DrawingButtons } from "./DrawingButtons";
 import { SubmitButton } from "./SubmitButton";
 import { OperationsModal } from "./OperationsModal";
+import { MapContentManager } from "../map/MapContentManager";
+import { useSelectedGrowerAndFarm } from "../layout/topBar/selectionHooks";
+import { useGetFieldsQuery } from "../../redux/fields/fieldsApi";
 
 export const DrawableMapScreen = () => {
   const dispatch = useDispatch();
   const mapRef = useRef<MapView>(null);
   const initialRegion = useSelector((state: RootState) => state.map.region);
-  const operation = useSelector((state: RootState) => state['map-drawing'].operation);
+  const operation = useSelector(
+    (state: RootState) => state["map-drawing"].operation
+  );
   const isDrawing = useSelector(
     (state: RootState) => state["map-drawing"].isDrawing
   );
@@ -28,9 +33,16 @@ export const DrawableMapScreen = () => {
       );
     }
   };
+
+  const { selectedGrower, selectedFarm } = useSelectedGrowerAndFarm();
+  const { data: fieldResponse } = useGetFieldsQuery({
+    growerId: selectedGrower?.ID as number,
+    farmId: selectedFarm?.ID as number,
+    withBoundaries: true,
+  });
   return (
     <>
-      <DrawingButtons />
+      <DrawingButtons setModalVisible={setModalVisible} />
       <MapView
         style={styles.map}
         ref={mapRef}
@@ -41,10 +53,15 @@ export const DrawableMapScreen = () => {
         mapType={"hybrid"}
         showsUserLocation={true}
       >
+        <MapContentManager mapRef={mapRef} fields={fieldResponse?.data} />
         <DrawingManager mapRef={mapRef} />
       </MapView>
       <SubmitButton operation={operation} setModalVisible={setModalVisible} />
-      <OperationsModal setModalVisible={setModalVisible} visible={modalVisible}/>
+      <OperationsModal
+        operation={operation}
+        setModalVisible={setModalVisible}
+        visible={modalVisible}
+      />
     </>
   );
 };
