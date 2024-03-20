@@ -1,5 +1,6 @@
 import React from "react";
 import { TouchableOpacity, View, StyleSheet, Text } from "react-native";
+import { Button } from "@rneui/themed";
 import { useSelector, useDispatch } from "react-redux";
 import { RootState } from "../../redux/store";
 import { DrawingOperation } from "../../redux/map/drawingSlice";
@@ -14,25 +15,34 @@ type SubmitButtonProps = {
 const operationTranslations = {
   "add-field": "Submit New Field",
   "edit-field": "Save Changes",
+  "upload-shapefile": "Upload Shapefile",
 };
 
-export const SubmitButton: React.FC<SubmitButtonProps> = ({ operation, setModalVisible }) => {
+export const SubmitButton: React.FC<SubmitButtonProps> = ({
+  operation,
+  setModalVisible,
+}) => {
   const handlePress = () => {
     if (operation === "add-field") {
       // Perform add field operation
-      console.log("Add field operation");
+      // console.log("Add field operation");
       setModalVisible(true);
     } else if (operation === "edit-field") {
       // Perform edit field operation
-      console.log("Edit field operation");
+      // console.log("Edit field operation");
     }
   };
 
   return (
     <View style={styles.container}>
-        <TouchableOpacity style={styles.buttonContainer} onPress={handlePress} activeOpacity={0.8}>
-          <Text style={styles.submitText}>{operation ? operationTranslations[operation]: "Submit"}</Text>
-        </TouchableOpacity>
+      <Button
+        containerStyle={styles.buttonContainer}
+        buttonStyle={styles.buttonContainer}
+        onPress={handlePress}
+        activeOpacity={0.8}
+        title={operation ? operationTranslations[operation] : "Submit"}
+        titleStyle={styles.submitText}
+      />
     </View>
   );
 };
@@ -44,15 +54,10 @@ const styles = StyleSheet.create({
   },
   buttonContainer: {
     flex: 1,
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    backgroundColor: colors.primaryButton,
-    borderColor: "black",
+    borderRadius: 0,
   },
   submitText: {
     fontSize: 20,
-    color: "white",
     fontWeight: "800",
-  }
+  },
 });

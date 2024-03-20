@@ -1,14 +1,8 @@
-import React, { useRef } from "react";
-import {
-  View,
-  Text,
-  TouchableOpacity,
-  SafeAreaView,
-  StyleSheet,
-} from "react-native";
-import { Picker } from "@react-native-picker/picker";
+import React, { useState } from "react";
+import { StyleSheet, View, ScrollView } from "react-native";
 import { colors } from "../../../constants/styles";
 import { useSelector, useDispatch } from "react-redux";
+import { Dialog, Text, ListItem, Button } from "@rneui/themed";
 
 // Data
 import {
@@ -19,24 +13,27 @@ import {
   useGetGrowersQuery,
   useGetFarmsQuery,
 } from "../../../redux/field-management/fieldManagementApi";
-import { useGetFieldsQuery } from "../../../redux/fields/fieldsApi";
 import { RootState } from "../../../redux/store";
 import { Grower, Farm } from "../../../redux/field-management/types";
 
-const defaultSelectionString = "Select a Grower / Farm";
 export const TopBar = () => {
-  const dispatch = useDispatch();
-  const selectedSeason = useSelector(
-    (state: RootState) => state[GLOBAL_SELECTIONS_REDUCER_KEY].season
+  return (
+    <View style={styles.container}>
+      <GrowerAndFarmSelector />
+      <SeasonSelector />
+    </View>
   );
+};
 
+const GrowerAndFarmSelector = () => {
+  const dispatch = useDispatch();
+  const [isGrowerFarmDialogOpen, setIsGrowerFarmDialogOpen] = useState(false);
   const selectedGrowerOrFarm = useSelector((state: RootState) => {
     return (
       state[GLOBAL_SELECTIONS_REDUCER_KEY].farm ||
       state[GLOBAL_SELECTIONS_REDUCER_KEY].grower
     );
   });
-
   // const selectedGrowerOrFarm = { Name: "Test" };
   const { data: growers } = useGetGrowersQuery("default", {
     refetchOnReconnect: true,
@@ -44,122 +41,129 @@ export const TopBar = () => {
   const { data: farms } = useGetFarmsQuery("default", {
     refetchOnReconnect: true,
   });
-
-  // useGetFieldsQuery({
-  //   growerId: selectedGrowerOrFarm?.ID as number,
-  //   farmId: selectedGrowerOrFarm?.ID as number,
-  //   with_boundaries: true,
-  // });
-  const growerFarmFieldPickerRef = useRef<Picker<Grower | string>>(null);
-  const seasonPickerRef = useRef<Picker<string | null>>(null);
+  const onSelectGrower = (grower: Grower) => () => {
+    dispatch(globalSelectionsSlice.actions.setGrower(grower));
+    setIsGrowerFarmDialogOpen(false);
+  };
+  const onSelectFarm = (farm: Farm) => () => {
+    const grower = growers?.find((g) => g.ID === farm.GrowerId) as Grower;
+    dispatch(globalSelectionsSlice.actions.setFarm({ farm, grower }));
+    setIsGrowerFarmDialogOpen(false);
+  };
 
   return (
-    <SafeAreaView style={styles.container}>
-      <TouchableOpacity
-        style={styles.selectionButton}
-        onPress={() => growerFarmFieldPickerRef?.current?.focus()}
+    <>
+      <Button
+        title={selectedGrowerOrFarm?.Name || "Select Grower or Farm"}
+        titleStyle={styles.selectionButtonText}
+        // style={styles.selectionButton
+        onPress={() => setIsGrowerFarmDialogOpen(true)}
+        buttonStyle={styles.selectionButton}
+        icon={{ name: "arrow-drop-down" }}
+        iconPosition="right"
+        raised
+      />
+      <Dialog
+        isVisible={isGrowerFarmDialogOpen}
+        onBackdropPress={() => setIsGrowerFarmDialogOpen(false)}
       >
-        <Text style={styles.selectionButtonText}>
-          {selectedGrowerOrFarm?.Name || defaultSelectionString}
-        </Text>
-        <Picker
-          ref={growerFarmFieldPickerRef}
-          selectedValue={selectedGrowerOrFarm || ""}
-          onValueChange={(itemValue: Grower | Farm | string) => {
-            if (itemValue !== "") {
-              if (typeof itemValue !== "string" && "GrowerId" in itemValue) {
-                const grower = growers?.find(
-                  (g) => g.ID === (itemValue as Farm).GrowerId
-                );
-                dispatch(
-                  globalSelectionsSlice.actions.setFarm({
-                    farm: itemValue as Farm,
-                    grower: grower as Grower,
-                  })
-                );
-              } else {
-                dispatch(
-                  globalSelectionsSlice.actions.setGrower(itemValue as Grower)
-                );
-              }
-            }
-          }}
-        >
-          <Picker.Item label={defaultSelectionString} value={""} />
+        <ScrollView>
+          <Dialog.Title title={"Select a Grower or Farm"} />
           {growers
             ? growers.reduce((acc, grower: Grower) => {
                 acc.push(
-                  <Picker.Item
-                    label={`Grower - ${grower.Name}`}
-                    value={grower}
+                  <ListItem
+                    onPress={onSelectGrower(grower)}
                     key={`grower${grower.ID}`}
-                  />
+                    bottomDivider
+                  >
+                    <ListItem.Title>{`Grower - ${grower.Name}`}</ListItem.Title>
+                  </ListItem>
                 );
                 const farmsForGrower = farms?.filter(
                   (farm) => farm.GrowerId === grower.ID
                 );
                 farmsForGrower?.forEach((farm) => {
                   acc.push(
-                    <Picker.Item
-                      label={`Farm - ${farm.Name}`}
-                      value={farm}
+                    <ListItem
                       key={`farm${farm.ID}`}
-                    />
+                      onPress={onSelectFarm(farm)}
+                    >
+                      <ListItem.Title
+                        style={{ paddingLeft: 20 }}
+                      >{`Farm - ${farm.Name}`}</ListItem.Title>
+                    </ListItem>
                   );
                 });
                 return acc;
               }, [] as JSX.Element[])
             : null}
-          {/* {farms
-            ? farms.map((farm) => (
-                <Picker.Item label={farm.Name} value={farm} key={farm.ID} />
-              ))
-            : null} */}
-        </Picker>
-      </TouchableOpacity>
-      <TouchableOpacity
-        onPress={() => seasonPickerRef?.current?.focus()}
-        style={styles.selectionButton}
-      >
-        <Text style={styles.selectionButtonText}>{selectedSeason}</Text>
-        <Picker
-          ref={seasonPickerRef}
-          selectedValue={selectedSeason}
-          onValueChange={(itemValue) => {
-            dispatch(
-              globalSelectionsSlice.actions.setSeason(itemValue as string)
-            );
-          }}
-        >
-          <Picker.Item label="Select a Season" value="" />
-          <Picker.Item label="2024" value="2024" />
-          <Picker.Item label="2023" value="2023" />
-        </Picker>
-      </TouchableOpacity>
-    </SafeAreaView>
+        </ScrollView>
+      </Dialog>
+    </>
   );
 };
 
+const SeasonSelector = () => {
+  const dispatch = useDispatch();
+  const [isSeasonDialogOpen, setIsSeasonDialogOpen] = useState(false);
+  const selectedSeason = useSelector(
+    (state: RootState) => state[GLOBAL_SELECTIONS_REDUCER_KEY].season
+  );
+  return (
+    <React.Fragment key={"season-selector-container"}>
+      <Button
+        title={selectedSeason || "Select a Season"}
+        titleStyle={styles.selectionButtonText}
+        onPress={() => setIsSeasonDialogOpen(true)}
+        buttonStyle={styles.selectionButton}
+        icon={{ name: "arrow-drop-down" }}
+        iconPosition="right"
+      >
+        <Text style={styles.selectionButtonText}>
+          {selectedSeason || "Select a Season"}
+        </Text>
+        <Dialog
+          isVisible={isSeasonDialogOpen}
+          onBackdropPress={() => setIsSeasonDialogOpen(false)}
+        >
+          <ScrollView>
+            <Dialog.Title title={"Select a Season"} />
+            {["2024", "2023"].map((season) => (
+              <ListItem
+                onPress={() => {
+                  dispatch(globalSelectionsSlice.actions.setSeason(season));
+                  setIsSeasonDialogOpen(false);
+                }}
+                key={season}
+              >
+                <ListItem.Title>{season}</ListItem.Title>
+              </ListItem>
+            ))}
+          </ScrollView>
+        </Dialog>
+      </Button>
+    </React.Fragment>
+  );
+};
 const styles = StyleSheet.create({
-  safeAreaView: {
-    paddingTop: 60,
-  },
   container: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
     padding: 16,
-    paddingTop: 60,
+    paddingTop: 70,
     backgroundColor: colors.primary,
     elevation: 4,
   },
   selectionButton: {
-    padding: 8,
+    padding: 16,
     borderRadius: 4,
-    backgroundColor: "#ccc",
+    backgroundColor: colors.secondary,
   },
   selectionButtonText: {
-    color: "#fff",
+    color: colors.primary,
     fontWeight: "bold",
+    fontSize: 16,
   },
 });

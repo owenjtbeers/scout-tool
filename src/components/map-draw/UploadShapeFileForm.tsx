@@ -2,26 +2,34 @@ import React, { useState } from "react";
 import { View, Text, StyleSheet } from "react-native";
 import { getDocumentAsync, DocumentPickerResult } from "expo-document-picker";
 import { ErrorMessage } from "../../forms/components/ErrorMessage";
-import { BottomSheet, Button } from "@rneui/themed";
+import { BottomSheet, Button, useTheme } from "@rneui/themed";
 import { useDispatch } from "react-redux";
 import { drawingSlice } from "../../redux/map/drawingSlice";
 import { humanReadableFileSize } from "../../utils/formatting/readableBytes";
 import * as FileSystem from "expo-file-system";
-import { ActivityIndicator } from "react-native";
 import shp from "shpjs";
+import { FeatureCollection } from "@turf/helpers";
+import turfCentroid from "@turf/centroid";
+import MapView from "react-native-maps";
 
 global.Buffer = global.Buffer || require("buffer").Buffer;
 
-export const UploadShapeFileForm = () => {
+type UploadShapeFileFormProps = {
+  mapRef: React.RefObject<MapView>;
+  setModalVisible: (val: boolean) => void;
+};
+
+export const UploadShapeFileForm = (props: UploadShapeFileFormProps) => {
+  const { theme } = useTheme();
   const [files, setFiles] = useState<DocumentPickerResult | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
-
   const dispatch = useDispatch();
   const onClose = () => {
     // TODO: This can maybe be set a different way, but for now this can work
     // We really just want to go back to the operation before we hit upload
     dispatch(drawingSlice.actions.setOperation("add-field"));
+    props?.setModalVisible(false);
   };
   const handleFileUpload = async () => {
     try {
@@ -32,9 +40,11 @@ export const UploadShapeFileForm = () => {
       if (res.canceled) {
         return;
       }
-      if (res.assets?.length !== 1) {
+      if (res.assets?.length !== 2) {
         // Check if both a .shp and a .dbf file were selected
-        setError("Please select exactly one file, a .shp file");
+        setError(
+          "Please select exactly two files, a .shp and a .dbf file (use multiselect)"
+        );
 
         // TODO: Clear the file input
         return;
@@ -46,8 +56,8 @@ export const UploadShapeFileForm = () => {
           extensions[ext] = true;
         }
       });
-      if (!extensions.shp) {
-        setError("Please select exactly one file, a .shp file");
+      if (!extensions.shp || !extensions.dbf) {
+        setError("Please select exactly two files, a .shp and a .dbf file");
         return;
       }
       setFiles(res);
@@ -69,6 +79,20 @@ export const UploadShapeFileForm = () => {
       }}
     >
       <View style={styles.modalView}>
+        <View
+          style={{
+            flexDirection: "row",
+            justifyContent: "space-between",
+            paddingBottom: 10,
+          }}
+        >
+          <Text>
+            Currently we only support the EPSG:4326 coordinate system and WGS84
+            projections, if you get results that don't make sense, check the
+            projection of your shapefile(s). Uploading a shapefile will clear
+            any drawn polygons currently
+          </Text>
+        </View>
         {error && <ErrorMessage message={error} />}
         <Button title="Pick .dbf and .shp file" onPress={handleFileUpload} />
         {files &&
@@ -94,23 +118,39 @@ export const UploadShapeFileForm = () => {
                     asset.name.endsWith(".dbf")
                   );
 
-                  if (shpFileAsset) {
+                  if (shpFileAsset && dbfFileAsset) {
                     const shpFileBuffer = await convertUriToBuffer(
                       shpFileAsset.uri
                     );
-
-                    const geojson = await shp.parseShp(shpFileBuffer);
-                    console.log(geojson);
+                    const dbfBuffer = await convertUriToBuffer(
+                      dbfFileAsset.uri
+                    );
+                    const geojson = await shp.combine([
+                      shp.parseShp(shpFileBuffer),
+                      shp.parseDbf(dbfBuffer, new ArrayBuffer(0)),
+                    ]);
+                    dispatch(
+                      drawingSlice.actions.setTempGeoJSON(
+                        geojson as FeatureCollection
+                      )
+                    );
+                    dispatch(drawingSlice.actions.clearPolygon());
+                    const centroid = turfCentroid(geojson as FeatureCollection)
+                      .geometry.coordinates;
+                    props.mapRef.current?.animateCamera({
+                      center: { latitude: centroid[1], longitude: centroid[0] },
+                    });
                   }
                   setLoading(false);
+                  onClose();
                 }
               } catch (err) {
                 console.log(err);
+                setLoading(false);
               }
             }}
-          >
-            {loading ? <ActivityIndicator /> : <Text>Upload</Text>}
-          </Button>
+            loading={loading}
+          />
         )}
       </View>
     </BottomSheet>
@@ -118,30 +158,18 @@ export const UploadShapeFileForm = () => {
 };
 
 const convertUriToBuffer = async (uri: string): Promise<ArrayBuffer> => {
-  console.log(uri);
+  // Read the file as a base64 string, the files are actually binaries even though
+  // they may say encoding in utf-8 in qgis
   let stringContent = await FileSystem.readAsStringAsync(uri, {
-    encoding: "utf8",
+    encoding: "base64",
   });
-  console.log(stringContent);
   const buffer = stringToArrayBuffer(stringContent);
-  const buffer2 = stringToArrayBufferWithCharCode(stringContent);
-  console.log("buffer1", buffer);
-  console.log("buffer2", buffer2);
   return buffer;
 };
 
 function stringToArrayBuffer(str: string) {
-  const binaryString = Buffer.from(str, "utf8");
-  return binaryString;
-}
-
-function stringToArrayBufferWithCharCode(str: string) {
-  const buf = new ArrayBuffer(str.length);
-  const bufView = new Uint8Array(buf);
-  for (let i = 0, strLen = str.length; i < strLen; i++) {
-    bufView[i] = str.charCodeAt(i);
-  }
-  return buf;
+  const binaryView = Buffer.from(str, "base64");
+  return binaryView;
 }
 
 const styles = StyleSheet.create({

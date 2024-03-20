@@ -3,6 +3,7 @@ import React from "react";
 // Components
 import { View, TouchableOpacity, Text, StyleSheet } from "react-native";
 import { Ionicons, Entypo, AntDesign } from "@expo/vector-icons";
+import { Button, useTheme } from "@rneui/themed";
 
 // Data
 import { useSelector } from "react-redux";
@@ -11,12 +12,12 @@ import {
   MAP_DRAWING_REDUCER_KEY,
   drawingSlice,
 } from "../../redux/map/drawingSlice";
-import { set } from "react-hook-form";
 
 type DrawingButtonsProps = {
   setModalVisible: (val: boolean) => void;
 };
 export const DrawingButtons = (props: DrawingButtonsProps) => {
+  const { theme } = useTheme();
   const { setModalVisible } = props;
   const dispatch = useAppDispatch();
 
@@ -24,39 +25,47 @@ export const DrawingButtons = (props: DrawingButtonsProps) => {
     (state: RootState) => state[MAP_DRAWING_REDUCER_KEY].isDrawing
   );
 
-  const clearPolygon = () => {
+  const clearTempGeoJSON = () => {
     dispatch(drawingSlice.actions.clearPolygon());
+    dispatch(drawingSlice.actions.clearTempGeoJSON());
   };
 
   const toggleIsDrawing = () => {
     dispatch(drawingSlice.actions.setIsDrawing(!isDrawing));
+    // Do this to prevent a bad state, so we don't confuse the uploaded shapefile with the drawn polygon
+    dispatch(drawingSlice.actions.clearTempGeoJSON());
   };
 
   const spawnFileUploadModal = () => {
+    dispatch(drawingSlice.actions.setIsDrawing(false));
     dispatch(drawingSlice.actions.setOperation("upload-shapefile"));
     setModalVisible(true);
   };
 
+  const selectedColor = isDrawing ? "black" : theme.colors.secondary;
+
   return (
     <View style={styles.drawingButtonsContainer}>
-      <TouchableOpacity
+      <Button
         onPress={toggleIsDrawing}
-        style={{
-          ...styles.button,
-          backgroundColor: isDrawing ? "lightblue" : "white",
-        }}
-      >
-        <Ionicons name="pencil" size={24} color="black" />
-        <Text>Draw</Text>
-      </TouchableOpacity>
-      <TouchableOpacity onPress={spawnFileUploadModal} style={styles.button}>
-        <AntDesign name="addfile" size={24} color="black" />
-        <Text>Upload</Text>
-      </TouchableOpacity>
-      <TouchableOpacity onPress={clearPolygon} style={styles.button}>
-        <Entypo name="eraser" size={24} color="black" />
-        <Text>Clear</Text>
-      </TouchableOpacity>
+        title={"Draw Polygon"}
+        icon={<Ionicons name="pencil" size={24} color={selectedColor} />}
+        // color={"primary"}
+        titleStyle={{ color: selectedColor }}
+        type={isDrawing ? "outline" : "solid"}
+      ></Button>
+      <Button
+        onPress={spawnFileUploadModal}
+        icon={
+          <AntDesign name="addfile" size={24} color={theme.colors.secondary} />
+        }
+        title={"Upload"}
+      ></Button>
+      <Button
+        title={"Clear Shape"}
+        onPress={clearTempGeoJSON}
+        icon={<Entypo name="eraser" size={24} color={theme.colors.secondary} />}
+      ></Button>
     </View>
   );
 };
@@ -72,7 +81,7 @@ const styles = StyleSheet.create({
   button: {
     height: 50,
     width: 50,
-    backgroundColor: "white",
+    // backgroundColor: "white"
     alignItems: "center",
     borderRadius: 5,
     justifyContent: "space-around",

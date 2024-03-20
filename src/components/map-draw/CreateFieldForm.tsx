@@ -1,22 +1,23 @@
-import React from "react";
+import React, { useCallback } from "react";
 import { useSelector } from "react-redux";
 import { RootState } from "../../redux/store";
 import { View, TouchableOpacity, StyleSheet, Pressable } from "react-native";
-import { BottomSheet, Text, Button, Input } from "@rneui/themed";
+import { BottomSheet, Button, Input } from "@rneui/themed";
 import { useForm, Controller } from "react-hook-form";
 import { FeatureCollection, Units } from "@turf/helpers";
 import { Ionicons } from "@expo/vector-icons";
-import { RNMapsPolygonArea } from "../../utils/area";
+import { RNMapsPolygonArea, FeatureCollectionArea } from "../../utils/area";
 import { validationRules } from "../../forms/validationRules";
 import { validation } from "../../forms/validationFunctions";
-import { ErrorMessage } from "../../forms/components/ErrorMessage";
-import { Picker } from "@react-native-picker/picker";
 import { useCreateFieldMutation } from "../../redux/fields/fieldsApi";
 import { Field } from "../../redux/fields/types";
 import { useSelectedGrowerAndFarm } from "../layout/topBar/selectionHooks";
 import { convertRNMapsPolygonToTurfFeatureCollection } from "../../utils/latLngConversions";
-import { Href, useRouter } from "expo-router";
+import { useRouter } from "expo-router";
+import { useGetFarmsQuery } from "../../redux/field-management/fieldManagementApi";
 import { HOME_MAP_SCREEN } from "../../navigation/screens";
+import { CustomDialogPicker } from "../../forms/components/DialogPicker";
+import { Href } from "expo-router";
 
 type FieldFormProps = {
   isVisible: boolean;
@@ -25,6 +26,8 @@ type FieldFormProps = {
 };
 
 type FieldFormData = {
+  growerId: string;
+  farmId: string;
   name: string;
   legalDescription: string;
   crop: string;
@@ -36,24 +39,33 @@ type FieldFormData = {
 const cropOptions = ["Wheat", "Potato", "Winter Wheat", "Corn", "Barley"];
 
 export function CreateFieldForm(props: FieldFormProps) {
-  const { control, handleSubmit } = useForm<FieldFormData>();
-  const router = useRouter();
   const { isVisible, setIsVisible, areaUnit } = props;
+  const router = useRouter();
+  const { control, handleSubmit } = useForm<FieldFormData>();
+
   const [createField] = useCreateFieldMutation();
-  const onClose = () => {
-    setIsVisible(false);
-  };
+
   const polygon = useSelector(
     (state: RootState) => state["map-drawing"].polygon
   );
+  const tempGeoJSON = useSelector(
+    (state: RootState) => state["map-drawing"].tempGeoJSON
+  );
+  const { data: masterFarmsList } = useGetFarmsQuery("default");
 
-  const { selectedGrower, selectedFarm } = useSelectedGrowerAndFarm();
+  const { selectedGrower } = useSelectedGrowerAndFarm();
+
   const onSubmit = async (data: FieldFormData) => {
-    const fc = convertRNMapsPolygonToTurfFeatureCollection(polygon);
+    let fc: FeatureCollection;
+    if (tempGeoJSON !== null) {
+      fc = tempGeoJSON;
+    } else {
+      fc = convertRNMapsPolygonToTurfFeatureCollection(polygon);
+    }
     const fieldData = {
       Name: data.name,
       GrowerId: selectedGrower?.ID,
-      FarmId: selectedFarm?.ID,
+      FarmId: Number(data.farmId),
       // legalDescription: data.legalDescription,
       // crop: data.crop,
       // area: data.area,
@@ -65,17 +77,31 @@ export function CreateFieldForm(props: FieldFormProps) {
     const response = await createField(fieldData);
     if ("data" in response) {
       setIsVisible(false);
-      router.push(HOME_MAP_SCREEN);
+      router.push(HOME_MAP_SCREEN as Href<string>);
     } else if ("error" in response) {
       // Error Modal on page?
       console.log(response.error);
     }
   };
 
+  const getPolygonArea = useCallback(() => {
+    if (tempGeoJSON !== null) {
+      return FeatureCollectionArea(tempGeoJSON, areaUnit, 3);
+    }
+    return RNMapsPolygonArea(polygon, areaUnit, 3);
+  }, [polygon, tempGeoJSON]);
+
   const onError = (errors: any) => {
     console.log(errors);
   };
 
+  const onClose = () => {
+    setIsVisible(false);
+  };
+
+  const farmsOfSelectedGrower = masterFarmsList?.filter(
+    (farm) => farm.GrowerId === selectedGrower?.ID
+  );
   return (
     <View>
       <BottomSheet
@@ -96,21 +122,39 @@ export function CreateFieldForm(props: FieldFormProps) {
             </View>
             <View style={styles.formView}>
               <View>
-                <Text style={styles.inputTitleText}>Grower</Text>
                 <Input
                   placeholder="Grower"
                   value={selectedGrower?.Name}
                   style={styles.input}
+                  label="Grower"
                   disabled
                 />
               </View>
               <View>
-                <Text style={styles.inputTitleText}>Farm</Text>
-                <Input
-                  placeholder="Farm"
-                  value={selectedFarm?.Name}
-                  style={styles.input}
-                  disabled
+                <Controller
+                  control={control}
+                  rules={{
+                    validate: validation.isNotPlaceholderValue(undefined),
+                  }}
+                  render={({
+                    field: { onChange, onBlur, value },
+                    fieldState: { error },
+                  }) => (
+                    <>
+                      <CustomDialogPicker
+                        options={farmsOfSelectedGrower?.map((farm) => ({
+                          label: farm.Name,
+                          value: farm.ID.toString(),
+                        }))}
+                        value={value?.toString()}
+                        onChangeText={onChange}
+                        label="Farm"
+                        errorMessage={error?.message}
+                        dialogTitle="Select a Farm"
+                      />
+                    </>
+                  )}
+                  name="farmId"
                 />
               </View>
               <View>
@@ -121,18 +165,13 @@ export function CreateFieldForm(props: FieldFormProps) {
                     fieldState: { error },
                   }) => (
                     <>
-                      <Text style={styles.inputTitleText}>Field Name</Text>
-                      {error && (
-                        <ErrorMessage
-                          style={styles.errorMessage}
-                          message={error.message}
-                        />
-                      )}
                       <Input
+                        label="Field Name"
                         placeholder="Field Name"
                         onBlur={onBlur}
                         onChangeText={onChange}
                         value={value}
+                        errorMessage={error?.message}
                       />
                     </>
                   )}
@@ -142,7 +181,6 @@ export function CreateFieldForm(props: FieldFormProps) {
                 />
               </View>
               <View>
-                <Text style={styles.inputTitleText}>Legal Description</Text>
                 <Controller
                   control={control}
                   render={({ field: { onChange, onBlur, value } }) => (
@@ -151,6 +189,7 @@ export function CreateFieldForm(props: FieldFormProps) {
                       onBlur={onBlur}
                       onChangeText={onChange}
                       value={value}
+                      label={"Legal Description"}
                     />
                   )}
                   name="legalDescription"
@@ -166,53 +205,36 @@ export function CreateFieldForm(props: FieldFormProps) {
                     field: { onChange, onBlur, value },
                     fieldState: { error },
                   }) => (
-                    <>
-                      <Text style={styles.inputTitleText}>Crop</Text>
-                      {error && (
-                        <ErrorMessage
-                          style={styles.errorMessage}
-                          message={error.message}
-                        />
-                      )}
-                      <View>
-                        <Picker
-                          selectedValue={value}
-                          onValueChange={onChange}
-                          onBlur={onBlur}
-                        >
-                          <Picker.Item label="Choose a Crop" value="" />
-                          {cropOptions.map((crop, index) => (
-                            <Picker.Item
-                              key={index}
-                              label={crop}
-                              value={crop}
-                            />
-                          ))}
-                        </Picker>
-                      </View>
-                    </>
+                    <CustomDialogPicker
+                      options={cropOptions.map((crop) => ({
+                        label: crop,
+                        value: crop,
+                      }))}
+                      value={value}
+                      onChangeText={onChange}
+                      label="Crop"
+                      errorMessage={error?.message}
+                    />
                   )}
                   name="crop"
                   defaultValue=""
                 />
               </View>
               <View>
-                <Text style={styles.inputTitleText}>
-                  {`Area in ${areaUnit} (optional)`}{" "}
-                </Text>
                 <Controller
                   control={control}
                   render={({ field: { onChange, onBlur, value } }) => {
-                    const area = RNMapsPolygonArea(polygon, areaUnit, 3);
+                    const calculatedArea = getPolygonArea();
                     return (
                       <Input
+                        label={`Area in ${areaUnit} (optional) `}
                         placeholder="Area"
-                        defaultValue={area?.toString()}
+                        defaultValue={calculatedArea?.toString()}
                         onBlur={onBlur}
                         onChangeText={onChange}
                         value={
                           value === undefined
-                            ? area?.toString()
+                            ? calculatedArea?.toString()
                             : value.toString()
                         }
                         keyboardType="numeric"
@@ -289,6 +311,9 @@ const styles = StyleSheet.create({
     paddingLeft: 10,
   },
   errorMessage: {
+    paddingLeft: 15,
+  },
+  pickerStyle: {
     paddingLeft: 10,
   },
 });

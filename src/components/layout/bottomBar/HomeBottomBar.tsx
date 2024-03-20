@@ -1,15 +1,17 @@
 import React from "react";
 
-import { View, StyleSheet, TouchableOpacity } from "react-native";
+import { StyleSheet, Text } from "react-native";
 import { useRouter, usePathname, Href } from "expo-router";
 import { MapTabIcon, FieldTabIcon, SettingsTabIcon } from "./BottomButtons";
+import { Tab } from "@rneui/themed";
 import { ScreenNames } from "../../../navigation/navigation";
+import { colors } from "../../../constants/styles";
 import {
   HOME_MAP_SCREEN,
   HOME_SCOUT_REPORT_SCREEN,
-  SETTINGS_SCREEN,
+  HOME_SETTINGS_SCREEN,
 } from "../../../navigation/screens";
-const FOCUSED_TAB_COLOR = "black";
+const FOCUSED_TAB_COLOR = colors.secondary;
 const UNFOCUSED_TAB_COLOR = "gray";
 
 type TAB = {
@@ -22,56 +24,74 @@ const TABS: Array<TAB> = [
   {
     component: MapTabIcon,
     path: HOME_MAP_SCREEN,
-    name: HOME_MAP_SCREEN.split("/")[1],
+    name: HOME_MAP_SCREEN.split("/").pop() as string,
   },
   {
     component: FieldTabIcon,
     path: HOME_SCOUT_REPORT_SCREEN,
-    name: HOME_SCOUT_REPORT_SCREEN.split("/")[1],
+    name: HOME_SCOUT_REPORT_SCREEN.split("/").pop() as string,
   },
   {
     component: SettingsTabIcon,
-    path: SETTINGS_SCREEN,
-    name: SETTINGS_SCREEN.split("/")[1],
+    path: HOME_SETTINGS_SCREEN,
+    name: HOME_SETTINGS_SCREEN.split("/").pop() as string,
   },
 ];
 
 export const BottomBar = () => {
   const router = useRouter();
   const pathName = usePathname();
-  // TODO: Is this safe??? maybe better to check this inside the onPress function
-  const activeTab = pathName.split("/")[2];
 
+  const [tabIndex, setTabIndex] = React.useState(0);
+
+  const getActiveTab = () => {
+    return pathName.split("/").pop();
+  };
+  const onTabPress = (tabIndex: number) => {
+    const activeTab = getActiveTab();
+    const tab = TABS[tabIndex];
+    activeTab !== tab.name && router.push(tab.path as Href<string>);
+    setTabIndex(tabIndex);
+  };
   return (
-    <View style={styles.container}>
-      {TABS.map((Tab, index) => {
-        const isFocused = activeTab === Tab.name;
+    <Tab style={styles.container} value={tabIndex} onChange={onTabPress}>
+      {TABS.map((TabInfo, index) => {
+        const activeTab = getActiveTab();
+        const isFocused = activeTab === TabInfo.name;
+        const focusedColor = isFocused
+          ? FOCUSED_TAB_COLOR
+          : UNFOCUSED_TAB_COLOR;
         return (
-          <TouchableOpacity
+          <Tab.Item
             style={styles.buttonContainer}
-            key={index}
-            onPress={() => {
-              activeTab !== Tab.name && router.push(Tab.path as Href<string>);
-            }}
+            key={`Tab${index}`}
+            title={TabInfo.name}
+            // onPress={() => {
+            //   activeTab !== TabInfo.name &&
+            //     router.push(TabInfo.path as Href<string>);
+            // }}
           >
-            <Tab.component
-              key={index}
+            <TabInfo.component
+              key={`Tab${index}-Icon-BottomBar`}
               focused={isFocused}
-              color={isFocused ? FOCUSED_TAB_COLOR : UNFOCUSED_TAB_COLOR}
+              color={focusedColor}
             />
-          </TouchableOpacity>
+            <Text style={{ color: focusedColor }}>
+              {TabInfo.name.toUpperCase()}
+            </Text>
+          </Tab.Item>
         );
       })}
-    </View>
+    </Tab>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: "lightgray",
+    backgroundColor: colors.primary,
     flexDirection: "row",
     justifyContent: "space-around",
-    height: 50,
+    height: 60,
     alignItems: "center",
   },
   buttonContainer: {

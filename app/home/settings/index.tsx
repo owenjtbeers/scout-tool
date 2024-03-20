@@ -3,10 +3,10 @@ import { useRouter } from "expo-router";
 import { useDispatch } from "react-redux";
 
 import { View, Text, StyleSheet } from "react-native";
-import { Button } from "@rneui/base";
-import { userSlice } from "../../src/redux/user/userSlice";
-import { BottomBar } from "../../src/components/layout/bottomBar/HomeBottomBar";
-import { baseApi } from "../../src/redux/baseApi";
+import { Button } from "@rneui/themed";
+import { userSlice } from "../../../src/redux/user/userSlice";
+import { BottomBar } from "../../../src/components/layout/bottomBar/HomeBottomBar";
+import { baseApi } from "../../../src/redux/baseApi";
 
 export default () => {
   const router = useRouter();
@@ -25,7 +25,6 @@ export default () => {
       <View style={styles.container}>
         <Button onPress={onLogout}>Logout</Button>
       </View>
-      <BottomBar />
     </>
   );
 };

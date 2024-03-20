@@ -1,5 +1,6 @@
 import type { LatLng } from "react-native-maps";
 import type { FeatureCollection } from "@turf/helpers";
+import { BBox } from "@turf/helpers";
 
 /*
   This function takes an array of coordinate arrays and returns an array of LatLng objects.
@@ -39,4 +40,11 @@ export const convertRNMapsPolygonToTurfFeatureCollection = (
       },
     ],
   };
+};
+
+export const convertTurfBBoxToLatLng = (bbox: BBox): LatLng[] => {
+  return [
+    { latitude: bbox[1], longitude: bbox[0] },
+    { latitude: bbox[3], longitude: bbox[2] },
+  ];
 };

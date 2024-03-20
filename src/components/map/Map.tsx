@@ -10,6 +10,7 @@ import * as Location from "expo-location";
 // Components
 import { MapContentManager } from "./MapContentManager";
 import UserLocationButton from "./components/UserLocationButton";
+import FieldBoundsZoomButton from "./components/FieldBoundsZoomButton";
 
 // Data
 import { RootState } from "../../redux/store";
@@ -20,6 +21,17 @@ import AnimatedMapActionButtons from "./components/AnimatedMapActionButtons";
 import { defaultRegion } from "../../constants/constants";
 import { useGetFieldsQuery } from "../../redux/fields/fieldsApi";
 import { useSelectedGrowerAndFarm } from "../layout/topBar/selectionHooks";
+import { Feature, FeatureCollection, featureCollection } from "@turf/helpers";
+import bbox from "@turf/bbox";
+import {
+  convertTurfBBoxToLatLng,
+  mapCoordinatesToLatLng,
+} from "../../utils/latLngConversions";
+import MapUtilButtons from "./components/MapUtilButtons";
+import {
+  GLOBAL_SELECTIONS_REDUCER_KEY,
+  globalSelectionsSlice,
+} from "../../redux/globalSelections/globalSelectionsSlice";
 
 export const MapScreen = () => {
   const mapRef = React.useRef<MapView>(null);
@@ -57,6 +69,39 @@ export const MapScreen = () => {
     farmId: selectedFarm?.ID as number,
     withBoundaries: true,
   });
+  const shouldZoomToBbox = useSelector((state: RootState) => {
+    return state[GLOBAL_SELECTIONS_REDUCER_KEY].shouldZoomToBbox;
+  });
+  useEffect(() => {
+    if (shouldZoomToBbox && fieldResponse?.data?.length) {
+      const features = fieldResponse.data.reduce((acc, field) => {
+        const activeBoundary = field?.ActiveBoundary?.Json;
+        if (activeBoundary && activeBoundary.features?.length > 0) {
+          activeBoundary.features.forEach((feature) => {
+            acc.push(feature);
+          });
+        }
+        return acc;
+      }, [] as Feature[]);
+      const fc = featureCollection(features);
+      const bboxOfFields = bbox(fc);
+      if (bboxOfFields) {
+        console.log("bboxOfFields", bboxOfFields);
+        mapRef.current?.fitToCoordinates(
+          convertTurfBBoxToLatLng(bboxOfFields),
+          {
+            edgePadding: {
+              top: 50,
+              right: 50,
+              bottom: 50,
+              left: 50,
+            },
+          }
+        );
+        dispatch(globalSelectionsSlice.actions.setShouldZoomToBbox(false));
+      }
+    }
+  }, [shouldZoomToBbox]);
   return (
     <View style={styles.container}>
       <MapView
@@ -65,8 +110,10 @@ export const MapScreen = () => {
         showsUserLocation={true}
         showsCompass={true}
         showsMyLocationButton={false}
+        showsPointsOfInterest={false}
         followsUserLocation={true}
         onMapReady={onMapReady}
+        toolbarEnabled={false}
         provider={PROVIDER_GOOGLE}
         mapType="hybrid"
         userLocationUpdateInterval={5000}
@@ -81,7 +128,7 @@ export const MapScreen = () => {
       >
         <MapContentManager mapRef={mapRef} fields={fieldResponse?.data} />
       </MapView>
-      <UserLocationButton currentLocation={currentLocation} mapRef={mapRef} />
+      <MapUtilButtons mapRef={mapRef} fields={fieldResponse?.data} />
       <AnimatedMapActionButtons />
     </View>
   );

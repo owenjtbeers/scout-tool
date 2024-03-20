@@ -3,6 +3,8 @@ import { Text } from "react-native";
 import { Field } from "../../redux/fields/types";
 import centroid from "@turf/centroid";
 import MapView, { Marker, Polygon, LatLng, Geojson } from "react-native-maps";
+import { useTheme } from "@rneui/themed";
+import { colors } from "../../constants/styles";
 import {
   FeatureCollection,
   Polygon as TurfPolygon,
@@ -18,7 +20,7 @@ type MapContentManagerProps = {
 
 export const MapContentManager = (props: MapContentManagerProps) => {
   const { fields } = props;
-
+  const { theme } = useTheme();
   return (
     <>
       {fields &&
@@ -53,8 +55,8 @@ export const MapContentManager = (props: MapContentManagerProps) => {
                 <Geojson
                   // @ts-ignore TODO: Figure out how to resolve this between the two libraries
                   geojson={field.ActiveBoundary?.Json}
-                  strokeColor={"#F00"}
-                  fillColor={"rgba(255,0,0,0.5)"}
+                  strokeColor={theme.colors.primary}
+                  fillColor={colors.tertiary}
                 />
               )}
             </React.Fragment>

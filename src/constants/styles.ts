@@ -1,13 +1,17 @@
 import { createTheme } from "@rneui/themed";
 
 export const colors = {
-  primary: "#6B818D", // Blue green
-  primaryButton: "#6B818D",
+  // primary: "#6B818D", // Blue green
+  primary: "#00342B", // Dark green
+  secondary: "#d3f0db",
+  tertiary: "#d3f0dbAA", // Light green with opacity???
 };
 
 export const theme = createTheme({
   lightColors: {
     primary: colors.primary,
+    secondary: colors.secondary,
+    // tertiary: colors.tertiary,
   },
   darkColors: {
     primary: colors.primary,
@@ -16,6 +20,9 @@ export const theme = createTheme({
   components: {
     Button: {
       raised: true,
+      titleStyle: {
+        color: colors.secondary,
+      },
     },
     Dialog: {
       style: {
@@ -34,6 +41,9 @@ export const theme = createTheme({
         borderStyle: "solid",
         padding: 10,
       },
+    },
+    Icon: {
+      color: "black",
     },
   },
 });

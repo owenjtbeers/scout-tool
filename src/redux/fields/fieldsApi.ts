@@ -18,14 +18,6 @@ export const fieldsApi = baseApi.injectEndpoints({
         params,
       }),
       transformResponse: (response: { data: Field[]; message: string }) => {
-        // Transform the json on the ActiveBoundary for each field
-        if (response && response.data) {
-          response?.data.forEach((field) => {
-            if (field.ActiveBoundary) {
-              console.log("Field ActiveBoundary", field.ActiveBoundary);
-            }
-          });
-        }
         return response;
       },
       providesTags: ["Fields"],

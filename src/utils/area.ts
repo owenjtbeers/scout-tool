@@ -5,6 +5,7 @@ import {
   convertArea,
   Units,
   round,
+  FeatureCollection,
 } from "@turf/helpers";
 import { LatLng } from "react-native-maps";
 
@@ -16,7 +17,6 @@ export const RNMapsPolygonArea = (
   if (polygon.length < 4) {
     return 0;
   }
-  console.log("Calculating area for polygon in RNMapsPolygonArea", polygon);
   const convertedPolygon = polygon.map(
     (point) => [point.longitude, point.latitude] as Position
   );
@@ -29,6 +29,20 @@ export const RNMapsPolygonArea = (
   if (precision !== undefined) {
     calculatedArea = round(calculatedArea, precision);
   }
-  console.log("Calculated area", calculatedArea);
+  return calculatedArea;
+};
+
+export const FeatureCollectionArea = (
+  fc: FeatureCollection,
+  unit: Units,
+  precision: number | undefined
+) => {
+  let calculatedArea = area(fc);
+  if (unit !== "meters" && calculatedArea !== undefined) {
+    calculatedArea = convertArea(calculatedArea, "meters", unit);
+  }
+  if (precision !== undefined) {
+    calculatedArea = round(calculatedArea, precision);
+  }
   return calculatedArea;
 };

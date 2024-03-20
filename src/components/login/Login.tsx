@@ -1,9 +1,10 @@
 import React from "react";
-import { View, StyleSheet, Text, Image } from "react-native";
-import { Button, Input } from "@rneui/themed";
+import { View, StyleSheet, Image } from "react-native";
+import { Button, Input, Text } from "@rneui/themed";
 import { useForm, Controller } from "react-hook-form";
 import { useDispatch } from "react-redux";
 import { Href, Link, useRouter } from "expo-router";
+import { Entypo, MaterialIcons } from "@expo/vector-icons";
 import { useLoginMutation } from "../../../src/redux/auth/authApi";
 import { HOME_MAP_SCREEN } from "../../../src/navigation/screens";
 import { userSlice } from "../../../src/redux/user/userSlice";
@@ -26,6 +27,7 @@ export const Login = () => {
     });
     if ("data" in response) {
       dispatch(userSlice.actions.setToken(response.data.token));
+      // TODO: Actually set the user in state as well
       router.replace(HOME_MAP_SCREEN as Href<string>);
     } else if ("error" in response) {
       const errorMessage = getErrorMessage(response);
@@ -44,13 +46,24 @@ export const Login = () => {
       <View style={styles.inputsContainer}>
         <Controller
           control={control}
-          render={({ field: { onChange, onBlur, value } }) => (
+          render={({
+            field: { onChange, onBlur, value },
+            fieldState: { error },
+          }) => (
             <Input
               // style={styles.input}
               onBlur={onBlur}
               onChangeText={onChange}
               value={value}
               placeholder="Email"
+              leftIcon={
+                <MaterialIcons
+                  name="email"
+                  size={24}
+                  color={theme.theme.colors.primary}
+                />
+              }
+              errorMessage={error?.message}
             />
           )}
           name="email"
@@ -59,13 +72,24 @@ export const Login = () => {
         />
         <Controller
           control={control}
-          render={({ field: { onChange, onBlur, value } }) => (
+          render={({
+            field: { onChange, onBlur, value },
+            fieldState: { error },
+          }) => (
             <Input
               // style={styles.input}
               onBlur={onBlur}
               onChangeText={onChange}
               value={value}
               placeholder="Password"
+              leftIcon={
+                <Entypo
+                  name="lock"
+                  size={24}
+                  color={theme.theme.colors.primary}
+                />
+              }
+              errorMessage={error?.message}
               secureTextEntry
             />
           )}
@@ -96,6 +120,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     padding: 16,
+    backgroundColor: "#F2F2F2",
   },
   logoContainer: {
     flex: 1,

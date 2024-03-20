@@ -9,6 +9,7 @@ import { colors } from "../../src/constants/styles";
 const translationMap = {
   "add-field": "Create New Field",
   "edit-field": "Edit field: ",
+  "upload-shapefile": "Upload Shapefile",
 };
 
 const Layout = () => {

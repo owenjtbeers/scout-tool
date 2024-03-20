@@ -19,8 +19,9 @@ export const DrawingButtons = () => {
     (state: RootState) => state[MAP_DRAWING_REDUCER_KEY].isDrawing
   );
 
-  const clearPolygon = () => {
+  const clearGeojson = () => {
     dispatch(drawingSlice.actions.clearPolygon());
+    dispatch(drawingSlice.actions.clearTempGeoJSON());
   };
 
   const toggleIsDrawing = () => {
@@ -37,7 +38,7 @@ export const DrawingButtons = () => {
         <Text>Draw</Text>
       </TouchableOpacity>
       <TouchableOpacity
-        onPress={clearPolygon}
+        onPress={clearGeojson}
         style={{ flex: 1, alignItems: "center" }}
       >
         <Entypo name="eraser" size={24} color="black" />

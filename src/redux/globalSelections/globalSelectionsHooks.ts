@@ -29,6 +29,7 @@ export const useSelectDefaultGlobalSelections = (
   }
 
   if (!globalSelections.season) {
+    // TODO: Get the current season from the server
     dispatch(globalSelectionsSlice.actions.setSeason("2024"));
   }
 };

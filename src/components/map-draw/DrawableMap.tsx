@@ -1,7 +1,7 @@
 import React, { useRef, useState } from "react";
 import MapView, { MapPressEvent, PROVIDER_GOOGLE } from "react-native-maps";
 import { useSelector, useDispatch } from "react-redux";
-import { StyleSheet } from "react-native";
+import { StyleSheet, View } from "react-native";
 
 import { defaultRegion } from "../../constants/constants";
 import { RootState } from "../../redux/store";
@@ -13,6 +13,8 @@ import { OperationsModal } from "./OperationsModal";
 import { MapContentManager } from "../map/MapContentManager";
 import { useSelectedGrowerAndFarm } from "../layout/topBar/selectionHooks";
 import { useGetFieldsQuery } from "../../redux/fields/fieldsApi";
+import MapUtilButtons from "./MapUtilButtons";
+import DrawingInfoText from "./DrawingInfoText";
 
 export const DrawableMapScreen = () => {
   const dispatch = useDispatch();
@@ -41,8 +43,9 @@ export const DrawableMapScreen = () => {
     withBoundaries: true,
   });
   return (
-    <>
+    <View style={styles.container}>
       <DrawingButtons setModalVisible={setModalVisible} />
+
       <MapView
         style={styles.map}
         ref={mapRef}
@@ -52,21 +55,29 @@ export const DrawableMapScreen = () => {
         onMapReady={() => {}}
         mapType={"hybrid"}
         showsUserLocation={true}
+        showsMyLocationButton={false}
+        toolbarEnabled={false}
       >
         <MapContentManager mapRef={mapRef} fields={fieldResponse?.data} />
         <DrawingManager mapRef={mapRef} />
       </MapView>
+      <DrawingInfoText />
+      <MapUtilButtons mapRef={mapRef} />
       <SubmitButton operation={operation} setModalVisible={setModalVisible} />
       <OperationsModal
         operation={operation}
         setModalVisible={setModalVisible}
         visible={modalVisible}
+        mapRef={mapRef}
       />
-    </>
+    </View>
   );
 };
 
 const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+  },
   map: {
     flex: 1,
   },

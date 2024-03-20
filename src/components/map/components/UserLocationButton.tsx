@@ -1,17 +1,13 @@
 import React from "react";
-import { Button, Icon } from "@rneui/base";
+import { Button } from "@rneui/themed";
+import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { StyleSheet } from "react-native";
 import MapView, { LatLng } from "react-native-maps";
 
 import * as Location from "expo-location";
 import { defaultRegion } from "../../../constants/constants";
 
-const UserLocationButton = (props: {
-  mapRef: React.RefObject<MapView>;
-  currentLocation: { latitude: number; longitude: number };
-}) => {
-  const [currentLocation, setCurrentLocation] = React.useState({} as LatLng);
-
+const UserLocationButton = (props: { mapRef: React.RefObject<MapView> }) => {
   const onButtonPress = () => {
     (async () => {
       let { status } = await Location.requestForegroundPermissionsAsync();
@@ -20,7 +16,7 @@ const UserLocationButton = (props: {
         return;
       }
       let location = await Location.getCurrentPositionAsync({});
-      setCurrentLocation(location.coords as LatLng);
+      // setCurrentLocation(location.coords as LatLng);
       props.mapRef.current?.animateToRegion({
         ...defaultRegion,
         latitude: location.coords.latitude,
@@ -30,7 +26,7 @@ const UserLocationButton = (props: {
   };
 
   const locateIcon = () => (
-    <Icon type="material-community" name="crosshairs-gps" size={25} />
+    <MaterialCommunityIcons name="crosshairs-gps" size={25} />
   );
 
   return (
@@ -38,20 +34,15 @@ const UserLocationButton = (props: {
       onPress={onButtonPress}
       icon={locateIcon()}
       buttonStyle={styles.buttonStyle}
-      containerStyle={styles.containerStyle}
+      raised={false}
+      color={"secondary"}
     />
   );
 };
 
 const styles = StyleSheet.create({
   buttonStyle: {
-    backgroundColor: "white",
     borderRadius: 50,
-  },
-  containerStyle: {
-    position: "absolute",
-    top: "12%",
-    right: "7%",
   },
 });
 

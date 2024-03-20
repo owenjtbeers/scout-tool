@@ -16,6 +16,7 @@ export const ErrorMessage: React.FC<ErrorMessageProps> = (props) => {
 const styles = StyleSheet.create({
   error: {
     color: "red",
-    fontStyle: "italic"
+    // fontStyle: "italic",
+    fontSize: 12,
   },
 });

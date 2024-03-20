@@ -12,10 +12,10 @@ export const mapSlice = createSlice({
     region: null as Region | null,
   },
   reducers: {
-    setRegion: (state, action) => {
-      console.log("setRegion", action.payload);
-      state.region = action.payload;
-    },
+    setRegion: (state, action) => ({
+      ...state,
+      region: action.payload,
+    }),
     clearRegion: (state) => {
       state.region = null;
     },

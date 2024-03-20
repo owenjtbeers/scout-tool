@@ -5,6 +5,7 @@ import { Link } from "expo-router";
 import { useForm, Controller } from "react-hook-form";
 import { useDispatch } from "react-redux";
 import { Href, useRouter } from "expo-router";
+import { Octicons, Entypo, MaterialIcons } from "@expo/vector-icons";
 import { useSignupUserMutation } from "../../../src/redux/user/userApi";
 import { HOME_MAP_SCREEN } from "../../../src/navigation/screens";
 import { userSlice } from "../../../src/redux/user/userSlice";
@@ -12,11 +13,12 @@ import { Dialog } from "@rneui/themed";
 import { getErrorMessage } from "../../utils/errors";
 import { validation } from "../../forms/validationFunctions";
 import { validationRules } from "../../forms/validationRules";
+import { useTheme } from "@rneui/themed";
 
 export const Signup = () => {
   const dispatch = useDispatch();
   const [signupUser] = useSignupUserMutation();
-
+  const theme = useTheme();
   const router = useRouter();
   const { control, handleSubmit } = useForm();
   const [message, setMessage] = React.useState<string | null>(null);
@@ -49,6 +51,13 @@ export const Signup = () => {
             onChangeText={onChange}
             value={value}
             placeholder="Email"
+            leftIcon={
+              <MaterialIcons
+                name="email"
+                size={24}
+                color={theme.theme.colors.primary}
+              />
+            }
           />
         )}
         name="email"
@@ -65,6 +74,13 @@ export const Signup = () => {
             value={value}
             placeholder="Password"
             secureTextEntry
+            leftIcon={
+              <Entypo
+                name="lock"
+                size={24}
+                color={theme.theme.colors.primary}
+              />
+            }
           />
         )}
         name="password"
@@ -79,6 +95,13 @@ export const Signup = () => {
             onChangeText={onChange}
             value={value}
             placeholder="Organization Name"
+            leftIcon={
+              <Octicons
+                name="organization"
+                size={24}
+                color={theme.theme.colors.primary}
+              />
+            }
           />
         )}
         name="organizationName"

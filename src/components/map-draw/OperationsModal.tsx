@@ -4,11 +4,13 @@ import type { Units } from "@turf/helpers";
 import { CreateFieldForm } from "./CreateFieldForm";
 import { DrawingOperation } from "../../redux/map/drawingSlice";
 import { UploadShapeFileForm } from "./UploadShapeFileForm";
+import MapView from "react-native-maps";
 
 type OperationsModalProps = {
   operation: DrawingOperation;
   visible: boolean;
   setModalVisible: React.Dispatch<React.SetStateAction<boolean>>;
+  mapRef: React.RefObject<MapView>;
 };
 
 const units = ["acres", "hectares"] as Units[];
@@ -24,7 +26,7 @@ export const OperationsModal: React.FC<OperationsModalProps> = (props) => {
   return (
     <View style={styles.centeredView}>
       {operation === ("upload-shapefile" as DrawingOperation) ? (
-        <UploadShapeFileForm />
+        <UploadShapeFileForm mapRef={props.mapRef} setModalVisible={setModalVisible}/>
       ) : (
         // TODO Make this play nice with the keyboard
         <CreateFieldForm
