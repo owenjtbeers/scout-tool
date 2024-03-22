@@ -45,7 +45,6 @@ export const DrawableMapScreen = () => {
   return (
     <View style={styles.container}>
       <DrawingButtons setModalVisible={setModalVisible} />
-
       <MapView
         style={styles.map}
         ref={mapRef}

@@ -5,6 +5,7 @@ export const colors = {
   primary: "#00342B", // Dark green
   secondary: "#d3f0db",
   tertiary: "#d3f0dbAA", // Light green with opacity???
+  selectedFieldBoundaryFill: "#87CEFAAA", // Blue with opacity
 };
 
 export const theme = createTheme({

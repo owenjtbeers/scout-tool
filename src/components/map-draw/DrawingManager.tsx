@@ -8,6 +8,7 @@ import {
   drawingSlice,
 } from "../../redux/map/drawingSlice";
 import { RootState } from "../../redux/store";
+import { colors } from "../../constants/styles";
 
 export const DrawingManager = (props: { mapRef: React.RefObject<MapView> }) => {
   const dispatch = useDispatch();
@@ -61,7 +62,7 @@ export const DrawingManager = (props: { mapRef: React.RefObject<MapView> }) => {
       {polygon.length > 0 && (
         <Polygon
           coordinates={polygon}
-          fillColor={"#004e9d"}
+          fillColor={colors.selectedFieldBoundaryFill}
           strokeColor="lightblue"
           strokeWidth={5}
           lineDashPattern={[7, 1]}
@@ -73,7 +74,7 @@ export const DrawingManager = (props: { mapRef: React.RefObject<MapView> }) => {
           // @ts-ignore TODO: Figure out how to resolve this between the two libraries
           geojson={tempGeoJSON}
           strokeColor={"lightblue"}
-          fillColor={"#004e9d"}
+          fillColor={colors.selectedFieldBoundaryFill}
         />
       )}
     </>

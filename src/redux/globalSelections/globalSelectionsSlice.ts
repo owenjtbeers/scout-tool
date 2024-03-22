@@ -42,7 +42,7 @@ export const globalSelectionsSlice = createSlice({
       grower: action.payload.grower,
       shouldZoomToBbox: true,
     }),
-    setField: (state, action: PayloadAction<Field>) => ({
+    setField: (state, action: PayloadAction<Field | null>) => ({
       ...state,
       field: action.payload,
     }),
