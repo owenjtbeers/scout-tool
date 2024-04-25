@@ -134,7 +134,7 @@ export const UploadShapeFileForm = (props: UploadShapeFileFormProps) => {
                         geojson as FeatureCollection
                       )
                     );
-                    dispatch(drawingSlice.actions.clearPolygon());
+                    dispatch(drawingSlice.actions.clearPolygons());
                     const centroid = turfCentroid(geojson as FeatureCollection)
                       .geometry.coordinates;
                     props.mapRef.current?.animateCamera({

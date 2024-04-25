@@ -11,25 +11,17 @@ import {
   Position,
 } from "@turf/helpers";
 import { mapCoordinatesToLatLng } from "../../utils/latLngConversions";
-import {
-  GLOBAL_SELECTIONS_REDUCER_KEY,
-  globalSelectionsSlice,
-} from "../../redux/globalSelections/globalSelectionsSlice";
-import { useDispatch, useSelector } from "react-redux";
-import { RootState } from "../../redux/store";
+import { ScoutingArea } from "../../redux/scouting/types";
 
 type MapContentManagerProps = {
   mapRef: RefObject<MapView>;
   fields: Field[] | undefined;
+  scoutingAreas: ScoutingArea[];
 };
 
-export const MapContentManager = (props: MapContentManagerProps) => {
-  const { fields, mapRef } = props;
-  const selectedField = useSelector(
-    (state: RootState) => state[GLOBAL_SELECTIONS_REDUCER_KEY].field
-  );
+export const ScoutingMapContentManager = (props: MapContentManagerProps) => {
+  const { fields, scoutingAreas } = props;
   const { theme } = useTheme();
-  const dispatch = useDispatch();
   return (
     <>
       {fields &&
@@ -65,39 +57,27 @@ export const MapContentManager = (props: MapContentManagerProps) => {
                   // @ts-ignore TODO: Figure out how to resolve this between the two libraries
                   geojson={field.ActiveBoundary?.Json}
                   strokeColor={theme.colors.primary}
-                  fillColor={
-                    selectedField?.ID === field.ID
-                      ? colors.selectedFieldBoundaryFill
-                      : colors.tertiary
-                  }
-                  tappable
-                  onPress={(geoJsonProps) => {
-                    if (selectedField?.ID !== field.ID) {
-                      // Set the selected field in the global selections
-                      dispatch(globalSelectionsSlice.actions.setField(field));
-                      const { coordinates } = geoJsonProps;
-                      if (coordinates && mapRef.current) {
-                        console.log("Fitting to coordinates", coordinates);
-                        // TODO: Figure out how to deal with this error
-                        props.mapRef.current?.fitToCoordinates(coordinates, {
-                          edgePadding: {
-                            top: 20,
-                            right: 20,
-                            bottom: 20,
-                            left: 20,
-                          },
-                          animated: true,
-                        });
-                      }
-                    } else {
-                      dispatch(globalSelectionsSlice.actions.setField(null));
-                    }
-                  }}
+                  fillColor={colors.tertiary}
                 />
               )}
             </React.Fragment>
           );
         })}
+      {scoutingAreas.map((scoutArea) => {
+        const area = scoutArea?.area;
+        return (
+          <React.Fragment key={`${scoutArea.uuid}`}>
+            {area && (
+              <Geojson
+                // @ts-ignore TODO: Figure out how to resolve this between the two libraries
+                geojson={area}
+                strokeColor={theme.colors.primary}
+                fillColor={colors.tertiary}
+              />
+            )}
+          </React.Fragment>
+        );
+      })}
     </>
   );
 };

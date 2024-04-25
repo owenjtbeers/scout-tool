@@ -8,6 +8,16 @@ export const baseApi = createApi({
     baseUrl: ROOT_API_URL,
     prepareHeaders: prepareHeaders,
   }),
-  tagTypes: ["Farms", "Growers", "Fields", "Token", "User"],
+  tagTypes: [
+    "Farms",
+    "Growers",
+    "Fields",
+    "ScoutingReports",
+    "Token",
+    "User",
+    "OrgWeeds",
+    "OrgDiseases",
+    "OrgInsects",
+  ],
   endpoints: () => ({}),
 });

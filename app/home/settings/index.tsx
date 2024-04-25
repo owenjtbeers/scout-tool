@@ -2,10 +2,9 @@ import React from "react";
 import { useRouter } from "expo-router";
 import { useDispatch } from "react-redux";
 
-import { View, Text, StyleSheet } from "react-native";
+import { View, StyleSheet } from "react-native";
 import { Button } from "@rneui/themed";
 import { userSlice } from "../../../src/redux/user/userSlice";
-import { BottomBar } from "../../../src/components/layout/bottomBar/HomeBottomBar";
 import { baseApi } from "../../../src/redux/baseApi";
 
 export default () => {
@@ -35,6 +34,5 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     backgroundColor: "lightgray",
-    fontFamily: "Roboto",
   },
 });

@@ -41,7 +41,6 @@ export default function App() {
     }
   }, [token, rootNavigation?.key]);
 
-  // TODO: loading component should be defined, this should never really render based on the useEffect above
   return (
     <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
       <ActivityIndicator size="large" color={colors.primary} />

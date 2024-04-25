@@ -1,12 +1,15 @@
 import React, { useEffect, useState } from "react";
 
-import { AntDesign, FontAwesome5, Ionicons } from "@expo/vector-icons";
+import { AntDesign, FontAwesome5 } from "@expo/vector-icons";
 import { Href, useRouter } from "expo-router";
-import { Animated, StyleSheet } from "react-native";
+import { StyleSheet } from "react-native";
 import { SpeedDial } from "@rneui/themed";
 import { useDispatch } from "react-redux";
 import { colors } from "../../../constants/styles";
-import { MAP_DRAW_SCREEN } from "../../../navigation/screens";
+import {
+  MAP_DRAW_SCREEN,
+  SCOUT_CREATE_REPORT_SCREEN,
+} from "../../../navigation/screens";
 import { drawingSlice } from "../../../redux/map/drawingSlice";
 import { RootState } from "../../../redux/store";
 import {
@@ -49,7 +52,7 @@ const AnimatedMapActionButtons = () => {
         iconContainerStyle={styles.buttonPadding2}
         title="Add New Field"
         onPress={() => {
-          dispatch(drawingSlice.actions.clearPolygon());
+          dispatch(drawingSlice.actions.clearPolygons());
           dispatch(drawingSlice.actions.clearTempGeoJSON());
           dispatch(drawingSlice.actions.setOperation("add-field"));
           router.push(MAP_DRAW_SCREEN as Href<string>);
@@ -77,6 +80,7 @@ export const SelectedFieldSpeedDial = () => {
 };
 const SelectedFieldSpeedDialContents = () => {
   const dispatch = useDispatch();
+  const router = useRouter();
   const [isExpanded, setIsExpanded] = useState<boolean>(true);
   return (
     <SpeedDial
@@ -94,7 +98,9 @@ const SelectedFieldSpeedDialContents = () => {
       <SpeedDial.Action
         iconContainerStyle={styles.buttonPadding2}
         title="Add New Scouting Report For Single Field"
-        onPress={() => {}}
+        onPress={() => {
+          router.push(SCOUT_CREATE_REPORT_SCREEN as Href<string>);
+        }}
         icon={<AntDesign name="addfile" size={24} />}
       />
       <SpeedDial.Action

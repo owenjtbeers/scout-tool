@@ -1,3 +1,4 @@
+import { StyleSheet } from "react-native";
 import { createTheme } from "@rneui/themed";
 
 export const colors = {
@@ -12,10 +13,12 @@ export const theme = createTheme({
   lightColors: {
     primary: colors.primary,
     secondary: colors.secondary,
+    grey0: "lightgray",
     // tertiary: colors.tertiary,
   },
   darkColors: {
     primary: colors.primary,
+    grey0: "lightgray",
   },
   mode: "light",
   components: {
@@ -46,5 +49,38 @@ export const theme = createTheme({
     Icon: {
       color: "black",
     },
+    SearchBar: {
+      inputStyle: {
+        backgroundColor: "white",
+      },
+      inputContainerStyle: {
+        backgroundColor: "white",
+      },
+      containerStyle: {
+        backgroundColor: "lightgray",
+      },
+    },
+  },
+});
+
+export const globalStyles = StyleSheet.create({
+  flex1: {
+    flex: 1,
+  },
+  flexCenter: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  centerText: {
+    textAlign: "center",
+  },
+  topBar: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    paddingTop: 50,
+    height: 100,
+    backgroundColor: colors.primary,
   },
 });

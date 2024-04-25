@@ -2,7 +2,7 @@ import React from "react";
 
 // Components
 import { View, TouchableOpacity, Text, StyleSheet } from "react-native";
-import { Ionicons, Entypo, AntDesign } from "@expo/vector-icons";
+import { FontAwesome5, Entypo, AntDesign } from "@expo/vector-icons";
 import { Button, useTheme } from "@rneui/themed";
 
 // Data
@@ -26,18 +26,25 @@ export const DrawingButtons = (props: DrawingButtonsProps) => {
   );
 
   const clearTempGeoJSON = () => {
-    dispatch(drawingSlice.actions.clearPolygon());
+    dispatch(drawingSlice.actions.clearPolygons());
     dispatch(drawingSlice.actions.clearTempGeoJSON());
   };
 
   const toggleIsDrawing = () => {
-    dispatch(drawingSlice.actions.setIsDrawing(!isDrawing));
+    dispatch(
+      drawingSlice.actions.setIsDrawing({
+        isDrawing: !isDrawing,
+        drawMode: isDrawing ? null : "polygon",
+      })
+    );
     // Do this to prevent a bad state, so we don't confuse the uploaded shapefile with the drawn polygon
     dispatch(drawingSlice.actions.clearTempGeoJSON());
   };
 
   const spawnFileUploadModal = () => {
-    dispatch(drawingSlice.actions.setIsDrawing(false));
+    dispatch(
+      drawingSlice.actions.setIsDrawing({ isDrawing: false, drawMode: null })
+    );
     dispatch(drawingSlice.actions.setOperation("upload-shapefile"));
     setModalVisible(true);
   };
@@ -49,7 +56,9 @@ export const DrawingButtons = (props: DrawingButtonsProps) => {
       <Button
         onPress={toggleIsDrawing}
         title={"Draw Polygon"}
-        icon={<Ionicons name="pencil" size={24} color={selectedColor} />}
+        icon={
+          <FontAwesome5 name="draw-polygon" size={24} color={selectedColor} />
+        }
         // color={"primary"}
         titleStyle={{ color: selectedColor }}
         type={isDrawing ? "outline" : "solid"}

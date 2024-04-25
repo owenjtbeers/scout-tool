@@ -3,6 +3,7 @@ import { StyleSheet, View, ScrollView } from "react-native";
 import { colors } from "../../../constants/styles";
 import { useSelector, useDispatch } from "react-redux";
 import { Dialog, Text, ListItem, Button } from "@rneui/themed";
+import { AntDesign } from "@expo/vector-icons";
 
 // Data
 import {
@@ -19,91 +20,140 @@ import { Grower, Farm } from "../../../redux/field-management/types";
 export const TopBar = () => {
   return (
     <View style={styles.container}>
-      <GrowerAndFarmSelector />
+      <GrowerSelector />
+      <FarmSelector />
+      {/* <GrowerAndFarmSelector /> */}
       <SeasonSelector />
     </View>
   );
 };
 
-const GrowerAndFarmSelector = () => {
+
+
+const GrowerSelector = () => {
   const dispatch = useDispatch();
-  const [isGrowerFarmDialogOpen, setIsGrowerFarmDialogOpen] = useState(false);
-  const selectedGrowerOrFarm = useSelector((state: RootState) => {
-    return (
-      state[GLOBAL_SELECTIONS_REDUCER_KEY].farm ||
-      state[GLOBAL_SELECTIONS_REDUCER_KEY].grower
-    );
-  });
-  // const selectedGrowerOrFarm = { Name: "Test" };
+  const [isGrowerDialogOpen, setIsGrowerDialogOpen] = useState(false);
   const { data: growers } = useGetGrowersQuery("default", {
     refetchOnReconnect: true,
   });
-  const { data: farms } = useGetFarmsQuery("default", {
-    refetchOnReconnect: true,
-  });
-  const onSelectGrower = (grower: Grower) => () => {
-    dispatch(globalSelectionsSlice.actions.setGrower(grower));
-    setIsGrowerFarmDialogOpen(false);
-  };
-  const onSelectFarm = (farm: Farm) => () => {
-    const grower = growers?.find((g) => g.ID === farm.GrowerId) as Grower;
-    dispatch(globalSelectionsSlice.actions.setFarm({ farm, grower }));
-    setIsGrowerFarmDialogOpen(false);
-  };
-
+  const selectedGrower = useSelector(
+    (state: RootState) => state[GLOBAL_SELECTIONS_REDUCER_KEY].grower
+  );
   return (
-    <>
+    <React.Fragment key={"grower-selector-container"}>
       <Button
-        title={selectedGrowerOrFarm?.Name || "Select Grower or Farm"}
+        title={selectedGrower?.Name || "Select a Grower"}
         titleStyle={styles.selectionButtonText}
-        // style={styles.selectionButton
-        onPress={() => setIsGrowerFarmDialogOpen(true)}
+        onPress={() => setIsGrowerDialogOpen(true)}
         buttonStyle={styles.selectionButton}
         icon={{ name: "arrow-drop-down" }}
         iconPosition="right"
-        raised
-      />
-      <Dialog
-        isVisible={isGrowerFarmDialogOpen}
-        onBackdropPress={() => setIsGrowerFarmDialogOpen(false)}
       >
-        <ScrollView>
-          <Dialog.Title title={"Select a Grower or Farm"} />
-          {growers
-            ? growers.reduce((acc, grower: Grower) => {
-                acc.push(
-                  <ListItem
-                    onPress={onSelectGrower(grower)}
-                    key={`grower${grower.ID}`}
-                    bottomDivider
-                  >
-                    <ListItem.Title>{`Grower - ${grower.Name}`}</ListItem.Title>
-                  </ListItem>
-                );
-                const farmsForGrower = farms?.filter(
-                  (farm) => farm.GrowerId === grower.ID
-                );
-                farmsForGrower?.forEach((farm) => {
-                  acc.push(
-                    <ListItem
-                      key={`farm${farm.ID}`}
-                      onPress={onSelectFarm(farm)}
-                    >
-                      <ListItem.Title
-                        style={{ paddingLeft: 20 }}
-                      >{`Farm - ${farm.Name}`}</ListItem.Title>
-                    </ListItem>
-                  );
-                });
-                return acc;
-              }, [] as JSX.Element[])
-            : null}
-        </ScrollView>
-      </Dialog>
-    </>
+        <Text style={styles.selectionButtonText}>
+          {selectedGrower?.Name || "Select a Grower"}
+        </Text>
+        <Dialog
+          isVisible={isGrowerDialogOpen}
+          onBackdropPress={() => setIsGrowerDialogOpen(false)}
+        >
+          <ScrollView>
+            <Dialog.Title title={"Select a Grower"} />
+            {growers?.map((grower) => (
+              <ListItem
+                onPress={() => {
+                  dispatch(globalSelectionsSlice.actions.setGrower(grower));
+                  setIsGrowerDialogOpen(false);
+                }}
+                key={grower.ID}
+              >
+                <ListItem.Title>{grower.Name}</ListItem.Title>
+                {grower.ID === selectedGrower?.ID && <AntDesign name="check" />}
+              </ListItem>
+            ))}
+          </ScrollView>
+        </Dialog>
+      </Button>
+    </React.Fragment>
   );
 };
 
+const FarmSelector = () => {
+  const dispatch = useDispatch();
+  const [isFarmDialogOpen, setIsFarmDialogOpen] = useState(false);
+  const { data: farms } = useGetFarmsQuery("default", {
+    refetchOnReconnect: true,
+  });
+  const { data: growers } = useGetGrowersQuery("default", {
+    refetchOnReconnect: true,
+  });
+  const selectedGrower = useSelector(
+    (state: RootState) => state[GLOBAL_SELECTIONS_REDUCER_KEY].grower
+  );
+  const selectedFarm = useSelector(
+    (state: RootState) => state[GLOBAL_SELECTIONS_REDUCER_KEY].farm
+  );
+  let farmSelectorTitle = selectedFarm?.Name || "Select a Farm";
+  if (selectedGrower !== null && !selectedFarm?.Name) {
+    farmSelectorTitle = "All Farms";
+  }
+  return (
+    <React.Fragment key={"farm-selector-container"}>
+      <Button
+        // title={farmSelectorTitle}
+        titleStyle={styles.selectionButtonText}
+        onPress={() => setIsFarmDialogOpen(true)}
+        buttonStyle={styles.selectionButton}
+        icon={{ name: "arrow-drop-down" }}
+        iconPosition="right"
+      >
+        <Text style={styles.selectionButtonText}>{farmSelectorTitle}</Text>
+        <Dialog
+          isVisible={isFarmDialogOpen}
+          onBackdropPress={() => setIsFarmDialogOpen(false)}
+        >
+          <ScrollView>
+            <Dialog.Title title={"Select a Farm"} />
+            <ListItem
+              onPress={() => {
+                dispatch(
+                  globalSelectionsSlice.actions.setFarm({
+                    farm: null,
+                    grower: selectedGrower as Grower,
+                  })
+                );
+                setIsFarmDialogOpen(false);
+              }}
+            >
+              <ListItem.Title>All Farms</ListItem.Title>
+              {selectedFarm === null && <AntDesign name="check" />}
+            </ListItem>
+            {farms
+              ?.filter((farm) => farm.GrowerId === selectedGrower?.ID)
+              .map((farm) => (
+                <ListItem
+                  onPress={() => {
+                    dispatch(
+                      globalSelectionsSlice.actions.setFarm({
+                        farm,
+                        grower: growers?.find(
+                          (g) => g.ID === farm.GrowerId
+                        ) as Grower,
+                      })
+                    );
+                    setIsFarmDialogOpen(false);
+                  }}
+                  key={farm.ID}
+                >
+                  <ListItem.Title>{farm.Name}</ListItem.Title>
+                  {farm.ID === selectedFarm?.ID && <AntDesign name="check" />}
+                </ListItem>
+              ))}
+          </ScrollView>
+        </Dialog>
+      </Button>
+    </React.Fragment>
+  );
+};
 const SeasonSelector = () => {
   const dispatch = useDispatch();
   const [isSeasonDialogOpen, setIsSeasonDialogOpen] = useState(false);
