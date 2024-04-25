@@ -8,20 +8,45 @@ const DrawingInfoText = () => {
   const isDrawing = useSelector(
     (state: RootState) => state[MAP_DRAWING_REDUCER_KEY].isDrawing
   );
-
+  const drawMode = useSelector(
+    (state: RootState) => state[MAP_DRAWING_REDUCER_KEY].drawMode
+  );
+  if (isDrawing && drawMode === "polygon") {
+    return (
+      <View style={styles.positioningContainer}>
+        <DrawPolygonText />
+      </View>
+    );
+  }
   return (
     <>
       {isDrawing && (
         <View style={styles.positioningContainer}>
-          <Text>
-            Drawing a Polygon{"\n"}
-            1. Tap on the map to draw a point{"\n"}
-            2. Tap a different point{"\n"}
-            3. Tap the first point to close the polygon
-          </Text>
+          <DropPointText />
         </View>
       )}
     </>
+  );
+};
+
+const DrawPolygonText = () => {
+  return (
+    <View style={styles.positioningContainer}>
+      <Text>
+        Drawing a Polygon{"\n"}
+        1. Tap on the map to draw a point{"\n"}
+        2. Tap a different point{"\n"}
+        3. Tap the first point to close the polygon
+      </Text>
+    </View>
+  );
+};
+
+const DropPointText = () => {
+  return (
+    <View style={styles.positioningContainer}>
+      <Text>Hold and drag a pin to move it</Text>
+    </View>
   );
 };
 

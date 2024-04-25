@@ -20,12 +20,17 @@ export const DrawingButtons = () => {
   );
 
   const clearGeojson = () => {
-    dispatch(drawingSlice.actions.clearPolygon());
+    dispatch(drawingSlice.actions.clearPolygons());
     dispatch(drawingSlice.actions.clearTempGeoJSON());
   };
 
   const toggleIsDrawing = () => {
-    dispatch(drawingSlice.actions.setIsDrawing(!isDrawing));
+    dispatch(
+      drawingSlice.actions.setIsDrawing({
+        isDrawing: !isDrawing,
+        drawMode: isDrawing ? "polygon" : null,
+      })
+    );
   };
 
   return (

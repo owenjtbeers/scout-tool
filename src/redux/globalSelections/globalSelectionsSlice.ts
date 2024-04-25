@@ -35,14 +35,14 @@ export const globalSelectionsSlice = createSlice({
     }),
     setFarm: (
       state,
-      action: PayloadAction<{ grower: Grower; farm: Farm }>
+      action: PayloadAction<{ grower: Grower; farm: Farm | null }>
     ) => ({
       ...state,
       farm: action.payload.farm,
       grower: action.payload.grower,
       shouldZoomToBbox: true,
     }),
-    setField: (state, action: PayloadAction<Field>) => ({
+    setField: (state, action: PayloadAction<Field | null>) => ({
       ...state,
       field: action.payload,
     }),

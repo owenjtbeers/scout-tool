@@ -8,17 +8,24 @@ export type DrawingOperation =
   | "upload-shapefile"
   | null;
 
+export type DrawMode = "polygon" | "polyline" | "point" | null;
 interface DrawingState {
-  polygon: Array<LatLng>;
+  polygons: LatLng[][];
+  points: LatLng[];
+  polylines: LatLng[][];
   tempGeoJSON: FeatureCollection | null;
   isDrawing: boolean;
   operation: DrawingOperation;
+  drawMode: DrawMode;
 }
 
 const initialState: DrawingState = {
-  polygon: [],
+  polygons: [],
+  points: [],
+  polylines: [],
   tempGeoJSON: null,
   isDrawing: false,
+  drawMode: null,
   operation: null,
 };
 
@@ -27,21 +34,72 @@ export const drawingSlice = createSlice({
   name: MAP_DRAWING_REDUCER_KEY,
   initialState,
   reducers: {
-    addPointToPolygon: (state, action: PayloadAction<LatLng>) => ({
+    addPointToPolygon: (
+      state,
+      action: PayloadAction<{ index: number; point: LatLng }>
+    ) => {
+      const newPolygons = [...state.polygons];
+      if (!newPolygons[action.payload.index]) {
+        newPolygons[action.payload.index] = [];
+      }
+      newPolygons[action.payload.index] = [
+        ...newPolygons[action.payload.index],
+        action.payload.point,
+      ];
+      return {
+        ...state,
+        polygons: newPolygons,
+      };
+    },
+    setPointOfPolygon: (
+      state,
+      action: PayloadAction<{
+        index: number;
+        pointIndex: number;
+        point: LatLng;
+      }>
+    ) => {
+      const newPolygons = [...state.polygons];
+      newPolygons[action.payload.index] = [
+        ...newPolygons[action.payload.index],
+      ];
+      newPolygons[action.payload.index][action.payload.pointIndex] =
+        action.payload.point;
+      return {
+        ...state,
+        polygons: newPolygons,
+      };
+    },
+    addPoint: (state, action: PayloadAction<LatLng>) => ({
       ...state,
-      polygon: [...state.polygon, action.payload],
+      points: [...state.points, action.payload],
     }),
-    setPolygon: (state, action: PayloadAction<Array<LatLng>>) => ({
+    setPoint: (
+      state,
+      action: PayloadAction<{ index: number; point: LatLng }>
+    ) => {
+      const newPoints = [...state.points];
+      newPoints[action.payload.index] = action.payload.point;
+      return {
+        ...state,
+        points: newPoints,
+      };
+    },
+    clearPolygons: (state) => ({
       ...state,
-      polygon: action.payload,
+      polygons: [],
     }),
-    clearPolygon: (state) => ({
+    setIsDrawing: (
+      state: DrawingState,
+      action: PayloadAction<{ drawMode: DrawMode; isDrawing: boolean }>
+    ) => ({
       ...state,
-      polygon: [],
+      isDrawing: action.payload.isDrawing,
+      drawMode: action.payload.drawMode,
     }),
-    setIsDrawing: (state, action: PayloadAction<boolean>) => ({
+    setDrawMode: (state, action: PayloadAction<DrawMode>) => ({
       ...state,
-      isDrawing: action.payload,
+      drawMode: action.payload,
     }),
     setOperation: (state, action: PayloadAction<DrawingOperation>) => ({
       ...state,
@@ -55,5 +113,12 @@ export const drawingSlice = createSlice({
       ...state,
       tempGeoJSON: null,
     }),
+    clearAllShapes: (state) => ({
+      ...state,
+      polygons: [],
+      points: [],
+      polylines: [],
+    }),
+    clearState: () => initialState,
   },
 });

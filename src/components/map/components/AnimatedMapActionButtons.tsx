@@ -1,149 +1,117 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 
-import { AntDesign, FontAwesome5, Ionicons } from "@expo/vector-icons";
+import { AntDesign, FontAwesome5 } from "@expo/vector-icons";
 import { Href, useRouter } from "expo-router";
-import {
-  Animated,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  View,
-} from "react-native";
-import { useTheme } from "@rneui/themed";
+import { StyleSheet } from "react-native";
 import { SpeedDial } from "@rneui/themed";
 import { useDispatch } from "react-redux";
 import { colors } from "../../../constants/styles";
-import { ScreenNames } from "../../../navigation/navigation";
-import { MAP_DRAW_SCREEN } from "../../../navigation/screens";
+import {
+  MAP_DRAW_SCREEN,
+  SCOUT_CREATE_REPORT_SCREEN,
+} from "../../../navigation/screens";
 import { drawingSlice } from "../../../redux/map/drawingSlice";
+import { RootState } from "../../../redux/store";
+import {
+  GLOBAL_SELECTIONS_REDUCER_KEY,
+  globalSelectionsSlice,
+} from "../../../redux/globalSelections/globalSelectionsSlice";
+import { useSelector } from "react-redux";
 
 const BUTTON_HEIGHT = 60;
 const BUTTON_WIDTH = 60;
 
 const AnimatedMapActionButtons = () => {
-  const [isExpanded, setIsExpanded] = useState<boolean>(false);
-  const { theme } = useTheme();
-  const [animation] = useState(new Animated.Value(0));
   const dispatch = useDispatch();
   const router = useRouter();
-
-  // const handleAddButtonPress = () => {
-  //   setIsExpanded(!isExpanded);
-  //   Animated.spring(animation, {
-  //     toValue: isExpanded ? 0 : 1,
-  //     friction: 5,
-  //     useNativeDriver: true,
-  //   }).start();
-  // };
-
-  // const addButtonStyle = {
-  //   transform: [
-  //     {
-  //       scale: animation.interpolate({
-  //         inputRange: [0, 1],
-  //         outputRange: [1, 0.95],
-  //       }),
-  //     },
-  //     {
-  //       rotate: animation.interpolate({
-  //         inputRange: [0, 1],
-  //         outputRange: ["0deg", "135deg"],
-  //       }),
-  //     },
-  //   ],
-  // };
-
-  // const expandedButtonStyle = {
-  //   opacity: animation,
-  //   transform: [
-  //     {
-  //       translateY: animation.interpolate({
-  //         inputRange: [0, 1],
-  //         outputRange: [0, -100],
-  //       }),
-  //     },
-  //   ],
-  // };
+  // const [animation] = useState(new Animated.Value(0));
+  const [isExpanded, setIsExpanded] = useState<boolean>(false);
+  const selectedField = useSelector(
+    (state: RootState) => state[GLOBAL_SELECTIONS_REDUCER_KEY].field
+  );
+  useEffect(() => {
+    if (selectedField !== null) {
+      setIsExpanded(false);
+    }
+  }, [selectedField]);
 
   return (
     <SpeedDial
       isOpen={isExpanded}
       onOpen={() => setIsExpanded(true)}
-      onClose={() => setIsExpanded(false)}
+      onClose={() => {
+        setIsExpanded(false);
+      }}
       icon={{ name: "add", size: 24 }}
       openIcon={{ name: "close", size: 24 }}
       labelPressable
       transitionDuration={100}
+      placement="right"
     >
+      <SpeedDial.Action
+        iconContainerStyle={styles.buttonPadding2}
+        title="Add New Field"
+        onPress={() => {
+          dispatch(drawingSlice.actions.clearPolygons());
+          dispatch(drawingSlice.actions.clearTempGeoJSON());
+          dispatch(drawingSlice.actions.setOperation("add-field"));
+          router.push(MAP_DRAW_SCREEN as Href<string>);
+        }}
+        icon={<FontAwesome5 name="draw-polygon" size={24} />}
+      />
       <SpeedDial.Action
         iconContainerStyle={styles.buttonPadding2}
         title="Add New Scouting Report"
         onPress={() => {}}
         icon={<AntDesign name="addfile" size={24} />}
-      ></SpeedDial.Action>
-      <SpeedDial.Action
-        title="Add New Field"
-        onPress={() => {
-          dispatch(drawingSlice.actions.clearPolygon());
-          dispatch(drawingSlice.actions.clearTempGeoJSON());
-          dispatch(drawingSlice.actions.setOperation("add-field"));
-          router.push(MAP_DRAW_SCREEN as Href<string>);
-        }}
-      >
-        <FontAwesome5 name="draw-polygon" size={24} />
-      </SpeedDial.Action>
+      />
     </SpeedDial>
   );
-  // return (
-  //   <View>
-  //     <View style={styles.absolutePositioning}>
-  //       <Animated.View
-  //         style={[
-  //           styles.textIconContainer,
-  //           styles.buttonPadding,
-  //           expandedButtonStyle,
-  //         ]}
-  //       >
-  //         <Text style={styles.text}>Add New Scouting Report</Text>
-  //         <TouchableOpacity style={styles.circle} activeOpacity={0.5}>
-  //           <AntDesign name="addfile" size={24} color="black" />
-  //         </TouchableOpacity>
-  //       </Animated.View>
-  //       <Animated.View
-  //         style={[
-  //           styles.textIconContainer,
-  //           styles.buttonPadding,
-  //           expandedButtonStyle,
-  //         ]}
-  //       >
-  //         <Text style={styles.text}>Add New Field</Text>
-  //         <TouchableOpacity
-  //           style={styles.circle}
-  //           activeOpacity={0.5}
-  //           onPress={() => {
-  //             dispatch(drawingSlice.actions.clearPolygon());
-  //             dispatch(drawingSlice.actions.clearTempGeoJSON());
-  //             dispatch(drawingSlice.actions.setOperation("add-field"));
-  //             router.push("map-draw" as Href<ScreenNames[number]>);
-  //           }}
-  //         >
-  //           <FontAwesome5 name="draw-polygon" size={24} color="black" />
-  //         </TouchableOpacity>
-  //       </Animated.View>
-  //     </View>
-  //     <Animated.View style={[styles.absolutePositioning]}>
-  //       <TouchableOpacity
-  //         onPress={handleAddButtonPress}
-  //         style={[styles.circle, addButtonStyle]}
-  //         activeOpacity={0.5}
-  //       >
-  //         <Ionicons name="add-sharp" size={24} color="black" />
-  //       </TouchableOpacity>
-  //     </Animated.View>
-  //   </View>
-  // );
 };
 
+export const SelectedFieldSpeedDial = () => {
+  const selectedField = useSelector(
+    (state: RootState) => state[GLOBAL_SELECTIONS_REDUCER_KEY].field
+  );
+  if (selectedField === null) {
+    return null;
+  }
+  return <SelectedFieldSpeedDialContents />;
+};
+const SelectedFieldSpeedDialContents = () => {
+  const dispatch = useDispatch();
+  const router = useRouter();
+  const [isExpanded, setIsExpanded] = useState<boolean>(true);
+  return (
+    <SpeedDial
+      isOpen={isExpanded}
+      onOpen={() => setIsExpanded(true)}
+      onClose={() => {
+        dispatch(globalSelectionsSlice.actions.setField(null));
+      }}
+      icon={{ name: "add", size: 24 }}
+      openIcon={{ name: "close", size: 24 }}
+      labelPressable
+      transitionDuration={100}
+      placement={"left"}
+    >
+      <SpeedDial.Action
+        iconContainerStyle={styles.buttonPadding2}
+        title="Add New Scouting Report For Single Field"
+        onPress={() => {
+          router.push(SCOUT_CREATE_REPORT_SCREEN as Href<string>);
+        }}
+        icon={<AntDesign name="addfile" size={24} />}
+      />
+      <SpeedDial.Action
+        iconContainerStyle={styles.buttonPadding2}
+        title="Edit Crop History"
+        onPress={() => {}}
+        icon={<AntDesign name="edit" size={24} />}
+      />
+    </SpeedDial>
+  );
+};
 const styles = StyleSheet.create({
   circle: {
     backgroundColor: colors.primary,

@@ -17,7 +17,9 @@ import { RootState } from "../../redux/store";
 
 // Constants and Types
 import { mapSlice, MAP_REDUCER_KEY } from "../../redux/map/mapSlice";
-import AnimatedMapActionButtons from "./components/AnimatedMapActionButtons";
+import AnimatedMapActionButtons, {
+  SelectedFieldSpeedDial,
+} from "./components/AnimatedMapActionButtons";
 import { defaultRegion } from "../../constants/constants";
 import { useGetFieldsQuery } from "../../redux/fields/fieldsApi";
 import { useSelectedGrowerAndFarm } from "../layout/topBar/selectionHooks";
@@ -130,6 +132,7 @@ export const MapScreen = () => {
       </MapView>
       <MapUtilButtons mapRef={mapRef} fields={fieldResponse?.data} />
       <AnimatedMapActionButtons />
+      <SelectedFieldSpeedDial />
     </View>
   );
 };

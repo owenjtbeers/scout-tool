@@ -1,23 +1,22 @@
-import React, { useCallback } from "react";
-import { useSelector } from "react-redux";
-import { RootState } from "../../redux/store";
-import { View, TouchableOpacity, StyleSheet, Pressable } from "react-native";
-import { BottomSheet, Button, Input } from "@rneui/themed";
-import { useForm, Controller } from "react-hook-form";
-import { FeatureCollection, Units } from "@turf/helpers";
 import { Ionicons } from "@expo/vector-icons";
-import { RNMapsPolygonArea, FeatureCollectionArea } from "../../utils/area";
-import { validationRules } from "../../forms/validationRules";
+import { BottomSheet, Button, Input } from "@rneui/themed";
+import { FeatureCollection, Units } from "@turf/helpers";
+import { Href, useRouter } from "expo-router";
+import React, { useCallback } from "react";
+import { Controller, useForm } from "react-hook-form";
+import { Pressable, StyleSheet, TouchableOpacity, View } from "react-native";
+import { useSelector } from "react-redux";
+import { CustomDialogPicker } from "../../forms/components/DialogPicker";
 import { validation } from "../../forms/validationFunctions";
+import { validationRules } from "../../forms/validationRules";
+import { HOME_MAP_SCREEN } from "../../navigation/screens";
+import { useGetFarmsQuery } from "../../redux/field-management/fieldManagementApi";
 import { useCreateFieldMutation } from "../../redux/fields/fieldsApi";
 import { Field } from "../../redux/fields/types";
-import { useSelectedGrowerAndFarm } from "../layout/topBar/selectionHooks";
+import { RootState } from "../../redux/store";
+import { FeatureCollectionArea, RNMapsPolygonArea } from "../../utils/area";
 import { convertRNMapsPolygonToTurfFeatureCollection } from "../../utils/latLngConversions";
-import { useRouter } from "expo-router";
-import { useGetFarmsQuery } from "../../redux/field-management/fieldManagementApi";
-import { HOME_MAP_SCREEN } from "../../navigation/screens";
-import { CustomDialogPicker } from "../../forms/components/DialogPicker";
-import { Href } from "expo-router";
+import { useSelectedGrowerAndFarm } from "../layout/topBar/selectionHooks";
 
 type FieldFormProps = {
   isVisible: boolean;
@@ -45,8 +44,8 @@ export function CreateFieldForm(props: FieldFormProps) {
 
   const [createField] = useCreateFieldMutation();
 
-  const polygon = useSelector(
-    (state: RootState) => state["map-drawing"].polygon
+  const polygons = useSelector(
+    (state: RootState) => state["map-drawing"].polygons
   );
   const tempGeoJSON = useSelector(
     (state: RootState) => state["map-drawing"].tempGeoJSON
@@ -60,7 +59,7 @@ export function CreateFieldForm(props: FieldFormProps) {
     if (tempGeoJSON !== null) {
       fc = tempGeoJSON;
     } else {
-      fc = convertRNMapsPolygonToTurfFeatureCollection(polygon);
+      fc = convertRNMapsPolygonToTurfFeatureCollection(polygons[0]);
     }
     const fieldData = {
       Name: data.name,
@@ -88,8 +87,8 @@ export function CreateFieldForm(props: FieldFormProps) {
     if (tempGeoJSON !== null) {
       return FeatureCollectionArea(tempGeoJSON, areaUnit, 3);
     }
-    return RNMapsPolygonArea(polygon, areaUnit, 3);
-  }, [polygon, tempGeoJSON]);
+    return RNMapsPolygonArea(polygons[0], areaUnit, 3);
+  }, [polygons, tempGeoJSON]);
 
   const onError = (errors: any) => {
     console.log(errors);

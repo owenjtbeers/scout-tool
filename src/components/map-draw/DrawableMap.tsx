@@ -31,7 +31,10 @@ export const DrawableMapScreen = () => {
   const onPress = (event: MapPressEvent) => {
     if (!!isDrawing) {
       dispatch(
-        drawingSlice.actions.addPointToPolygon(event.nativeEvent.coordinate)
+        drawingSlice.actions.addPointToPolygon({
+          index: 0,
+          point: event.nativeEvent.coordinate,
+        })
       );
     }
   };
@@ -45,7 +48,6 @@ export const DrawableMapScreen = () => {
   return (
     <View style={styles.container}>
       <DrawingButtons setModalVisible={setModalVisible} />
-
       <MapView
         style={styles.map}
         ref={mapRef}
