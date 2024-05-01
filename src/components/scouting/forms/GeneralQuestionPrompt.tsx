@@ -17,11 +17,15 @@ import {
 import { scoutFormStyles } from "./styles";
 import { globalStyles } from "../../../constants/styles";
 import { useTheme } from "@rneui/themed";
-import type { Alias } from "../../../redux/scouting/types";
+import type {
+  Alias,
+  ObservationTypePrefix,
+} from "../../../redux/scouting/types";
+import type { Observation } from "../../../redux/scouting/types";
 import { set } from "react-hook-form";
 import { ViewComponent } from "react-native";
 interface GeneralQuestionPromptProps {
-  type: "Weed" | "Pest" | "Disease";
+  type: ObservationTypePrefix;
   picklist: Alias[];
   isLoadingPicklist: boolean;
   getAddedAliases: () => Alias[];

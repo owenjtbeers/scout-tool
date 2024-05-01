@@ -18,7 +18,7 @@ export const scoutingApi = baseApi.injectEndpoints({
       { growerId: number; farmId: number; dateRange?: [string, string] }
     >({
       query: (params) => ({
-        url: "/scouting/reports",
+        url: "/scouting/scout-report",
         method: "GET",
         params,
       }),
@@ -32,7 +32,7 @@ export const scoutingApi = baseApi.injectEndpoints({
       Partial<ScoutingReport>
     >({
       query: (data) => ({
-        url: "/scouting/reports",
+        url: "/scouting/scout-report",
         method: "POST",
         data,
       }),

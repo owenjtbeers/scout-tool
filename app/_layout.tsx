@@ -1,6 +1,6 @@
 import React from "react";
 import { SafeAreaView } from "react-native";
-
+import { en, registerTranslation } from "react-native-paper-dates";
 // Navigation
 import { Slot } from "expo-router";
 
@@ -13,6 +13,7 @@ import { store, persistor } from "../src/redux/store";
 import { ThemeProvider } from "@rneui/themed";
 import { theme } from "../src/constants/styles";
 
+registerTranslation("en", en);
 export default function App() {
   return (
     <Provider store={store}>

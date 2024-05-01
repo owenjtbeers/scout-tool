@@ -4,24 +4,24 @@ import { ScoutingAppUser } from "./types";
 export const USER_API_REDUCER_KEY = "userApi";
 export const userApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
-    getCurrentUser: builder.query<ScoutingAppUser, string>({
+    getCurrentUser: builder.query<
+      {
+        data: ScoutingAppUser;
+        message: string;
+      },
+      string
+    >({
       query: () => ({
-        url: "/me",
+        url: "/users/me",
       }),
       providesTags: ["User"],
-      transformResponse: (response: ScoutingAppUser) => {
-        return response;
-      },
-      transformErrorResponse: (response, meta, arg) => {
-        return response;
-      },
     }),
     signupUser: builder.mutation<
       ScoutingAppUser,
       { email: string; password: string; organizationName: string }
     >({
       query: (body) => ({
-        url: "/signup",
+        url: "/users/signup",
         method: "POST",
         body,
       }),

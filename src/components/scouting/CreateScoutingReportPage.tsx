@@ -9,12 +9,10 @@ import {
   UseFormHandleSubmit,
   UseFormSetValue,
   UseFormWatch,
-  set,
   useForm,
 } from "react-hook-form";
 import {
   Alert,
-  ScrollView,
   StyleSheet,
   TouchableOpacity,
   View,
@@ -29,24 +27,12 @@ import {
   MAP_DRAWING_REDUCER_KEY,
   drawingSlice,
 } from "../../redux/map/drawingSlice";
-import type {
-  Observation,
-  ObservationMedia,
-  ScoutingArea,
-} from "../../redux/scouting/types";
 import { RootState } from "../../redux/store";
 import { ScoutingReportMapView } from "./ScoutingReportMapView";
 import { ScoutingSideSheet } from "./ScoutingSideSheet";
 import { ScoutingReportSummaryContent } from "./forms/ScoutingReportSummaryContent";
 import { ScoutingReportObservationContent } from "./forms/ScoutingReportObservationContent";
-
-interface ScoutingReportForm {
-  scoutingAreas: ScoutingArea[];
-  observations: Observation[];
-  media: ObservationMedia[];
-  summaryText: string;
-  recommendationText: string;
-}
+import { ScoutingReportForm } from "./types";
 
 export const CreateScoutingReportPage = () => {
   const router = useRouter();
@@ -71,6 +57,7 @@ export const CreateScoutingReportPage = () => {
       media: [],
       summaryText: "",
       recommendationText: "",
+      fieldIds: [selectedField.ID]
     },
   });
 

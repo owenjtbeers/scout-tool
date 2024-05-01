@@ -3,7 +3,7 @@ import { View, Alert } from "react-native";
 import { scoutFormStyles } from "./styles";
 import { useTheme, Text } from "@rneui/themed";
 import { Ionicons } from "@expo/vector-icons";
-import { Observation } from "../../../redux/scouting/types";
+import type { Observation, ObservationTypePrefix } from "../../../redux/scouting/types";
 import type {
   Control,
   UseFormGetValues,
@@ -17,7 +17,7 @@ interface AliasGroupingProps {
   formSetValue: UseFormSetValue<ScoutingReportForm>;
   formGetValues: UseFormGetValues<ScoutingReportForm>;
   scoutingAreaFormIndex: number;
-  observationTypeFormPrefix: "weed" | "insect" | "disease" | "general";
+  observationTypeFormPrefix: ObservationTypePrefix;
 }
 
 interface ObservationWithFormIndex extends Observation {

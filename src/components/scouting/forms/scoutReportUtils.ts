@@ -2,7 +2,11 @@ import type {
   ScoutingArea,
   Alias,
   Observation,
+  ObservationTypePrefix,
+  ScoutingReport,
 } from "../../../redux/scouting/types";
+import { ScoutingAppUser } from "../../../redux/user/types";
+import type { ScoutingReportForm } from "../types";
 
 const valueIsDefined = (value: string | number | null | undefined): boolean => {
   if (value === "") {
@@ -14,16 +18,16 @@ export const getNumberOfObservationsFromScoutingArea = (
   scoutingArea: ScoutingArea
 ): number => {
   return (
-    scoutingArea?.weedObservations?.filter((weedObs) =>
+    scoutingArea?.WeedObservations?.filter((weedObs) =>
       valueIsDefined(weedObs.value)
     )?.length +
-      scoutingArea?.insectObservations?.filter((insectObs) =>
+      scoutingArea?.InsectObservations?.filter((insectObs) =>
         valueIsDefined(insectObs.value)
       )?.length +
-      scoutingArea?.diseaseObservations?.filter((diseaseObs) =>
+      scoutingArea?.DiseaseObservations?.filter((diseaseObs) =>
         valueIsDefined(diseaseObs.value)
       )?.length +
-      scoutingArea?.generalObservations?.filter((generalObs) =>
+      scoutingArea?.GeneralObservations?.filter((generalObs) =>
         valueIsDefined(generalObs.value)
       )?.length || 0
   );
@@ -37,7 +41,6 @@ export const getNewWeedObservationSet = (alias: Alias): Observation[] => {
       name: "Density",
       options: ["Low", "Medium", "High"],
       value: "",
-      type: "weed",
       tags: null,
       ScoutingAreaId: 0,
     },
@@ -47,7 +50,6 @@ export const getNewWeedObservationSet = (alias: Alias): Observation[] => {
       name: "Height",
       value: "",
       options: ["0", "48"],
-      type: "weed",
       valueUnit1: "inches",
       // valueUnit2: "m2",
       tags: null,
@@ -59,7 +61,6 @@ export const getNewWeedObservationSet = (alias: Alias): Observation[] => {
       name: "Diameter",
       value: "",
       options: ["0", "3"],
-      type: "weed",
       valueUnit1: "inches",
       // valueUnit2: "m2",
       tags: null,
@@ -71,7 +72,6 @@ export const getNewWeedObservationSet = (alias: Alias): Observation[] => {
       name: "Leaf Stage",
       options: [],
       value: "",
-      type: "weed",
       tags: null,
       ScoutingAreaId: 0,
     },
@@ -87,13 +87,13 @@ export const getNewWeedObservationSet = (alias: Alias): Observation[] => {
 */
 export const getRecentAliasesFromObservations = (
   observationAreas: ScoutingArea[],
-  type?: "weed" | "insect" | "disease" | "general"
+  type?: ObservationTypePrefix
 ): Map<string, number> => {
   const keyMapping = {
-    weed: "weedObservations",
-    insect: "insectObservations",
-    disease: "diseaseObservations",
-    general: "generalObservations",
+    Weed: "WeedObservations",
+    Insect: "InsectObservations",
+    Disease: "DiseaseObservations",
+    General: "GeneralObservations",
   } as { [key: string]: keyof ScoutingArea };
   let keys = Object.values(keyMapping);
   if (type) {
@@ -112,9 +112,9 @@ export const getRecentAliasesFromObservations = (
     );
     // We want to create a unique list of the alias names found at this scouting area
     recentObservations.forEach((observation) => {
-      const alias = observation.Alias.Name;
-      const count = scoutingAreaMap.get(alias);
-      if (count === undefined) {
+      const alias = observation?.Alias?.Name;
+      const count = scoutingAreaMap.get(alias || "");
+      if (count === undefined && !!alias) {
         scoutingAreaMap.set(alias, 1);
       }
     });
@@ -130,4 +130,79 @@ export const getRecentAliasesFromObservations = (
     }
   });
   return recentMap;
+};
+
+export const mapFormDataToPostScoutReport = (
+  scoutReportForm: ScoutingReportForm,
+  currentUser?: ScoutingAppUser
+): ScoutingReport => {
+  const { summaryText, scoutingAreas, fieldIds, scoutedById, scoutedDate } =
+    scoutReportForm;
+  return {
+    ID: 0,
+    // TODO: Record the date properly through the UI
+    ScoutedDate: scoutedDate.toISOString(),
+    // TODO: Record the scouted by properly through the UI
+    ScoutedById: scoutedById || currentUser?.ID || 0,
+    Summary: summaryText,
+    Fields: fieldIds,
+    // @ts-ignore TODO: Type this better. The input type to the api is not the same as the output type
+    ObservationAreas: scoutingAreas.map((scoutingArea) => {
+      return {
+        ID: scoutingArea.ID,
+        UId: scoutingArea.UId,
+        ScoutReportId: scoutingArea.ScoutReportId,
+        Geometry: scoutingArea.Geometry,
+        WeedObservations: mapScoutingAreaObservationsToAPITypeObservation(
+          scoutingArea.WeedObservations
+        ),
+        InsectObservations: mapScoutingAreaObservationsToAPITypeObservation(
+          scoutingArea.InsectObservations
+        ),
+        DiseaseObservations: mapScoutingAreaObservationsToAPITypeObservation(
+          scoutingArea.DiseaseObservations
+        ),
+        GeneralObservations: scoutingArea.GeneralObservations.map(
+          mapFormObservationToAPIQuestionVal
+        ),
+      };
+    }),
+  };
+};
+
+const mapScoutingAreaObservationsToAPITypeObservation = (
+  observations: Observation[]
+) => {
+  // Group the observations by alias
+  const aliasMap = observations.reduce((acc, observation) => {
+    const { Alias } = observation;
+    if (!Alias) {
+      return acc;
+    }
+    if (!acc[Alias.Name]) {
+      acc[Alias.Name] = { ID: Alias.ID, observations: [] as Observation[] };
+    }
+    acc[Alias.Name].observations.push(observation);
+    return acc;
+  }, {} as Record<string, { ID: number; observations: Observation[] }>);
+
+  // Map the grouped observations to the API format
+  return Object.keys(aliasMap).map((aliasName) => {
+    const alias = aliasMap[aliasName];
+    return {
+      AliasName: aliasName,
+      AliasId: alias.ID,
+      QuestionVals: alias.observations.map(mapFormObservationToAPIQuestionVal),
+    };
+  });
+};
+const mapFormObservationToAPIQuestionVal = (observation: Observation) => {
+  return {
+    Question: observation.name,
+    Value: String(observation.value),
+    Options: observation.options?.join(","),
+    RenderType: observation.questionType,
+    ValueUnit1: observation.valueUnit1,
+    ValueUnit2: observation.valueUnit2,
+  };
 };

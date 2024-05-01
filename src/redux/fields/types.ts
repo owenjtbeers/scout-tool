@@ -1,7 +1,7 @@
 import { FeatureCollection } from "@turf/helpers";
 
 export type Field = {
-  ID: string;
+  ID: number;
   Name: string;
   GrowerId: number;
   FarmId: number;

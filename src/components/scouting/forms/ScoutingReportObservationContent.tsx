@@ -85,11 +85,11 @@ export const ScoutingReportObservationContent = (
               type={"Weed"}
               recentlyObserved={getRecentAliasesFromObservations(
                 scoutingAreas,
-                "weed"
+                "Weed"
               )}
               getAddedAliases={() => {
                 const weedObservations = formGetValues(
-                  `scoutingAreas.${scoutingAreaFormIndex}.weedObservations`
+                  `scoutingAreas.${scoutingAreaFormIndex}.WeedObservations`
                 );
                 if (weedObservations) {
                   return weedObservations.map((obs) => obs.Alias);
@@ -105,7 +105,7 @@ export const ScoutingReportObservationContent = (
               isLoadingPicklist={isLoadingOrgWeeds}
               createQuestion={(alias) => {
                 const weedObservations = formGetValues(
-                  `scoutingAreas.${scoutingAreaFormIndex}.weedObservations`
+                  `scoutingAreas.${scoutingAreaFormIndex}.WeedObservations`
                 );
                 if (weedObservations) {
                   const newWeedObservations = [
@@ -113,7 +113,7 @@ export const ScoutingReportObservationContent = (
                     ...getNewWeedObservationSet(alias),
                   ];
                   formSetValue(
-                    `scoutingAreas.${scoutingAreaFormIndex}.weedObservations`,
+                    `scoutingAreas.${scoutingAreaFormIndex}.WeedObservations`,
                     newWeedObservations
                   );
                 }
@@ -123,7 +123,7 @@ export const ScoutingReportObservationContent = (
               control={formControl}
               render={({ field: { value } }) => (
                 <AliasGrouping
-                  observationTypeFormPrefix={"weed"}
+                  observationTypeFormPrefix={"Weed"}
                   formControl={formControl}
                   formGetValues={formGetValues}
                   formSetValue={formSetValue}
@@ -131,7 +131,7 @@ export const ScoutingReportObservationContent = (
                   observations={value}
                 />
               )}
-              name={`scoutingAreas.${scoutingAreaFormIndex}.weedObservations`}
+              name={`scoutingAreas.${scoutingAreaFormIndex}.WeedObservations`}
             />
 
             {/* <GeneralQuestionPrompt

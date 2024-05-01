@@ -127,15 +127,15 @@ export const ScoutingReportMapView = (props: ScoutingReportMapViewProps) => {
               });
               const nextIndex = getFormValues("scoutingAreas").length;
               setFormValue(`scoutingAreas.${nextIndex}`, {
-                id: 0,
+                ID: 0,
                 // TODO: Handle the case where there are more than 26 scouting areas
-                uuid: String.fromCharCode("A".charCodeAt(0) + (nextIndex % 26)),
-                area: fc,
-                reportId: 0,
-                weedObservations: [],
-                insectObservations: [],
-                diseaseObservations: [],
-                generalObservations: [],
+                UId: String.fromCharCode("A".charCodeAt(0) + (nextIndex % 26)),
+                ScoutReportId: 0,
+                Geometry: fc,
+                WeedObservations: [],
+                InsectObservations: [],
+                DiseaseObservations: [],
+                GeneralObservations: [],
               });
             }
             dispatch(

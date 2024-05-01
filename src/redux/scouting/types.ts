@@ -1,7 +1,8 @@
 import type { ScoutingToolUnits } from "../../constants/types";
 import type { FeatureCollection } from "@turf/helpers";
+
+export type ObservationTypePrefix = "Weed" | "Insect" | "Disease" | "General";
 export type Observation = {
-  type: "insect" | "weed" | "disease" | "general";
   name: string;
   questionType:
     | "text"
@@ -19,21 +20,22 @@ export type Observation = {
 };
 
 export type ScoutingArea = {
-  id: number;
-  uuid: string;
-  reportId: number;
-  area: FeatureCollection;
-  weedObservations: Observation[];
-  insectObservations: Observation[];
-  diseaseObservations: Observation[];
-  generalObservations: Observation[];
+  ID: number;
+  UId: string;
+  ScoutReportId: number;
+  Geometry: FeatureCollection;
+  WeedObservations: Observation[];
+  InsectObservations: Observation[];
+  DiseaseObservations: Observation[];
+  GeneralObservations: Observation[];
 };
 
 export type ScoutingReport = {
-  id: number;
-  fieldId: number;
-  summary: string;
-  date: string;
+  ID: number;
+  Fields: number[];
+  Summary: string;
+  ScoutedDate: string;
+  ObservationAreas?: ScoutingArea[];
 };
 
 export type ObservationMedia = {
