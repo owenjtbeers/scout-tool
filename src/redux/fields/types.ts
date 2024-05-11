@@ -5,8 +5,8 @@ export type Field = {
   Name: string;
   GrowerId: number;
   FarmId: number;
-  CreatedAt: string;
-  UpdatedAt: string;
+  CreatedAt?: string;
+  UpdatedAt?: string;
   ActiveBoundary: Boundary | null;
 };
 

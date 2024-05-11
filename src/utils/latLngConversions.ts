@@ -1,5 +1,5 @@
 import type { LatLng } from "react-native-maps";
-import type { FeatureCollection } from "@turf/helpers";
+import type { FeatureCollection, Feature, Polygon } from "@turf/helpers";
 import { BBox } from "@turf/helpers";
 
 /*
@@ -29,16 +29,20 @@ export const convertRNMapsPolygonToTurfFeatureCollection = (
 ): FeatureCollection => {
   return {
     type: "FeatureCollection",
-    features: [
-      {
-        type: "Feature",
-        properties: {},
-        geometry: {
-          type: "Polygon",
-          coordinates: [mapLatLngToCoordinates(latLngArray)],
-        },
-      },
-    ],
+    features: [convertRNMapsPolygonToTurfFeature(latLngArray)],
+  };
+};
+
+export const convertRNMapsPolygonToTurfFeature = (
+  latLngArray: LatLng[]
+): Feature<Polygon> => {
+  return {
+    type: "Feature",
+    properties: {},
+    geometry: {
+      type: "Polygon",
+      coordinates: [mapLatLngToCoordinates(latLngArray)],
+    },
   };
 };
 

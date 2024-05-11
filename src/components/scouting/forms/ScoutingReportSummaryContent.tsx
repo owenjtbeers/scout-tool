@@ -1,6 +1,6 @@
-import React from "react";
+import React, { useState } from "react";
 import { ScrollView, StyleSheet, View, Alert } from "react-native";
-import { Button, Input, Text, FAB } from "@rneui/themed";
+import { Button, Input, Text, FAB, Dialog, ListItem } from "@rneui/themed";
 import { DatePickerInput } from "react-native-paper-dates";
 import { FontAwesome5, Entypo } from "@expo/vector-icons";
 import { useTheme } from "@rneui/themed";
@@ -10,6 +10,7 @@ import {
   UseFormGetValues,
   Control,
   UseFormWatch,
+  set,
 } from "react-hook-form";
 import { useRouter } from "expo-router";
 import { useDispatch } from "react-redux";
@@ -21,7 +22,10 @@ import {
   getNumberOfObservationsFromScoutingArea,
   mapFormDataToPostScoutReport,
 } from "./scoutReportUtils";
-import { useCreateScoutingReportMutation } from "../../../redux/scouting/scoutingApi";
+import {
+  useCreateScoutingReportMutation,
+  useUpdateScoutingReportMutation,
+} from "../../../redux/scouting/scoutingApi";
 import { useGetCurrentUserQuery } from "../../../redux/user/userApi";
 
 interface ScoutingReportSummaryContentProps {
@@ -30,16 +34,31 @@ interface ScoutingReportSummaryContentProps {
   formControl: Control<ScoutingReportForm>;
   formGetValues: UseFormGetValues<ScoutingReportForm>;
   watch: UseFormWatch<ScoutingReportForm>;
+  setSelectedScoutingAreaIndex: (index: number) => void;
+  setSideSheetContentType: (contentType: "summary" | "observation") => void;
+  setIsDrawingScoutingArea: (isDrawing: boolean) => void;
 }
 export const ScoutingReportSummaryContent = (
   props: ScoutingReportSummaryContentProps
 ) => {
-  const { field, handleSubmit, formControl, formGetValues, watch } = props;
+  const {
+    field,
+    handleSubmit,
+    formControl,
+    formGetValues,
+    watch,
+    setSelectedScoutingAreaIndex,
+    setSideSheetContentType,
+    setIsDrawingScoutingArea,
+  } = props;
   const { data: currentUserResponse } = useGetCurrentUserQuery("default");
   const { theme } = useTheme();
   const dispatch = useDispatch();
   const router = useRouter();
-  const [createScoutingReport, result] = useCreateScoutingReportMutation();
+  const [createScoutingReport, createResult] =
+    useCreateScoutingReportMutation();
+  const [updateScoutReport, updateResult] = useUpdateScoutingReportMutation();
+  const [isScoutedAreaDialogOpen, setIsScoutedAreaDialogOpen] = useState(false);
   const scoutingAreas = watch("scoutingAreas");
 
   return (
@@ -61,6 +80,9 @@ export const ScoutingReportSummaryContent = (
                 drawMode: null,
               })
             );
+            dispatch(drawingSlice.actions.clearAllShapes());
+            setIsDrawingScoutingArea(true);
+            setSelectedScoutingAreaIndex(scoutingAreas.length);
           }}
         />
       </View>
@@ -109,11 +131,34 @@ export const ScoutingReportSummaryContent = (
           <View style={scoutFormStyles.summaryRow}>
             <FontAwesome5 name="binoculars" size={24} />
             <Text># of Scouted Areas</Text>
-            <FAB>
+            <FAB onPress={() => setIsScoutedAreaDialogOpen(true)}>
               <Text style={scoutFormStyles.buttonText}>
                 {formGetValues("scoutingAreas")?.length}
               </Text>
             </FAB>
+            <Dialog
+              isVisible={isScoutedAreaDialogOpen}
+              onBackdropPress={() => setIsScoutedAreaDialogOpen(false)}
+            >
+              <Dialog.Title
+                title={"Select a Scouting Area to View/Edit it's observations"}
+              ></Dialog.Title>
+              {scoutingAreas.map((scoutingArea, index) => (
+                <ListItem
+                  onPress={() => {
+                    setSelectedScoutingAreaIndex(index);
+                    setSideSheetContentType("observation");
+                  }}
+                  key={scoutingArea.UId}
+                >
+                  <ListItem.Title>{scoutingArea.UId}</ListItem.Title>
+                  <ListItem.Subtitle>
+                    {getNumberOfObservationsFromScoutingArea(scoutingArea)}{" "}
+                    Observations
+                  </ListItem.Subtitle>
+                </ListItem>
+              ))}
+            </Dialog>
           </View>
           <View style={scoutFormStyles.summaryRow}>
             <Entypo name="magnifying-glass" size={24} />
@@ -178,7 +223,16 @@ export const ScoutingReportSummaryContent = (
               currentUserResponse?.data
             );
             console.log(postData);
-            const scoutingReportResponse = await createScoutingReport(postData);
+            let scoutingReportResponse;
+            if (!!postData.ID) {
+              scoutingReportResponse = await updateScoutReport({
+                id: postData.ID,
+                data: postData,
+              });
+            } else {
+              scoutingReportResponse = await createScoutingReport(postData);
+            }
+
             if ("error" in scoutingReportResponse) {
               console.error(scoutingReportResponse.error);
             } else {
@@ -197,7 +251,7 @@ export const ScoutingReportSummaryContent = (
               // console.log(scoutingReportResponse.data);
             }
           })}
-          loading={result.isLoading}
+          loading={createResult.isLoading || updateResult.isLoading}
         />
       </ScrollView>
     </>

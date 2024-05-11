@@ -1,15 +1,11 @@
 import { baseApi } from "../baseApi";
 import { Field } from "./types";
-
-type FieldResponse = {
-  data: Field[];
-  message: string;
-};
+import type { APIResponse } from "../query";
 
 export const fieldsApi = baseApi.injectEndpoints({
   endpoints: (build) => ({
     getFields: build.query<
-      FieldResponse,
+      APIResponse<Field[]>,
       { growerId: number; farmId: number; withBoundaries: boolean | undefined }
     >({
       query: (params) => ({

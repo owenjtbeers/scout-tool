@@ -12,6 +12,7 @@ import {
   useForm,
 } from "react-hook-form";
 import {
+  ActivityIndicator,
   Alert,
   StyleSheet,
   TouchableOpacity,
@@ -19,10 +20,7 @@ import {
 } from "react-native";
 import { useDispatch, useSelector } from "react-redux";
 import type { Field } from "../../redux/fields/types";
-import {
-  GLOBAL_SELECTIONS_REDUCER_KEY,
-  globalSelectionsSlice,
-} from "../../redux/globalSelections/globalSelectionsSlice";
+import { globalSelectionsSlice } from "../../redux/globalSelections/globalSelectionsSlice";
 import {
   MAP_DRAWING_REDUCER_KEY,
   drawingSlice,
@@ -33,16 +31,49 @@ import { ScoutingSideSheet } from "./ScoutingSideSheet";
 import { ScoutingReportSummaryContent } from "./forms/ScoutingReportSummaryContent";
 import { ScoutingReportObservationContent } from "./forms/ScoutingReportObservationContent";
 import { ScoutingReportForm } from "./types";
+import { ScoutingReport } from "../../redux/scouting/types";
 
-export const CreateScoutingReportPage = () => {
+interface CreateScoutingReportPageProps {
+  mode: "create" | "edit";
+  existingScoutingReport?: ScoutingReport;
+  // Only useful if in edit mode
+  isFetchingScoutingReport: boolean;
+  fields: Field[];
+}
+
+export const CreateScoutingReportPage = (
+  props: CreateScoutingReportPageProps
+) => {
+  const { mode, existingScoutingReport, isFetchingScoutingReport, fields } =
+    props;
   const router = useRouter();
   const navigation = useNavigation();
   const dispatch = useDispatch();
   // TODO: Convert this to be multiple selected fields if possible
-  const selectedField = useSelector(
-    (state: RootState) => state[GLOBAL_SELECTIONS_REDUCER_KEY].field as Field
-  );
+  const selectedField = fields[0];
 
+  // Fetch existing scouting report if in edit mode
+
+  const defaultFormValues =
+    mode === "edit" && existingScoutingReport
+      ? {
+          ID: existingScoutingReport.ID,
+          scoutingAreas: existingScoutingReport.ObservationAreas,
+          scoutedBy: existingScoutingReport.ScoutedBy,
+          scoutedById: existingScoutingReport.ScoutedById,
+          scoutedDate: new Date(existingScoutingReport.ScoutedDate),
+          media: [],
+          summaryText: existingScoutingReport.Summary,
+          fieldIds: existingScoutingReport.FieldIds.map((obj) => obj.ID),
+        }
+      : {
+          ID: 0,
+          scoutingAreas: [],
+          media: [],
+          summaryText: "",
+          recommendationText: "",
+          fieldIds: fields.map((field) => field.ID),
+        };
   const {
     control,
     handleSubmit,
@@ -52,17 +83,12 @@ export const CreateScoutingReportPage = () => {
     reset,
     watch,
   } = useForm<ScoutingReportForm>({
-    defaultValues: {
-      scoutingAreas: [],
-      media: [],
-      summaryText: "",
-      recommendationText: "",
-      fieldIds: [selectedField.ID]
-    },
+    defaultValues: defaultFormValues,
   });
 
   // Internal State
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [isDrawingScoutingArea, setIsDrawingScoutingArea] = useState(false);
   const [sideSheetContentType, setSideSheetContentType] = useState<
     "summary" | "observation"
   >("summary");
@@ -111,6 +137,10 @@ export const CreateScoutingReportPage = () => {
       createLeavePageAlert();
     }
   };
+
+  if (isFetchingScoutingReport) {
+    return <ActivityIndicator />;
+  }
   return (
     <View style={{ flex: 1 }}>
       <Header
@@ -130,6 +160,8 @@ export const CreateScoutingReportPage = () => {
           getFormValues={getValues}
           fields={[selectedField]}
           setSideSheetContentType={setSideSheetContentType}
+          setIsDrawingScoutingArea={setIsDrawingScoutingArea}
+          isDrawingScoutingArea={isDrawingScoutingArea}
         />
         <CreateScoutReportForm
           formControl={control}
@@ -140,6 +172,8 @@ export const CreateScoutingReportPage = () => {
           formSetValue={setValue}
           sideSheetContentType={sideSheetContentType}
           setSideSheetContentType={setSideSheetContentType}
+          isDrawingScoutingArea={isDrawingScoutingArea}
+          setIsDrawingScoutingArea={setIsDrawingScoutingArea}
         />
       </View>
 
@@ -160,6 +194,8 @@ interface ScoutingReportFormProps {
   watch: UseFormWatch<ScoutingReportForm>;
   sideSheetContentType: "summary" | "observation";
   setSideSheetContentType: (contentType: "summary" | "observation") => void;
+  isDrawingScoutingArea: boolean;
+  setIsDrawingScoutingArea: (isDrawing: boolean) => void;
 }
 const CreateScoutReportForm = ({
   field,
@@ -170,15 +206,15 @@ const CreateScoutReportForm = ({
   sideSheetContentType,
   setSideSheetContentType,
   watch,
+  isDrawingScoutingArea,
+  setIsDrawingScoutingArea,
 }: ScoutingReportFormProps) => {
   const { theme } = useTheme();
 
-  const isDrawing = useSelector(
-    (state: RootState) => state[MAP_DRAWING_REDUCER_KEY].isDrawing
-  );
+  const [selectedScoutingAreaIndex, setSelectedScoutingAreaIndex] = useState(0);
 
   return (
-    <ScoutingSideSheet isDrawing={isDrawing}>
+    <ScoutingSideSheet isDrawing={isDrawingScoutingArea}>
       {sideSheetContentType === "summary" ? (
         <ScoutingReportSummaryContent
           field={field}
@@ -186,10 +222,13 @@ const CreateScoutReportForm = ({
           formGetValues={formGetValues}
           handleSubmit={handleSubmit}
           watch={watch}
+          setSelectedScoutingAreaIndex={setSelectedScoutingAreaIndex}
+          setSideSheetContentType={setSideSheetContentType}
+          setIsDrawingScoutingArea={setIsDrawingScoutingArea}
         />
       ) : (
         <ScoutingReportObservationContent
-          scoutingAreaFormIndex={formGetValues("scoutingAreas").length - 1}
+          scoutingAreaFormIndex={selectedScoutingAreaIndex}
           field={field}
           formControl={formControl}
           formGetValues={formGetValues}
