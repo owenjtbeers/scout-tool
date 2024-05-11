@@ -6,6 +6,11 @@ import {
   prepareHeaders as prepareScoutToolHeaders,
 } from "../utils/prepareHeaders";
 
+export type APIResponse<T> = {
+  data: T;
+  message: string;
+};
+
 export const axiosBaseQuery =
   (
     {

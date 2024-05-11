@@ -139,7 +139,7 @@ export const mapFormDataToPostScoutReport = (
   const { summaryText, scoutingAreas, fieldIds, scoutedById, scoutedDate } =
     scoutReportForm;
   return {
-    ID: 0,
+    ID: scoutReportForm.ID || 0,
     // TODO: Record the date properly through the UI
     ScoutedDate: scoutedDate.toISOString(),
     // TODO: Record the scouted by properly through the UI

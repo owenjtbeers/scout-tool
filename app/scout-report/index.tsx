@@ -1,8 +1,9 @@
 import React from "react";
-import { View } from "react-native";
+
+import { ScoutingReportList } from "../../src/components/scouting/ScoutingReportList";
 
 const BlankPage: React.FC = () => {
-  return <View />;
+  return <ScoutingReportList />;
 };
 
 export default BlankPage;

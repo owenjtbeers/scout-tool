@@ -1,8 +1,7 @@
 import React from "react";
 import { View } from "react-native";
-import MapView, { Marker } from "react-native-maps";
+import MapView from "react-native-maps";
 import { PROVIDER_GOOGLE } from "react-native-maps";
-import { MapContentManager } from "../map/MapContentManager";
 import { Field } from "../../redux/fields/types";
 import { RootState, store } from "../../redux/store";
 import { useSelector } from "react-redux";
@@ -15,8 +14,10 @@ import { useDispatch } from "react-redux";
 import { drawingSlice } from "../../redux/map/drawingSlice";
 import DrawingInfoText from "../map-draw/DrawingInfoText";
 import { featureCollection } from "@turf/helpers";
-import { mapLatLngToCoordinates } from "../../utils/latLngConversions";
-import getPathFromState from "expo-router/build/fork/getPathFromState";
+import {
+  convertRNMapsPolygonToTurfFeature,
+  mapLatLngToCoordinates,
+} from "../../utils/latLngConversions";
 
 import type { UseFormGetValues, UseFormSetValue } from "react-hook-form";
 import type { ScoutingReportForm } from "./types";
@@ -26,11 +27,19 @@ interface ScoutingReportMapViewProps {
   getFormValues: UseFormGetValues<ScoutingReportForm>;
   setFormValue: UseFormSetValue<ScoutingReportForm>;
   setSideSheetContentType: (contentType: "summary" | "observation") => void;
+  setIsDrawingScoutingArea: (isDrawing: boolean) => void;
+  isDrawingScoutingArea: boolean;
 }
 
 export const ScoutingReportMapView = (props: ScoutingReportMapViewProps) => {
-  const { fields, getFormValues, setFormValue, setSideSheetContentType } =
-    props;
+  const {
+    fields,
+    getFormValues,
+    setFormValue,
+    setSideSheetContentType,
+    isDrawingScoutingArea,
+    setIsDrawingScoutingArea,
+  } = props;
   const dispatch = useDispatch();
   const initialRegion = useSelector((state: RootState) => state.map.region);
   const mapRef = React.useRef<MapView>(null);
@@ -61,7 +70,9 @@ export const ScoutingReportMapView = (props: ScoutingReportMapViewProps) => {
   };
   return (
     <View style={{ flex: 1 }}>
-      {isDrawing ? <ScoutingDrawingButtons mapRef={mapRef} /> : null}
+      {isDrawingScoutingArea ? (
+        <ScoutingDrawingButtons mapRef={mapRef} />
+      ) : null}
       <MapView
         style={styles.map}
         ref={mapRef}
@@ -81,10 +92,11 @@ export const ScoutingReportMapView = (props: ScoutingReportMapViewProps) => {
         <ScoutingDrawingManager mapRef={mapRef} />
       </MapView>
       <DrawingInfoText />
-      {isDrawing ? (
+      {isDrawingScoutingArea ? (
         <Button
           onPress={() => {
             const drawingState = drawingSlice.selectSlice(store.getState());
+            dispatch(drawingSlice.actions.clearAllShapes());
             // Save all drawn areas to state
             if (
               drawingState.polygons.length > 0 ||
@@ -94,14 +106,7 @@ export const ScoutingReportMapView = (props: ScoutingReportMapViewProps) => {
               const fc = featureCollection([]);
               // Save all polygons
               drawingState.polygons.forEach((polygon) => {
-                fc.features.push({
-                  type: "Feature",
-                  properties: {},
-                  geometry: {
-                    type: "Polygon",
-                    coordinates: mapLatLngToCoordinates(polygon),
-                  },
-                });
+                fc.features.push(convertRNMapsPolygonToTurfFeature(polygon));
               });
               // Save all points
               drawingState.points.forEach((point) => {
@@ -144,7 +149,7 @@ export const ScoutingReportMapView = (props: ScoutingReportMapViewProps) => {
                 isDrawing: false,
               })
             );
-            dispatch(drawingSlice.actions.clearAllShapes());
+            setIsDrawingScoutingArea(false);
             setSideSheetContentType("observation");
           }}
           title={"Finish with Scouting Area"}

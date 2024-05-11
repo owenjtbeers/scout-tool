@@ -1,5 +1,5 @@
 import React from "react";
-
+import { Alert } from "react-native";
 // Components
 import { View, StyleSheet } from "react-native";
 import { FontAwesome5, Entypo } from "@expo/vector-icons";
@@ -55,41 +55,55 @@ export const ScoutingDrawingButtons = (props: DrawingButtonsProps) => {
       <Button
         title={"Drop Point"}
         onPress={async () => {
-          let location = await Location.getLastKnownPositionAsync({});
-          if (location?.coords) {
-            const latLng = {
-              latitude: location.coords.latitude,
-              longitude: location.coords.longitude,
-            };
-            dispatch(
-              drawingSlice.actions.addPoint(latLng)
-            );
-            // Zoom camera to location
-            const camera = await props.mapRef.current?.getCamera();
-            props.mapRef.current?.animateCamera({
-              ...camera,
-              center: latLng
-            });
-          } else {
-            // Drop at center of screen
-            const camera = await props.mapRef.current?.getCamera();
-            if (camera?.center) {
-              const latLng = {
-                latitude: camera.center.latitude,
-                longitude: camera.center.longitude,
-              }
-              dispatch(
-                drawingSlice.actions.addPoint(latLng)
-              );
-              props.mapRef.current?.animateCamera({
-                ...camera,
-                center: latLng
-              });
-            } else {
-              // Display an error message for the user
-              alert("Could not get location. Please try again.");
-            }
-          }
+          Alert.alert("Where to drop the point?", "", [
+            {
+              text: "Cancel",
+              style: "cancel",
+            },
+            {
+              text: "Current Location",
+              onPress: async () => {
+                let location = await Location.getLastKnownPositionAsync({});
+                if (location?.coords) {
+                  const latLng = {
+                    latitude: location.coords.latitude,
+                    longitude: location.coords.longitude,
+                  };
+                  dispatch(drawingSlice.actions.addPoint(latLng));
+                  // Zoom camera to location
+                  const camera = await props.mapRef.current?.getCamera();
+                  props.mapRef.current?.animateCamera({
+                    ...camera,
+                    center: latLng,
+                  });
+                } else {
+                  // Display an error message for the user
+                  alert("Could not get location. Please try again.");
+                }
+              },
+            },
+            {
+              text: "Center of Screen",
+              onPress: async () => {
+                // Drop at center of screen
+                const camera = await props.mapRef.current?.getCamera();
+                if (camera?.center) {
+                  const latLng = {
+                    latitude: camera.center.latitude,
+                    longitude: camera.center.longitude,
+                  };
+                  dispatch(drawingSlice.actions.addPoint(latLng));
+                  props.mapRef.current?.animateCamera({
+                    ...camera,
+                    center: latLng,
+                  });
+                } else {
+                  // Display an error message for the user
+                  alert("Could not get location. Please try again.");
+                }
+              },
+            },
+          ]);
         }}
         icon={
           <Entypo name="location" size={24} color={selectedColor("point")} />

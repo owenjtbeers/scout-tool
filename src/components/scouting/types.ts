@@ -4,6 +4,7 @@ import type {
 } from "../../redux/scouting/types";
 
 export interface ScoutingReportForm {
+  ID?: number; // ID of the scouting report
   scoutedById: number;
   scoutedDate: Date;
   title: string;

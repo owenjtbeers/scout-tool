@@ -1,5 +1,6 @@
 import React, { RefObject } from "react";
-import { Text } from "react-native";
+import { View, Text } from "react-native";
+import { FontAwesome5 } from "@expo/vector-icons";
 import { Field } from "../../redux/fields/types";
 import centroid from "@turf/centroid";
 import MapView, { Marker, Geojson } from "react-native-maps";
@@ -64,20 +65,46 @@ export const ScoutingMapContentManager = (props: MapContentManagerProps) => {
           );
         })}
       {scoutingAreas.map((scoutArea) => {
-        const area = scoutArea?.area;
+        const area: FeatureCollection =
+          // @ts-ignore TODO: Figure out how to resolve having the JSON in two different places potentially
+          scoutArea.Geometry?.Json || scoutArea.Geometry;
+        if (!area?.features?.length) {
+          return null;
+        }
         return (
-          <React.Fragment key={`${scoutArea.uuid}`}>
+          <React.Fragment key={scoutArea.UId}>
             {area && (
               <Geojson
                 // @ts-ignore TODO: Figure out how to resolve this between the two libraries
                 geojson={area}
                 strokeColor={theme.colors.primary}
                 fillColor={colors.tertiary}
+                title={scoutArea.UId}
+                tracksViewChanges={false}
+                markerComponent={<CustomMarkerComponent text={scoutArea.UId} />}
               />
             )}
           </React.Fragment>
         );
       })}
     </>
+  );
+};
+
+const CustomMarkerComponent = ({ text }: { text: string }) => {
+  return (
+    <View style={{ alignItems: "center" }}>
+      <FontAwesome5 name="map-marker" size={40} color={"red"}></FontAwesome5>
+      <Text
+        style={{
+          fontSize: 20,
+          color: "white",
+          position: "absolute",
+          textAlign: "center",
+        }}
+      >
+        {text}
+      </Text>
+    </View>
   );
 };

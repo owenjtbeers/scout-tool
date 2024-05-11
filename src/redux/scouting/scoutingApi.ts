@@ -1,30 +1,18 @@
 import { baseApi } from "../baseApi";
 import type { ScoutingReport, OrgWeed } from "./types";
-
-type ScoutingReportResponse = {
-  data: ScoutingReport[];
-  message: string;
-};
-
-type OrgWeedsResponse = {
-  data: OrgWeed[];
-  message: string;
-};
+import type { APIResponse } from "../query";
 
 export const scoutingApi = baseApi.injectEndpoints({
   endpoints: (build) => ({
     getScoutingReports: build.query<
-      ScoutingReportResponse,
-      { growerId: number; farmId: number; dateRange?: [string, string] }
+      APIResponse<ScoutingReport[]>,
+      { growerId: number; farmId: number; start_date: string; end_date: string }
     >({
       query: (params) => ({
         url: "/scouting/scout-report",
         method: "GET",
         params,
       }),
-      transformResponse: (response: ScoutingReportResponse) => {
-        return response;
-      },
       providesTags: ["ScoutingReports"],
     }),
     createScoutingReport: build.mutation<
@@ -38,7 +26,7 @@ export const scoutingApi = baseApi.injectEndpoints({
       }),
       invalidatesTags: ["ScoutingReports", "OrgWeeds"],
     }),
-    getOrgWeeds: build.query<OrgWeedsResponse, {}>({
+    getOrgWeeds: build.query<APIResponse<OrgWeed[]>, {}>({
       query: (params) => ({
         url: "/scouting/org-weed",
         method: "GET",
@@ -46,11 +34,34 @@ export const scoutingApi = baseApi.injectEndpoints({
       }),
       providesTags: ["OrgWeeds"],
     }),
+    getScoutReportDetail: build.query<
+      APIResponse<ScoutingReport>,
+      { id: number }
+    >({
+      query: (params) => ({
+        url: `/scouting/scout-report/${params.id}`,
+        method: "GET",
+      }),
+      providesTags: ["ScoutingReports"]
+    }),
+    updateScoutingReport: build.mutation<
+      APIResponse<ScoutingReport>,
+      { id: number; data: ScoutingReport }
+    >({
+      query: ({ id, data }) => ({
+        url: `/scouting/scout-report/${id}`,
+        method: "PUT",
+        data,
+      }),
+      invalidatesTags: ["ScoutingReports", "OrgWeeds"],
+    }),
   }),
 });
 
 export const {
   useGetScoutingReportsQuery,
   useCreateScoutingReportMutation,
+  useUpdateScoutingReportMutation,
+  useGetScoutReportDetailQuery,
   useGetOrgWeedsQuery,
 } = scoutingApi;
