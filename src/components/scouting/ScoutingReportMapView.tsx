@@ -142,6 +142,10 @@ export const ScoutingReportMapView = (props: ScoutingReportMapViewProps) => {
                 DiseaseObservations: [],
                 GeneralObservations: [],
               });
+            } else {
+              // If no shapes were drawn, display error message
+              alert("Please draw a shape, or specify a point on the map.");
+              return;
             }
             dispatch(
               drawingSlice.actions.setIsDrawing({

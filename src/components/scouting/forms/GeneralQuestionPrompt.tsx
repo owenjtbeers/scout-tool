@@ -21,9 +21,8 @@ import type {
   Alias,
   ObservationTypePrefix,
 } from "../../../redux/scouting/types";
-import type { Observation } from "../../../redux/scouting/types";
-import { set } from "react-hook-form";
-import { ViewComponent } from "react-native";
+import { ErrorMessage } from "../../../forms/components/ErrorMessage";
+
 interface GeneralQuestionPromptProps {
   type: ObservationTypePrefix;
   picklist: Alias[];
@@ -50,6 +49,7 @@ const GeneralQuestionPrompt = (props: GeneralQuestionPromptProps) => {
   const [addValue, setAddValue] = useState("");
   const [isAnswered, setIsAnswered] = useState(false);
   const [searchValue, setSearchValue] = useState("");
+  const [error, setError] = useState("");
 
   const handleItemPress = (item: Alias) => (event: GestureResponderEvent) => {
     if (itemsAdded.includes(item)) {
@@ -73,6 +73,7 @@ const GeneralQuestionPrompt = (props: GeneralQuestionPromptProps) => {
 
   const handleOptionsDialogClose = () => {
     setShowOptionsDialog(false);
+    setShowAddOptionDialog(false);
 
     itemsAdded.forEach((alias) => {
       const addedAliases = getAddedAliases();
@@ -115,141 +116,248 @@ const GeneralQuestionPrompt = (props: GeneralQuestionPromptProps) => {
           <Button title="Yes" onPress={handleYesClick} />
           <Button title="No" onPress={handleNoClick} />
         </View>
-        {showOptionsDialog && (
-          <Dialog
-            isVisible={showOptionsDialog}
-            onDismiss={handleOptionsDialogClose}
-          >
-            <View
-              style={{
-                display: "flex",
-                flexDirection: "row",
-                justifyContent: "space-between",
-              }}
-            >
-              <Dialog.Title title={props.type} />
-              <Button
-                title={"Add"}
-                style={{
-                  // flex: 0,
-                  justifyContent: "center",
-                  alignItems: "center",
-                }}
-                onPress={() => setShowAddOptionDialog(true)}
-              />
-            </View>
-            {/* TODO: Style this bar globally */}
-            <SearchBar
-              placeholder="Search"
-              onChangeText={setSearchValue}
-              value={searchValue}
+        <Dialog
+          isVisible={showOptionsDialog}
+          onDismiss={handleOptionsDialogClose}
+          onBackdropPress={handleOptionsDialogClose}
+        >
+          {!showAddOptionDialog && (
+            <OptionsPicklist
+              type={type}
+              picklist={picklist}
+              isLoadingPicklist={isLoadingPicklist}
+              getAddedAliases={getAddedAliases}
+              recentlyObserved={recentlyObserved}
+              setShowAddOptionDialog={setShowAddOptionDialog}
+              searchValue={searchValue}
+              setAddValue={setAddValue}
+              setSearchValue={setSearchValue}
+              itemsAdded={itemsAdded}
+              setItemsAdded={setItemsAdded}
+              newItemsAdded={newItemsAdded}
+              setNewItemsAdded={setNewItemsAdded}
+              setShowOptionsDialog={setShowOptionsDialog}
+              showOptionsDialog={showOptionsDialog}
+              handleItemPress={handleItemPress}
+              handleOptionsDialogClose={handleOptionsDialogClose}
             />
-            {recentlyObserved.size > 0 && (
-              <ListItem bottomDivider>
-                <Text>Recently Observed</Text>
-              </ListItem>
-            )}
-            {recentlyObserved.size > 0 &&
-              Array.from(recentlyObserved)
-                .filter(([alias]) => alias.includes(searchValue))
-                .sort((a, b) => a[1] - b[1])
-                .map(([alias, count]) => (
-                  <ListItem
-                    key={alias}
-                    onPress={handleItemPress({ ID: 0, Name: alias })}
-                    bottomDivider
-                  >
-                    <View
-                      style={{
-                        display: "flex",
-                        flexDirection: "row",
-                        justifyContent: "space-around",
-                      }}
-                    >
-                      <ListItem.CheckBox
-                        checked={
-                          !!itemsAdded.find(
-                            (clickedAlias) => alias === clickedAlias.Name
-                          ) || !!getAddedAliases().find((a) => a.Name === alias)
-                        }
-                        // onPress={handleItemPress(question)}
-                      />
-                      <Text>{alias}</Text>
-                      <Text>{`  ${count} times`}</Text>
-                    </View>
-                  </ListItem>
-                ))}
-
-            {picklist && picklist.length > 0 && (
-              <ListItem bottomDivider>
-                <Text>Organization List</Text>
-              </ListItem>
-            )}
-            {isLoadingPicklist ? (
-              <ActivityIndicator size="large" color={theme.colors.primary} />
-            ) : (
-              // TODO: Make this search through potential scientific values as well
-              picklist
-                ?.filter((alias) => alias.Name.includes(searchValue))
-                .map((alias, index) => (
-                  <ListItem
-                    key={alias.Name + index}
-                    onPress={handleItemPress(alias)}
-                  >
-                    <View
-                      style={{
-                        display: "flex",
-                        flexDirection: "row",
-                        justifyContent: "space-around",
-                      }}
-                    >
-                      <ListItem.CheckBox
-                        checked={
-                          !!itemsAdded.find(
-                            (clickedAlias) => alias.Name === clickedAlias.Name
-                          )
-                        }
-                        // onPress={handleItemPress(question)}
-                      />
-                      <Text>{alias.Name}</Text>
-                    </View>
-                  </ListItem>
-                ))
-            )}
-            <Button
-              title={newItemsAdded ? "Add new weed(s)" : "Close"}
-              onPress={handleOptionsDialogClose}
+          )}
+          {showAddOptionDialog && (
+            <AddOptionMenu
+              type={type}
+              error={error}
+              addValue={addValue}
+              setAddValue={setAddValue}
+              setError={setError}
+              setShowAddOptionDialog={setShowAddOptionDialog}
+              setShowOptionsDialog={setShowOptionsDialog}
+              createQuestion={createQuestion}
+              getAddedAliases={getAddedAliases}
+              picklist={picklist}
             />
-          </Dialog>
-        )}
-        {showAddOptionDialog && (
-          <Dialog
-            isVisible={showAddOptionDialog}
-            onDismiss={handleAddOptionDialogClose}
-          >
-            <Dialog.Title title={`Add ${type}`} />
-            <Input
-              label={`${type} Name`}
-              placeholder={`New ${type} Name`}
-              onChangeText={setAddValue}
-              value={addValue}
-            />
-            <Button
-              title="Add"
-              onPress={() => {
-                createQuestion({ ID: 0, Name: addValue });
-                setShowAddOptionDialog(false);
-                setShowOptionsDialog(false);
-                setAddValue("");
-              }}
-            />
-          </Dialog>
-        )}
+          )}
+        </Dialog>
       </ListItem.Accordion>
     </View>
   );
 };
 
+interface OptionsPicklistProps {
+  type: ObservationTypePrefix;
+  picklist: Alias[];
+  isLoadingPicklist: boolean;
+  getAddedAliases: () => Alias[];
+  recentlyObserved: Map<string, number>;
+  setShowAddOptionDialog: (show: boolean) => void;
+  setAddValue: (value: string) => void;
+  searchValue: string;
+  setSearchValue: (value: string) => void;
+  itemsAdded: Alias[];
+  setItemsAdded: (value: Alias[]) => void;
+  newItemsAdded: boolean;
+  setNewItemsAdded: (value: boolean) => void;
+  setShowOptionsDialog: (show: boolean) => void;
+  showOptionsDialog: boolean;
+  handleItemPress: (item: Alias) => (event: GestureResponderEvent) => void;
+  handleOptionsDialogClose: () => void;
+}
+const OptionsPicklist = (props: OptionsPicklistProps) => {
+  const {
+    type,
+    isLoadingPicklist,
+    picklist,
+    getAddedAliases,
+    recentlyObserved,
+    setShowAddOptionDialog,
+    setSearchValue,
+    searchValue,
+    handleItemPress,
+    itemsAdded,
+    newItemsAdded,
+    handleOptionsDialogClose,
+  } = props;
+  const { theme } = useTheme();
+  return (
+    <>
+      <View
+        style={{
+          display: "flex",
+          flexDirection: "row",
+          justifyContent: "space-between",
+        }}
+      >
+        <Dialog.Title title={props.type} />
+        <Button
+          title={"Add"}
+          style={{
+            // flex: 0,
+            justifyContent: "center",
+            alignItems: "center",
+          }}
+          onPress={() => setShowAddOptionDialog(true)}
+        />
+      </View>
+      {/* TODO: Style this bar globally */}
+      <SearchBar
+        placeholder="Search"
+        onChangeText={setSearchValue}
+        value={searchValue}
+      />
+      {recentlyObserved.size > 0 && (
+        <ListItem bottomDivider>
+          <Text>Recently Observed</Text>
+        </ListItem>
+      )}
+      {recentlyObserved.size > 0 &&
+        Array.from(recentlyObserved)
+          .filter(([alias]) => alias.includes(searchValue))
+          .sort((a, b) => a[1] - b[1])
+          .map(([alias, count]) => (
+            <ListItem
+              key={alias}
+              // TODO: This needs to have the correct ID
+              onPress={handleItemPress({ ID: 0, Name: alias })}
+              bottomDivider
+            >
+              <View
+                style={{
+                  display: "flex",
+                  flexDirection: "row",
+                  justifyContent: "space-around",
+                }}
+              >
+                <ListItem.CheckBox
+                  checked={
+                    !!itemsAdded.find(
+                      (clickedAlias) => alias === clickedAlias.Name
+                    ) || !!getAddedAliases().find((a) => a.Name === alias)
+                  }
+                  // onPress={handleItemPress(question)}
+                />
+                <Text>{alias}</Text>
+                <Text>{`  ${count} times`}</Text>
+              </View>
+            </ListItem>
+          ))}
+
+      {picklist && picklist.length > 0 && (
+        <ListItem bottomDivider>
+          <Text>Organization List</Text>
+        </ListItem>
+      )}
+      {isLoadingPicklist ? (
+        <ActivityIndicator size="large" color={theme.colors.primary} />
+      ) : (
+        // TODO: Make this search through potential scientific values as well
+        picklist
+          ?.filter((alias) => alias.Name.includes(searchValue))
+          .map((alias, index) => (
+            <ListItem key={alias.Name + index} onPress={handleItemPress(alias)}>
+              <View
+                style={{
+                  display: "flex",
+                  flexDirection: "row",
+                  justifyContent: "space-around",
+                }}
+              >
+                <ListItem.CheckBox
+                  checked={
+                    !!itemsAdded.find(
+                      (clickedAlias) => alias.Name === clickedAlias.Name
+                    )
+                  }
+                  // onPress={handleItemPress(question)}
+                />
+                <Text>{alias.Name}</Text>
+              </View>
+            </ListItem>
+          ))
+      )}
+      <Button
+        title={newItemsAdded ? `Add new ${type}(s)` : "Close"}
+        onPress={handleOptionsDialogClose}
+      />
+    </>
+  );
+};
+
+interface AddOptionMenuProps {
+  type: ObservationTypePrefix;
+  error: string;
+  addValue: string;
+  setAddValue: (value: string) => void;
+  setError: (value: string) => void;
+  setShowAddOptionDialog: (show: boolean) => void;
+  setShowOptionsDialog: (show: boolean) => void;
+  createQuestion: (alias: Alias) => void;
+  getAddedAliases: () => Alias[];
+  picklist: Alias[];
+}
+const AddOptionMenu = (props: AddOptionMenuProps) => {
+  const {
+    type,
+    error,
+    addValue,
+    setAddValue,
+    setError,
+    setShowAddOptionDialog,
+    setShowOptionsDialog,
+    createQuestion,
+    picklist,
+    getAddedAliases,
+  } = props;
+  return (
+    <>
+      <Dialog.Title title={`Add ${type}`} />
+      {error !== "" && <ErrorMessage message={error} />}
+      <Input
+        label={`${type} Name`}
+        placeholder={`New ${type} Name`}
+        onChangeText={setAddValue}
+        value={addValue}
+      />
+      <Button
+        title="Add"
+        onPress={() => {
+          const trimmedValue = addValue.trim();
+          const validationResult = validateNewAliasName(trimmedValue, [
+            ...picklist,
+            ...getAddedAliases(),
+          ]);
+          if (validationResult !== "") {
+            setError(validationResult);
+            return;
+          }
+          setError("");
+          createQuestion({ ID: 0, Name: trimmedValue });
+          setShowAddOptionDialog(false);
+          setShowOptionsDialog(false);
+          setAddValue("");
+        }}
+      />
+    </>
+  );
+};
 const styles = StyleSheet.create({
   buttonContainer: {
     display: "flex",
@@ -258,5 +366,15 @@ const styles = StyleSheet.create({
     padding: 10,
   },
 });
+
+const validateNewAliasName = (newAliasName: string, addedAliases: Alias[]) => {
+  if (newAliasName === "") {
+    return "Please enter a value";
+  }
+  if (addedAliases.find((alias) => alias.Name.trim() === newAliasName)) {
+    return "This value already exists. Please enter a new value.";
+  }
+  return "";
+};
 
 export default GeneralQuestionPrompt;
