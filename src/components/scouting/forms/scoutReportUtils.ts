@@ -4,6 +4,7 @@ import type {
   Observation,
   ObservationTypePrefix,
   ScoutingReport,
+  APIObservationArea,
 } from "../../../redux/scouting/types";
 import { ScoutingAppUser } from "../../../redux/user/types";
 import type { ScoutingReportForm } from "../types";
@@ -192,12 +193,93 @@ const mapScoutingAreaObservationsToAPITypeObservation = (
     return {
       AliasName: aliasName,
       AliasId: alias.ID,
-      QuestionVals: alias.observations.map(mapFormObservationToAPIQuestionVal),
+      QuestionVals: alias.observations.map(mapFormObservationToAPIQuestionVal).filter((questionVal) => valueIsDefined(questionVal.Value)),
     };
   });
 };
+
+export const convertObservationAreasToScoutingAreas = (
+  observationAreas: APIObservationArea[] | undefined
+): ScoutingArea[] => {
+  if (!observationAreas) {
+    return [];
+  }
+  return observationAreas.map((observationArea) => {
+    return {
+      ID: observationArea.ID,
+      UId: observationArea.UId,
+      ScoutReportId: observationArea.ScoutReportId,
+      Geometry: observationArea.Geometry,
+      WeedObservations: observationArea.WeedObservations.map((weedObs) => {
+        return weedObs.WeedQuestionVals.map((weedQuestionVal) => {
+          const questionVal = weedQuestionVal.QuestionVal;
+          return {
+            ID: questionVal.ID,
+            Alias: {
+              ID: weedObs.WeedAliasId,
+              Name: weedObs.WeedAlias.Name,
+            },
+            questionType: questionVal.RenderType,
+            name: questionVal.Question,
+            options: questionVal.Options.split(","),
+            value: questionVal.Value,
+            tags: null,
+            ScoutingAreaId: observationArea.ID,
+          } as Observation;
+        });
+      }).flat(),
+      InsectObservations: observationArea.InsectObservations.map(
+        (insectObs) => {
+          return insectObs.InsectQuestionVals.map((insectQuestionVal) => {
+            const questionVal = insectQuestionVal.QuestionVal;
+            return {
+              ID: questionVal.ID,
+              Alias: {
+                ID: insectObs.InsectAliasId,
+                Name: insectObs.InsectAlias.Name,
+              },
+              questionType: questionVal.RenderType,
+              name: questionVal.Question,
+              options: questionVal.Options.split(","),
+              value: questionVal.Value,
+              tags: null,
+              ScoutingAreaId: observationArea.ID,
+            } as Observation;
+          });
+        }
+      ).flat(),
+      DiseaseObservations: observationArea.DiseaseObservations.map(
+        (diseaseObs) => {
+          return diseaseObs.DiseaseQuestionVals.map((diseaseQuestionVal) => {
+            const questionVal = diseaseQuestionVal.QuestionVal;
+            return {
+              ID: questionVal.ID,
+              Alias: {
+                ID: diseaseObs.DiseaseAliasId,
+                Name: diseaseObs.DiseaseAlias.Name,
+              },
+              questionType: questionVal.RenderType,
+              name: questionVal.Question,
+              options: questionVal.Options.split(","),
+              valueUnit1: questionVal.ValueUnit1,
+              valueUnit2: questionVal.ValueUnit2,
+              value: questionVal.Value,
+              tags: null,
+              ScoutingAreaId: observationArea.ID,
+            } as Observation;
+          });
+        }
+      ).flat(),
+      // InsectObservations: observationArea.InsectObservations,
+      // DiseaseObservations: observationArea.DiseaseObservations,
+      GeneralObservations: observationArea.GeneralObservations,
+    } as ScoutingArea;
+  });
+};
+
 const mapFormObservationToAPIQuestionVal = (observation: Observation) => {
   return {
+    ID: observation.ID || 0,
     Question: observation.name,
     Value: String(observation.value),
     Options: observation.options?.join(","),
