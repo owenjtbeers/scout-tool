@@ -31,11 +31,12 @@ import { ScoutingSideSheet } from "./ScoutingSideSheet";
 import { ScoutingReportSummaryContent } from "./forms/ScoutingReportSummaryContent";
 import { ScoutingReportObservationContent } from "./forms/ScoutingReportObservationContent";
 import { ScoutingReportForm } from "./types";
-import { ScoutingReport } from "../../redux/scouting/types";
+import { APIScoutingReport } from "../../redux/scouting/types";
+import { convertObservationAreasToScoutingAreas } from "./forms/scoutReportUtils";
 
 interface CreateScoutingReportPageProps {
   mode: "create" | "edit";
-  existingScoutingReport?: ScoutingReport;
+  existingScoutingReport?: APIScoutingReport;
   // Only useful if in edit mode
   isFetchingScoutingReport: boolean;
   fields: Field[];
@@ -58,7 +59,9 @@ export const CreateScoutingReportPage = (
     mode === "edit" && existingScoutingReport
       ? {
           ID: existingScoutingReport.ID,
-          scoutingAreas: existingScoutingReport.ObservationAreas,
+          scoutingAreas: convertObservationAreasToScoutingAreas(
+            existingScoutingReport.ObservationAreas
+          ),
           scoutedBy: existingScoutingReport.ScoutedBy,
           scoutedById: existingScoutingReport.ScoutedById,
           scoutedDate: new Date(existingScoutingReport.ScoutedDate),
@@ -79,7 +82,7 @@ export const CreateScoutingReportPage = (
     handleSubmit,
     getValues,
     setValue,
-    formState: { isDirty, isValid },
+    formState: { isDirty, isValid, isSubmitSuccessful },
     reset,
     watch,
   } = useForm<ScoutingReportForm>({
@@ -124,7 +127,12 @@ export const CreateScoutingReportPage = (
   const onClose = () => {
     if (isDirty) {
       // Set Dialog to open that prompts user to save or discard changes
-      createLeavePageAlert();
+      if (isSubmitSuccessful) {
+        navigation.removeListener("beforeRemove", handleBeforeRemove);
+        router.back();
+      } else {
+        createLeavePageAlert();
+      }
     } else {
       dispatch(globalSelectionsSlice.actions.setField(null));
       dispatch(drawingSlice.actions.clearState());
