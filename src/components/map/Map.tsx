@@ -116,7 +116,7 @@ export const MapScreen = () => {
         followsUserLocation={true}
         onMapReady={onMapReady}
         toolbarEnabled={false}
-        provider={PROVIDER_GOOGLE}
+        // provider={PROVIDER_GOOGLE}
         mapType="hybrid"
         userLocationUpdateInterval={5000}
         initialRegion={

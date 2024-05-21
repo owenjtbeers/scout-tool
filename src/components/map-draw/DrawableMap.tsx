@@ -51,10 +51,10 @@ export const DrawableMapScreen = () => {
       <MapView
         style={styles.map}
         ref={mapRef}
-        provider={PROVIDER_GOOGLE}
+        // provider={PROVIDER_GOOGLE}
         region={initialRegion || defaultRegion}
         onPress={onPress}
-        onMapReady={() => {}}
+        onMapReady={() => { }}
         mapType={"hybrid"}
         showsUserLocation={true}
         showsMyLocationButton={false}
