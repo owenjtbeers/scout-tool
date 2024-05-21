@@ -4,9 +4,7 @@
   },
   "include": [
     "./src/**/*",
-    "./app/**/*",
-    ".expo/types/**/*.ts",
-    "expo-env.d.ts"
+    "./app/**/*"
   ],
   "extends": "expo/tsconfig.base"
 }

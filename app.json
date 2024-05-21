@@ -24,7 +24,12 @@
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
       },
-      "package": "com.owenbeers.scouttool"
+      "package": "com.owenbeers.scouttool",
+      "config": {
+        "googleMaps": {
+          "apiKey": "AIzaSyAKR7-C-bNc7BBjUdfwnvbPP5J-hcByUyo"
+        }
+      }
     },
     "web": {
       "favicon": "./assets/favicon.png",
@@ -36,9 +41,6 @@
       }
     },
     "owner": "owenbeers",
-    "scheme": "scout-tool",
-    "experiments": {
-      "typedRoutes": true
-    }
+    "scheme": "scout-tool"
   }
 }
