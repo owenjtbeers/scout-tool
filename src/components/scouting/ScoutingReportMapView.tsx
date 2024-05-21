@@ -76,7 +76,7 @@ export const ScoutingReportMapView = (props: ScoutingReportMapViewProps) => {
       <MapView
         style={styles.map}
         ref={mapRef}
-        provider={PROVIDER_GOOGLE}
+        // provider={PROVIDER_GOOGLE}
         region={initialRegion || defaultRegion}
         mapType={"hybrid"}
         showsUserLocation={true}

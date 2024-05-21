@@ -56,6 +56,7 @@ export const Login = () => {
               onChangeText={onChange}
               value={value}
               placeholder="Email"
+              autoCapitalize="none"
               leftIcon={
                 <MaterialIcons
                   name="email"
@@ -132,6 +133,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     width: "100%",
+    maxWidth: 500,
   },
   // input: {
   //   width: "100%",

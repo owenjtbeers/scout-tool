@@ -43,43 +43,45 @@ export const ScoutingSideSheet = (props: ScoutingSideSheetProps) => {
             {
               translateX: animation.interpolate({
                 inputRange: [0, 1],
-                outputRange: [0, -windowWidth],
+                outputRange: [0, Math.max(-windowWidth * 0.8, -500)],
               }),
             },
           ],
         }}
       >
+        <Animated.View
+          style={[
+            styles.floatingSideSheetCollapseButton,
+            {
+              transform: [
+                {
+                  translateX: animation.interpolate({
+                    inputRange: [0, 1],
+                    outputRange: [0, 0],
+                    // outputRange: [0, Math.max(-windowWidth * 0.8, -500)],
+                    extrapolate: "clamp",
+                  }),
+                },
+                {
+                  rotate: animation.interpolate({
+                    inputRange: [0, 1],
+                    outputRange: ["180deg", "0deg"],
+                    extrapolate: "clamp",
+                  }),
+                },
+              ],
+            },
+          ]}
+        >
+          <FAB
+            onPress={onHandlerStateChange}
+            icon={{ name: "arrow-right", size: 24 }}
+            visible={!props.isDrawing}
+          />
+        </Animated.View>
         {props.children}
       </Animated.View>
-      <Animated.View
-        style={[
-          styles.floatingSideSheetCollapseButton,
-          {
-            transform: [
-              {
-                translateX: animation.interpolate({
-                  inputRange: [0, 1],
-                  outputRange: [0, -windowWidth + 150],
-                  extrapolate: "clamp",
-                }),
-              },
-              {
-                rotate: animation.interpolate({
-                  inputRange: [0, 1],
-                  outputRange: ["180deg", "0deg"],
-                  extrapolate: "clamp",
-                }),
-              },
-            ],
-          },
-        ]}
-      >
-        <FAB
-          onPress={onHandlerStateChange}
-          icon={{ name: "arrow-right", size: 24 }}
-          visible={!props.isDrawing}
-        />
-      </Animated.View>
+
     </>
   );
 };
@@ -91,14 +93,17 @@ const styles = StyleSheet.create({
     top: 0,
     bottom: 0,
     width: "80%",
-    maxWidth: 1000,
+    maxWidth: 500,
     backgroundColor: "white",
     zIndex: 1,
   },
   floatingSideSheetCollapseButton: {
     padding: 5,
+    // display: "flex",
+    // justifyContent: "center",
+    // alignItems: "center",
     position: "absolute",
-    right: "15%",
+    right: "-13%",
     top: "50%",
     zIndex: 100,
     // backgroundColor: "none",

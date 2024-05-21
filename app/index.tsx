@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 
 import { ActivityIndicator, View } from "react-native";
 // Navigation
-import { useRouter, useRootNavigationState, Href } from "expo-router";
+import { useRouter, useRootNavigationState } from "expo-router";
 import { LOGIN_SCREEN, HOME_MAP_SCREEN } from "../src/navigation/screens";
 import { colors } from "../src/constants/styles";
 import { useSelector } from "react-redux";
@@ -24,10 +24,10 @@ export default function App() {
       const result = await validate({});
       if ("data" in result) {
         setIsLoggedIn(true);
-        router.push(HOME_MAP_SCREEN as Href<string>);
+        router.push(HOME_MAP_SCREEN);
       } else if ("error" in result) {
         setIsLoggedIn(false);
-        router.push(LOGIN_SCREEN as Href<string>);
+        router.push(LOGIN_SCREEN);
       }
     };
     if (!!rootNavigation?.key) {
@@ -36,7 +36,7 @@ export default function App() {
         validateToken();
       } else {
         setIsLoggedIn(false);
-        router.push(LOGIN_SCREEN as Href<string>);
+        router.push(LOGIN_SCREEN);
       }
     }
   }, [token, rootNavigation?.key]);

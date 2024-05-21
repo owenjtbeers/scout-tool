@@ -14,7 +14,7 @@ import { ThemeProvider } from "@rneui/themed";
 import { theme } from "../src/constants/styles";
 
 registerTranslation("en", en);
-export default function App() {
+const App = () => {
   return (
     <Provider store={store}>
       <PersistGate loading={null} persistor={persistor}>
@@ -26,4 +26,6 @@ export default function App() {
       </PersistGate>
     </Provider>
   );
-}
+};
+
+export default App;
