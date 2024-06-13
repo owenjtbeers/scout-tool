@@ -5,6 +5,7 @@ import type {
   ObservationTypePrefix,
   ScoutingReport,
   APIObservationArea,
+  ScoutingImage,
 } from "../../../redux/scouting/types";
 import { ScoutingAppUser } from "../../../redux/user/types";
 import type { ScoutingReportForm } from "../types";
@@ -79,6 +80,43 @@ export const getNewWeedObservationSet = (alias: Alias): Observation[] => {
   ];
 };
 
+export const getNewInsectObservationSet = (alias: Alias): Observation[] => {
+  return [
+    {
+      Alias: alias,
+      questionType: "select",
+      name: "Severity",
+      options: ["Low", "Medium", "High"],
+      value: "",
+      tags: null,
+      ScoutingAreaId: 0,
+    },
+    {
+      Alias: alias,
+      questionType: "numeric",
+      name: "Count",
+      value: "",
+      valueUnit1: "insects",
+      valueUnit2: "m2",
+      tags: null,
+      ScoutingAreaId: 0,
+    },
+  ];
+};
+
+export const getNewDiseaseObservationSet = (alias: Alias): Observation[] => {
+  return [
+    {
+      Alias: alias,
+      questionType: "select",
+      name: "Severity",
+      options: ["Low", "Medium", "High"],
+      value: "",
+      tags: null,
+      ScoutingAreaId: 0,
+    },
+  ];
+};
 /*
   This function is used to get a map of recent observations from a list of scouting areas.
   this will include a count of the number of times that alias has been observed in scouting areas.
@@ -168,6 +206,7 @@ export const mapFormDataToPostScoutReport = (
         ),
       };
     }),
+    Images: scoutReportForm.images,
   };
 };
 
@@ -193,7 +232,9 @@ const mapScoutingAreaObservationsToAPITypeObservation = (
     return {
       AliasName: aliasName,
       AliasId: alias.ID,
-      QuestionVals: alias.observations.map(mapFormObservationToAPIQuestionVal).filter((questionVal) => valueIsDefined(questionVal.Value)),
+      QuestionVals: alias.observations
+        .map(mapFormObservationToAPIQuestionVal)
+        .filter((questionVal) => valueIsDefined(questionVal.Value)),
     };
   });
 };
@@ -204,7 +245,7 @@ export const convertObservationAreasToScoutingAreas = (
   if (!observationAreas) {
     return [];
   }
-  return observationAreas.map((observationArea) => {
+  const returnVal = observationAreas.map((observationArea) => {
     return {
       ID: observationArea.ID,
       UId: observationArea.UId,
@@ -275,6 +316,8 @@ export const convertObservationAreasToScoutingAreas = (
       GeneralObservations: observationArea.GeneralObservations,
     } as ScoutingArea;
   });
+
+  return returnVal;
 };
 
 const mapFormObservationToAPIQuestionVal = (observation: Observation) => {
@@ -286,5 +329,31 @@ const mapFormObservationToAPIQuestionVal = (observation: Observation) => {
     RenderType: observation.questionType,
     ValueUnit1: observation.valueUnit1,
     ValueUnit2: observation.valueUnit2,
+  };
+};
+
+export const createScoutingImageMetadata = (
+  observationArea: ScoutingArea,
+  typePrefix: ObservationTypePrefix,
+  aliasInfo: { ID: number; Name: string },
+  questionVal?: Observation
+): ScoutingImage => {
+  return {
+    ID: 0,
+    Url: "",
+    ObservationAreaUid: observationArea?.UId,
+    ObservationAreaId: observationArea?.ID,
+    WeedAliasId: typePrefix === "Weed" ? aliasInfo?.ID : 0,
+    WeedAlias: typePrefix === "Weed" ? aliasInfo : undefined,
+    InsectAliasId: typePrefix === "Insect" ? aliasInfo.ID : 0,
+    InsectAlias: typePrefix === "Insect" ? aliasInfo : undefined,
+    DiseaseAliasId: typePrefix === "Disease" ? aliasInfo.ID : 0,
+    DiseaseAlias: typePrefix === "Disease" ? aliasInfo : undefined,
+    Type: typePrefix,
+    AddedById: 0,
+    QuestionValId:
+      typePrefix === "General" && questionVal ? questionVal.ID || 0 : 0,
+    QuestionVal:
+      typePrefix === "General" && questionVal ? questionVal : undefined,
   };
 };

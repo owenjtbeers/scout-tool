@@ -8,9 +8,9 @@ import {
   Controller,
   UseFormHandleSubmit,
   UseFormGetValues,
+  UseFormSetValue,
   Control,
   UseFormWatch,
-  set,
 } from "react-hook-form";
 import { useRouter } from "expo-router";
 import { useDispatch } from "react-redux";
@@ -22,17 +22,20 @@ import {
   getNumberOfObservationsFromScoutingArea,
   mapFormDataToPostScoutReport,
 } from "./scoutReportUtils";
+import { postScoutingImagesAsync } from "../../../utils/network/uploadToS3";
 import {
   useCreateScoutingReportMutation,
   useUpdateScoutingReportMutation,
 } from "../../../redux/scouting/scoutingApi";
 import { useGetCurrentUserQuery } from "../../../redux/user/userApi";
+import DisplayScoutingImages from "../camera/DisplayScoutingImages";
 
 interface ScoutingReportSummaryContentProps {
   field: Field;
   handleSubmit: UseFormHandleSubmit<ScoutingReportForm>;
   formControl: Control<ScoutingReportForm>;
   formGetValues: UseFormGetValues<ScoutingReportForm>;
+  formSetValue: UseFormSetValue<ScoutingReportForm>;
   watch: UseFormWatch<ScoutingReportForm>;
   setSelectedScoutingAreaIndex: (index: number) => void;
   setSideSheetContentType: (contentType: "summary" | "observation") => void;
@@ -50,6 +53,7 @@ export const ScoutingReportSummaryContent = (
     setSelectedScoutingAreaIndex,
     setSideSheetContentType,
     setIsDrawingScoutingArea,
+    formSetValue,
   } = props;
   const { data: currentUserResponse } = useGetCurrentUserQuery("default");
   const { theme } = useTheme();
@@ -59,8 +63,9 @@ export const ScoutingReportSummaryContent = (
     useCreateScoutingReportMutation();
   const [updateScoutReport, updateResult] = useUpdateScoutingReportMutation();
   const [isScoutedAreaDialogOpen, setIsScoutedAreaDialogOpen] = useState(false);
-  const scoutingAreas = watch("scoutingAreas");
+  const [isViewingPhotos, setIsViewingPhotos] = useState(false);
 
+  const scoutingAreas = watch("scoutingAreas");
   return (
     <>
       <View
@@ -131,11 +136,12 @@ export const ScoutingReportSummaryContent = (
           <View style={scoutFormStyles.summaryRow}>
             <FontAwesome5 name="binoculars" size={24} />
             <Text># of Scouted Areas</Text>
-            <FAB onPress={() => setIsScoutedAreaDialogOpen(true)}>
+            <FAB>
               <Text style={scoutFormStyles.buttonText}>
                 {formGetValues("scoutingAreas")?.length}
               </Text>
             </FAB>
+
             <Dialog
               isVisible={isScoutedAreaDialogOpen}
               onBackdropPress={() => setIsScoutedAreaDialogOpen(false)}
@@ -160,6 +166,13 @@ export const ScoutingReportSummaryContent = (
               ))}
             </Dialog>
           </View>
+          {formGetValues("scoutingAreas")?.length ? (
+            <Button
+              title={"View Scouted Areas"}
+              buttonStyle={{ paddingTop: 10 }}
+              onPress={() => setIsScoutedAreaDialogOpen(true)}
+            />
+          ) : null}
           <View style={scoutFormStyles.summaryRow}>
             <Entypo name="magnifying-glass" size={24} />
             <Text># of Observations</Text>
@@ -173,6 +186,36 @@ export const ScoutingReportSummaryContent = (
               </Text>
             </FAB>
           </View>
+          <View style={scoutFormStyles.summaryRow}>
+            <FontAwesome5 name="camera" size={24} />
+            <Text># of Images</Text>
+            <FAB>
+              <Text style={scoutFormStyles.buttonText}>
+                {formGetValues("images")?.length}
+              </Text>
+            </FAB>
+          </View>
+          {formGetValues("images")?.length ? (
+            <Button
+              title={"View Images"}
+              onPress={() => setIsViewingPhotos(!isViewingPhotos)}
+            />
+          ) : null}
+          {/* <Dialog
+            isVisible={isViewingPhotos}
+            onBackdropPress={() => {
+              setIsViewingPhotos(false);
+            }}
+          > */}
+          {isViewingPhotos ? (
+            <DisplayScoutingImages
+              onClose={() => setIsViewingPhotos(false)}
+              formGetValues={formGetValues}
+              formSetValue={formSetValue}
+              scoutingImages={formGetValues("images")}
+            />
+          ) : null}
+          {/* </Dialog> */}
         </View>
         <View
           key={"section-summary-text-input"}
@@ -218,11 +261,8 @@ export const ScoutingReportSummaryContent = (
         <Button
           title={"FINISH SCOUTING REPORT"}
           onPress={handleSubmit(async (data) => {
-            const postData = mapFormDataToPostScoutReport(
-              data,
-              currentUserResponse?.data
-            );
-            console.log(postData);
+            const user = currentUserResponse?.data;
+            const postData = mapFormDataToPostScoutReport(data, user);
             let scoutingReportResponse;
             if (!!postData.ID) {
               scoutingReportResponse = await updateScoutReport({
@@ -236,6 +276,18 @@ export const ScoutingReportSummaryContent = (
             if ("error" in scoutingReportResponse) {
               console.error(scoutingReportResponse.error);
             } else {
+              if (data?.images?.length > 0) {
+                Alert.alert(
+                  "Uploading Scouting Images",
+                  "Please wait while we upload your scouting images"
+                );
+                await postScoutingImagesAsync(
+                  // @ts-ignore TODO: Type this better
+                  scoutingReportResponse?.data?.ImageUploads,
+                  data.images
+                );
+              }
+
               Alert.alert(
                 "Scouting Report saved successfully",
                 "Press continue to proceed",
@@ -253,6 +305,7 @@ export const ScoutingReportSummaryContent = (
           })}
           loading={createResult.isLoading || updateResult.isLoading}
         />
+        <View key={"paddingBottomScrollView"} style={{ height: 50 }} />
       </ScrollView>
     </>
   );

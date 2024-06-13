@@ -1,12 +1,17 @@
 import { baseApi } from "../baseApi";
-import type { ScoutingReport, OrgWeed } from "./types";
+import type { ScoutingReport, OrgWeed, OrgDisease, OrgInsect } from "./types";
 import type { APIResponse } from "../query";
 
 export const scoutingApi = baseApi.injectEndpoints({
   endpoints: (build) => ({
     getScoutingReports: build.query<
       APIResponse<ScoutingReport[]>,
-      { growerId: number; farmId: number; start_date: string; end_date: string }
+      {
+        growerId: number | null;
+        farmId: number | null;
+        start_date: string;
+        end_date: string;
+      }
     >({
       query: (params) => ({
         url: "/scouting/scout-report",
@@ -24,7 +29,12 @@ export const scoutingApi = baseApi.injectEndpoints({
         method: "POST",
         data,
       }),
-      invalidatesTags: ["ScoutingReports", "OrgWeeds"],
+      invalidatesTags: [
+        "ScoutingReports",
+        "OrgWeeds",
+        "OrgDiseases",
+        "OrgInsects",
+      ],
     }),
     getOrgWeeds: build.query<APIResponse<OrgWeed[]>, {}>({
       query: (params) => ({
@@ -34,6 +44,22 @@ export const scoutingApi = baseApi.injectEndpoints({
       }),
       providesTags: ["OrgWeeds"],
     }),
+    getOrgDiseases: build.query<APIResponse<OrgDisease[]>, {}>({
+      query: (params) => ({
+        url: "/scouting/org-disease",
+        method: "GET",
+        params,
+      }),
+      providesTags: ["OrgDiseases"],
+    }),
+    getOrgInsects: build.query<APIResponse<OrgInsect[]>, {}>({
+      query: (params) => ({
+        url: "/scouting/org-insect",
+        method: "GET",
+        params,
+      }),
+      providesTags: ["OrgInsects"],
+    }),
     getScoutReportDetail: build.query<
       APIResponse<ScoutingReport>,
       { id: number }
@@ -42,7 +68,7 @@ export const scoutingApi = baseApi.injectEndpoints({
         url: `/scouting/scout-report/${params.id}`,
         method: "GET",
       }),
-      providesTags: ["ScoutingReports"]
+      providesTags: ["ScoutingReports"],
     }),
     updateScoutingReport: build.mutation<
       APIResponse<ScoutingReport>,
@@ -53,7 +79,12 @@ export const scoutingApi = baseApi.injectEndpoints({
         method: "PUT",
         data,
       }),
-      invalidatesTags: ["ScoutingReports", "OrgWeeds"],
+      invalidatesTags: [
+        "ScoutingReports",
+        "OrgWeeds",
+        "OrgDiseases",
+        "OrgInsects",
+      ],
     }),
   }),
 });
@@ -64,4 +95,6 @@ export const {
   useUpdateScoutingReportMutation,
   useGetScoutReportDetailQuery,
   useGetOrgWeedsQuery,
+  useGetOrgDiseasesQuery,
+  useGetOrgInsectsQuery,
 } = scoutingApi;

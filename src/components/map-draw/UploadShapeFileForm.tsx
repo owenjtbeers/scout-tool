@@ -6,13 +6,13 @@ import { BottomSheet, Button, useTheme } from "@rneui/themed";
 import { useDispatch } from "react-redux";
 import { drawingSlice } from "../../redux/map/drawingSlice";
 import { humanReadableFileSize } from "../../utils/formatting/readableBytes";
-import * as FileSystem from "expo-file-system";
 import shp from "shpjs";
 import { FeatureCollection } from "@turf/helpers";
 import turfCentroid from "@turf/centroid";
 import MapView from "react-native-maps";
+import { convertUriToBuffer } from "../../utils/files/base64";
 
-global.Buffer = global.Buffer || require("buffer").Buffer;
+
 
 type UploadShapeFileFormProps = {
   mapRef: React.RefObject<MapView>;
@@ -156,21 +156,6 @@ export const UploadShapeFileForm = (props: UploadShapeFileFormProps) => {
     </BottomSheet>
   );
 };
-
-const convertUriToBuffer = async (uri: string): Promise<ArrayBuffer> => {
-  // Read the file as a base64 string, the files are actually binaries even though
-  // they may say encoding in utf-8 in qgis
-  let stringContent = await FileSystem.readAsStringAsync(uri, {
-    encoding: "base64",
-  });
-  const buffer = stringToArrayBuffer(stringContent);
-  return buffer;
-};
-
-function stringToArrayBuffer(str: string) {
-  const binaryView = Buffer.from(str, "base64");
-  return binaryView;
-}
 
 const styles = StyleSheet.create({
   modalView: {

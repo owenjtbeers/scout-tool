@@ -13,5 +13,11 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
       },
     ],
     ["expo-router"],
+    [
+      "expo-camera",
+      {
+        cameraPermission: "Allow ${APP_NAME} to use your camera",
+      },
+    ],
   ],
 });

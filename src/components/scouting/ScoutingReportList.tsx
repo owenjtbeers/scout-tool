@@ -1,13 +1,12 @@
 import React from "react";
 import { ListItem, Text, useTheme } from "@rneui/themed";
 import { useRouter } from "expo-router";
-import { ActivityIndicator, StyleSheet, View } from "react-native";
+import { ActivityIndicator, StyleSheet, ScrollView } from "react-native";
 import { useSelector } from "react-redux";
 import { GLOBAL_SELECTIONS_REDUCER_KEY } from "../../redux/globalSelections/globalSelectionsSlice";
 import { useGetScoutingReportsQuery } from "../../redux/scouting/scoutingApi";
 import { RootState } from "../../redux/store";
 import { SCOUT_REPORT_EDIT_SCREEN } from "../../navigation/screens";
-import { Href } from "expo-router";
 
 export const ScoutingReportList: React.FC = () => {
   const { theme } = useTheme();
@@ -15,9 +14,16 @@ export const ScoutingReportList: React.FC = () => {
   const season = useSelector(
     (state: RootState) => state[GLOBAL_SELECTIONS_REDUCER_KEY].season
   );
+  const growerId = useSelector(
+    (state: RootState) => state[GLOBAL_SELECTIONS_REDUCER_KEY].grower?.ID
+  );
+  const farmId = useSelector(
+    (state: RootState) => state[GLOBAL_SELECTIONS_REDUCER_KEY].farm?.ID
+  );
+
   const { data, error, isLoading } = useGetScoutingReportsQuery({
-    growerId: 1,
-    farmId: 1,
+    growerId: growerId || null,
+    farmId: farmId || null,
     start_date: `${season}-01-01`,
     end_date: `${season}-12-31`,
   });
@@ -25,7 +31,7 @@ export const ScoutingReportList: React.FC = () => {
   const copiedData = data?.data?.slice();
   const sortedData = copiedData?.sort((a, b) => (a.ID - b.ID) * -1);
   return (
-    <View style={styles.container}>
+    <ScrollView style={styles.container}>
       {isLoading && <ActivityIndicator />}
       {sortedData &&
         sortedData.map((scoutingReport) => (
@@ -76,7 +82,7 @@ export const ScoutingReportList: React.FC = () => {
                   SCOUT_REPORT_EDIT_SCREEN.replace(
                     "[slug]",
                     `${scoutingReport.ID}`
-                  ) as Href<string>
+                  )
                 );
               }}
             />
@@ -89,7 +95,7 @@ export const ScoutingReportList: React.FC = () => {
           Scouting Report
         </Text>
       )}
-    </View>
+    </ScrollView>
   );
 
   // }

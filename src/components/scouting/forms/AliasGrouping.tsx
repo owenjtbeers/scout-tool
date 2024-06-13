@@ -1,16 +1,24 @@
 import React from "react";
 import { View, Alert } from "react-native";
 import { scoutFormStyles } from "./styles";
-import { useTheme, Text } from "@rneui/themed";
-import { Ionicons } from "@expo/vector-icons";
-import type { Observation, ObservationTypePrefix } from "../../../redux/scouting/types";
+import { useTheme, Text, Button } from "@rneui/themed";
+import { Ionicons, Entypo } from "@expo/vector-icons";
+import type {
+  Observation,
+  ObservationTypePrefix,
+  ScoutingArea,
+  ScoutingImage,
+} from "../../../redux/scouting/types";
 import type {
   Control,
   UseFormGetValues,
   UseFormSetValue,
+  UseFormWatch,
 } from "react-hook-form";
+import { createScoutingImageMetadata } from "./scoutReportUtils";
 import type { ScoutingReportForm } from "../types";
 import { Question } from "./Question";
+import DisplayScoutingImages from "../camera/DisplayScoutingImages";
 interface AliasGroupingProps {
   observations: Observation[];
   formControl: Control<ScoutingReportForm>;
@@ -18,6 +26,9 @@ interface AliasGroupingProps {
   formGetValues: UseFormGetValues<ScoutingReportForm>;
   scoutingAreaFormIndex: number;
   observationTypeFormPrefix: ObservationTypePrefix;
+  setIsTakingPhoto: (isTakingPhoto: boolean) => void;
+  setPhotoMetadata: (metadata: ScoutingImage) => void;
+  watch: UseFormWatch<ScoutingReportForm>;
 }
 
 interface ObservationWithFormIndex extends Observation {
@@ -31,11 +42,16 @@ export const AliasGrouping = (props: AliasGroupingProps) => {
     formGetValues,
     scoutingAreaFormIndex,
     observationTypeFormPrefix,
+    setIsTakingPhoto,
+    setPhotoMetadata,
+    watch,
   } = props;
   const { theme } = useTheme();
+  const [isViewingImages, setIsViewingImages] = React.useState(false);
   if (observations && observations.length === 0) {
     return null;
   }
+  const images = watch(`images`);
   const aliasGroupings = observations.reduce((acc, observation, formIndex) => {
     const { Alias } = observation;
     if (!Alias) {
@@ -47,9 +63,27 @@ export const AliasGrouping = (props: AliasGroupingProps) => {
     acc[Alias.Name].push({ ...observation, formIndex });
     return acc;
   }, {} as Record<string, ObservationWithFormIndex[]>);
+
+  const getImagesForAlias = (
+    alias: { ID: number; Name: string },
+    scoutingArea: ScoutingArea
+  ) =>
+    images.filter(
+      (image) =>
+        (image.ObservationAreaUid === scoutingArea.UId ||
+          image.ObservationAreaId === scoutingArea.ID) &&
+        (image?.WeedAlias?.Name === alias?.Name ||
+          image?.DiseaseAlias?.Name === alias?.Name ||
+          image?.InsectAlias?.Name === alias?.Name)
+    );
+  const scoutingArea = formGetValues(`scoutingAreas.${scoutingAreaFormIndex}`);
   return (
     <>
       {Object.keys(aliasGroupings).map((aliasName) => {
+        const aliasImages = getImagesForAlias(
+          aliasGroupings[aliasName][0].Alias,
+          scoutingArea
+        );
         return (
           <View key={aliasName} style={scoutFormStyles.section}>
             <View
@@ -98,6 +132,51 @@ export const AliasGrouping = (props: AliasGroupingProps) => {
                 />
               );
             })}
+            {aliasImages?.length ? (
+              <View
+                style={{
+                  flexDirection: "row",
+                  alignItems: "center",
+                  justifyContent: "space-between",
+                  paddingBottom: 10,
+                }}
+              >
+                <Text>{`${aliasImages.length} images`}</Text>
+                <Button
+                  title={"View Images"}
+                  icon={<Entypo name="image" color={theme.colors.secondary} />}
+                  onPress={() => setIsViewingImages(true)}
+                />
+              </View>
+            ) : null}
+            {isViewingImages && (
+              <DisplayScoutingImages
+                scoutingImages={aliasImages}
+                formGetValues={formGetValues}
+                formSetValue={formSetValue}
+                onClose={() => setIsViewingImages(false)}
+              />
+            )}
+            <Button
+              icon={<Entypo name="camera" color={theme.colors.secondary} />}
+              onPress={() => {
+                const scoutingArea = formGetValues(
+                  `scoutingAreas.${scoutingAreaFormIndex}`
+                );
+                const alias = aliasGroupings[aliasName][0].Alias;
+                setPhotoMetadata(
+                  createScoutingImageMetadata(
+                    scoutingArea,
+                    observationTypeFormPrefix,
+                    alias,
+                    undefined
+                  )
+                );
+                setIsTakingPhoto(true);
+              }}
+            >
+              Take Photo
+            </Button>
           </View>
         );
       })}

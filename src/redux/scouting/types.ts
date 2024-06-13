@@ -1,6 +1,7 @@
 import type { ScoutingToolUnits } from "../../constants/types";
 import type { FeatureCollection } from "@turf/helpers";
 import type { ScoutingAppUser } from "../user/types";
+import type { Asset } from "expo-media-library";
 
 export type ObservationTypePrefix = "Weed" | "Insect" | "Disease" | "General";
 export type Observation = {
@@ -69,6 +70,7 @@ export type APIScoutingReport = {
   ScoutedById: number;
   ScoutedBy: ScoutingAppUser;
   ObservationAreas?: APIObservationArea[];
+  Images: ScoutingImage[];
 };
 
 export type ScoutingReport = {
@@ -80,13 +82,31 @@ export type ScoutingReport = {
   ScoutedById: number;
   ScoutedBy: ScoutingAppUser;
   ObservationAreas?: ScoutingArea[];
+  Images: ScoutingImage[];
+  ImageUploads?: ScoutingImage[];
 };
 
-export type ObservationMedia = {
-  id: number;
-  mediaType: "image";
-  mediaUrl: string;
-  ObservationId: number;
+export type ScoutingImage = {
+  ID: number;
+  Url: string;
+  // This is saved on the backend as a string, should be the url as it was on the device
+  Filename?: string;
+  ObservationAreaId: number;
+  ObservationAreaUid: string;
+  WeedAliasId: number;
+  WeedAlias?: Partial<WeedAlias>;
+  DiseaseAliasId: number;
+  DiseaseAlias?: Partial<DiseaseAlias>;
+  InsectAliasId: number;
+  InsectAlias?: Partial<InsectAlias>;
+  QuestionValId: number;
+  QuestionVal?: Observation;
+  Type?: ObservationTypePrefix;
+  AddedById: number;
+  UploadLink?: string;
+  // This is attached in the case of local images before they are saved
+  // To easily reference the newly created image
+  asset?: Asset;
 };
 
 export type OrgWeed = {

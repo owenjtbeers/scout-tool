@@ -31,8 +31,9 @@ import { ScoutingSideSheet } from "./ScoutingSideSheet";
 import { ScoutingReportSummaryContent } from "./forms/ScoutingReportSummaryContent";
 import { ScoutingReportObservationContent } from "./forms/ScoutingReportObservationContent";
 import { ScoutingReportForm } from "./types";
-import { APIScoutingReport } from "../../redux/scouting/types";
+import { APIScoutingReport, ScoutingImage } from "../../redux/scouting/types";
 import { convertObservationAreasToScoutingAreas } from "./forms/scoutReportUtils";
+import { ScoutingCameraView } from "./camera/ScoutingCameraView";
 
 interface CreateScoutingReportPageProps {
   mode: "create" | "edit";
@@ -65,9 +66,9 @@ export const CreateScoutingReportPage = (
           scoutedBy: existingScoutingReport.ScoutedBy,
           scoutedById: existingScoutingReport.ScoutedById,
           scoutedDate: new Date(existingScoutingReport.ScoutedDate),
-          media: [],
           summaryText: existingScoutingReport.Summary,
           fieldIds: existingScoutingReport.FieldIds.map((obj) => obj.ID),
+          images: existingScoutingReport?.Images || [],
         }
       : {
           ID: 0,
@@ -76,6 +77,7 @@ export const CreateScoutingReportPage = (
           summaryText: "",
           recommendationText: "",
           fieldIds: fields.map((field) => field.ID),
+          images: [],
         };
   const {
     control,
@@ -92,6 +94,11 @@ export const CreateScoutingReportPage = (
   // Internal State
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [isDrawingScoutingArea, setIsDrawingScoutingArea] = useState(false);
+  const [isTakingPhoto, setIsTakingPhoto] = useState(false);
+  const [photoMetaData, setPhotoMetadata] = useState<ScoutingImage | null>(
+    null
+  );
+  const [selectedScoutingAreaIndex, setSelectedScoutingAreaIndex] = useState(0);
   const [sideSheetContentType, setSideSheetContentType] = useState<
     "summary" | "observation"
   >("summary");
@@ -149,6 +156,19 @@ export const CreateScoutingReportPage = (
   if (isFetchingScoutingReport) {
     return <ActivityIndicator />;
   }
+
+  if (isTakingPhoto) {
+    return (
+      <ScoutingCameraView
+        setIsTakingPhoto={setIsTakingPhoto}
+        photoMetadata={photoMetaData}
+        setPhotoMetadata={setPhotoMetadata}
+        pathToFormValue={"images"}
+        formGetValues={getValues}
+        formSetValue={setValue}
+      />
+    );
+  }
   return (
     <View style={{ flex: 1 }}>
       <Header
@@ -182,6 +202,10 @@ export const CreateScoutingReportPage = (
           setSideSheetContentType={setSideSheetContentType}
           isDrawingScoutingArea={isDrawingScoutingArea}
           setIsDrawingScoutingArea={setIsDrawingScoutingArea}
+          setIsTakingPhoto={setIsTakingPhoto}
+          setPhotoMetadata={setPhotoMetadata}
+          selectedScoutingAreaIndex={selectedScoutingAreaIndex}
+          setSelectedScoutingAreaIndex={setSelectedScoutingAreaIndex}
         />
       </View>
 
@@ -204,6 +228,10 @@ interface ScoutingReportFormProps {
   setSideSheetContentType: (contentType: "summary" | "observation") => void;
   isDrawingScoutingArea: boolean;
   setIsDrawingScoutingArea: (isDrawing: boolean) => void;
+  setIsTakingPhoto: (isTakingPhoto: boolean) => void;
+  setPhotoMetadata: (metadata: ScoutingImage) => void;
+  setSelectedScoutingAreaIndex: (index: number) => void;
+  selectedScoutingAreaIndex: number;
 }
 const CreateScoutReportForm = ({
   field,
@@ -216,10 +244,12 @@ const CreateScoutReportForm = ({
   watch,
   isDrawingScoutingArea,
   setIsDrawingScoutingArea,
+  setIsTakingPhoto,
+  setPhotoMetadata,
+  selectedScoutingAreaIndex,
+  setSelectedScoutingAreaIndex,
 }: ScoutingReportFormProps) => {
   const { theme } = useTheme();
-
-  const [selectedScoutingAreaIndex, setSelectedScoutingAreaIndex] = useState(0);
 
   return (
     <ScoutingSideSheet isDrawing={isDrawingScoutingArea}>
@@ -233,6 +263,9 @@ const CreateScoutReportForm = ({
           setSelectedScoutingAreaIndex={setSelectedScoutingAreaIndex}
           setSideSheetContentType={setSideSheetContentType}
           setIsDrawingScoutingArea={setIsDrawingScoutingArea}
+          formSetValue={formSetValue}
+          // setIsTakingPhoto={setIsTakingPhoto}
+          // setPhotoMetadata={setPhotoMetadata}
         />
       ) : (
         <ScoutingReportObservationContent
@@ -242,6 +275,8 @@ const CreateScoutReportForm = ({
           formGetValues={formGetValues}
           formSetValue={formSetValue}
           setSideSheetContentType={setSideSheetContentType}
+          setIsTakingPhoto={setIsTakingPhoto}
+          setPhotoMetadata={setPhotoMetadata}
           watch={watch}
         />
       )}

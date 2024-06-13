@@ -9,8 +9,9 @@ export const scoutFormStyles = StyleSheet.create({
   },
   page: {
     flex: 1,
-    padding: 10,
-    paddingTop: 25,
+    paddingTop: 35,
+    paddingLeft: 10,
+    paddingRight: 10,
   },
   heading: {
     color: "white",

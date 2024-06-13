@@ -9,19 +9,24 @@ import {
   UseFormSetValue,
   UseFormWatch,
 } from "react-hook-form";
-import { useDispatch } from "react-redux";
 import { scoutFormStyles } from "./styles";
-import { useGetOrgWeedsQuery } from "../../../redux/scouting/scoutingApi";
+import {
+  useGetOrgWeedsQuery,
+  useGetOrgDiseasesQuery,
+  useGetOrgInsectsQuery,
+} from "../../../redux/scouting/scoutingApi";
 import type { Field } from "../../../redux/fields/types";
 import type { ScoutingReportForm } from "../types";
 import GeneralQuestionPrompt from "./GeneralQuestionPrompt";
 import {
   getNewWeedObservationSet,
+  getNewDiseaseObservationSet,
+  getNewInsectObservationSet,
   getNumberOfObservationsFromScoutingArea,
   getRecentAliasesFromObservations,
 } from "./scoutReportUtils";
-import type { IQuestion } from "./Question";
 import { AliasGrouping } from "./AliasGrouping";
+import { ScoutingImage } from "../../../redux/scouting/types";
 
 interface ScoutingReportObservationContentProps {
   field: Field;
@@ -31,6 +36,8 @@ interface ScoutingReportObservationContentProps {
   formSetValue: UseFormSetValue<ScoutingReportForm>;
   watch: UseFormWatch<ScoutingReportForm>;
   setSideSheetContentType: (contentType: "summary" | "observation") => void;
+  setPhotoMetadata: (metadata: ScoutingImage) => void;
+  setIsTakingPhoto: (isTakingPhoto: boolean) => void;
 }
 export const ScoutingReportObservationContent = (
   props: ScoutingReportObservationContentProps
@@ -43,21 +50,25 @@ export const ScoutingReportObservationContent = (
     watch,
     scoutingAreaFormIndex,
     setSideSheetContentType,
+    setPhotoMetadata,
+    setIsTakingPhoto,
   } = props;
   const { theme } = useTheme();
   const { data: orgWeeds, isLoading: isLoadingOrgWeeds } = useGetOrgWeedsQuery(
     {},
     { refetchOnReconnect: true }
   );
+  const { data: orgDiseases, isLoading: isLoadingOrgDiseases } =
+    useGetOrgDiseasesQuery({}, { refetchOnReconnect: true });
+  const { data: orgInsects, isLoading: isLoadingOrgInsects } =
+    useGetOrgInsectsQuery({}, { refetchOnReconnect: true });
+
   const scoutingAreas = formGetValues(`scoutingAreas`);
   const scoutingArea = watch(`scoutingAreas.${scoutingAreaFormIndex}`);
 
   const handleSubmit = () => {
     setSideSheetContentType("summary");
   };
-  const orgWeedPicklist = orgWeeds?.data?.map(
-    (orgWeed) => orgWeed?.WeedAlias?.Name || ""
-  );
   // const recentWeeds = scoutingArea?.weedObservations?.filter()
   return (
     <View style={{ flex: 1 }}>
@@ -129,28 +140,125 @@ export const ScoutingReportObservationContent = (
                   formSetValue={formSetValue}
                   scoutingAreaFormIndex={scoutingAreaFormIndex}
                   observations={value}
+                  setIsTakingPhoto={setIsTakingPhoto}
+                  setPhotoMetadata={setPhotoMetadata}
+                  watch={watch}
                 />
               )}
               name={`scoutingAreas.${scoutingAreaFormIndex}.WeedObservations`}
             />
-
-            {/* <GeneralQuestionPrompt
-            type={"Pest"}
-            picklist={["Pest 1", "Pest 2", "Pest 3"]}
-            isLoadingPicklist={false}
-            createQuestion={(alias) => {}}
-          />
-          <GeneralQuestionPrompt
-            type={"Disease"}
-            isLoadingPicklist={false}
-            picklist={["Disease 1", "Disease 2", "Disease 3"]}
-            createQuestion={(question) => {
-              return;
-            }}
-          /> */}
+            <GeneralQuestionPrompt
+              type={"Insect"}
+              recentlyObserved={getRecentAliasesFromObservations(
+                scoutingAreas,
+                "Insect"
+              )}
+              getAddedAliases={() => {
+                const insectObservations = formGetValues(
+                  `scoutingAreas.${scoutingAreaFormIndex}.InsectObservations`
+                );
+                if (insectObservations) {
+                  return insectObservations.map((obs) => obs.Alias);
+                }
+                return [];
+              }}
+              picklist={
+                orgInsects?.data?.map((orgInsect) => ({
+                  ID: orgInsect.InsectAliasId,
+                  Name: orgInsect?.InsectAlias?.Name || "",
+                })) || []
+              }
+              isLoadingPicklist={isLoadingOrgInsects}
+              createQuestion={(alias) => {
+                const insectObservations = formGetValues(
+                  `scoutingAreas.${scoutingAreaFormIndex}.InsectObservations`
+                );
+                if (insectObservations) {
+                  const newInsectObservations = [
+                    ...insectObservations,
+                    ...getNewInsectObservationSet(alias),
+                  ];
+                  formSetValue(
+                    `scoutingAreas.${scoutingAreaFormIndex}.InsectObservations`,
+                    newInsectObservations
+                  );
+                }
+              }}
+            />
+            <Controller
+              control={formControl}
+              render={({ field: { value } }) => (
+                <AliasGrouping
+                  observationTypeFormPrefix={"Insect"}
+                  formControl={formControl}
+                  formGetValues={formGetValues}
+                  formSetValue={formSetValue}
+                  scoutingAreaFormIndex={scoutingAreaFormIndex}
+                  observations={value}
+                  setIsTakingPhoto={setIsTakingPhoto}
+                  setPhotoMetadata={setPhotoMetadata}
+                  watch={watch}
+                />
+              )}
+              name={`scoutingAreas.${scoutingAreaFormIndex}.InsectObservations`}
+            />
+            <GeneralQuestionPrompt
+              type={"Disease"}
+              recentlyObserved={getRecentAliasesFromObservations(
+                scoutingAreas,
+                "Disease"
+              )}
+              getAddedAliases={() => {
+                const diseaseObservations = formGetValues(
+                  `scoutingAreas.${scoutingAreaFormIndex}.DiseaseObservations`
+                );
+                if (diseaseObservations) {
+                  return diseaseObservations.map((obs) => obs.Alias);
+                }
+                return [];
+              }}
+              picklist={
+                orgDiseases?.data?.map((orgDisease) => ({
+                  ID: orgDisease.DiseaseAliasId,
+                  Name: orgDisease?.DiseaseAlias?.Name || "",
+                })) || []
+              }
+              isLoadingPicklist={isLoadingOrgDiseases}
+              createQuestion={(alias) => {
+                const DiseaseObservations = formGetValues(
+                  `scoutingAreas.${scoutingAreaFormIndex}.DiseaseObservations`
+                );
+                if (DiseaseObservations) {
+                  const newDiseaseObservations = [
+                    ...DiseaseObservations,
+                    ...getNewDiseaseObservationSet(alias),
+                  ];
+                  formSetValue(
+                    `scoutingAreas.${scoutingAreaFormIndex}.DiseaseObservations`,
+                    newDiseaseObservations
+                  );
+                }
+              }}
+            />
+            <Controller
+              control={formControl}
+              render={({ field: { value } }) => (
+                <AliasGrouping
+                  observationTypeFormPrefix={"Disease"}
+                  formControl={formControl}
+                  formGetValues={formGetValues}
+                  formSetValue={formSetValue}
+                  scoutingAreaFormIndex={scoutingAreaFormIndex}
+                  observations={value}
+                  setIsTakingPhoto={setIsTakingPhoto}
+                  setPhotoMetadata={setPhotoMetadata}
+                  watch={watch}
+                />
+              )}
+              name={`scoutingAreas.${scoutingAreaFormIndex}.DiseaseObservations`}
+            />
           </View>
           <Button
-            style={{ marginBottom: 1000 }}
             title={"FINISH WITH OBSERVATIONS FOR AREA"}
             onPress={handleSubmit}
           />

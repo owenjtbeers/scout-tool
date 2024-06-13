@@ -31,7 +31,6 @@ const FieldBoundsZoomButton = (props: Props) => {
       const fc = featureCollection(features);
       const bboxOfFields = bbox(fc);
       if (bboxOfFields) {
-        console.log("bboxOfFields", bboxOfFields);
         mapRef.current?.fitToCoordinates(
           convertTurfBBoxToLatLng(bboxOfFields),
           {
