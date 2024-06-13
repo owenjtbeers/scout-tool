@@ -3,7 +3,7 @@ import { View, StyleSheet, Image } from "react-native";
 import { Button, Input, Text } from "@rneui/themed";
 import { useForm, Controller } from "react-hook-form";
 import { useDispatch } from "react-redux";
-import { Href, Link, useRouter } from "expo-router";
+import { Link, useRouter } from "expo-router";
 import { Entypo, MaterialIcons } from "@expo/vector-icons";
 import { useLoginMutation } from "../../../src/redux/auth/authApi";
 import { HOME_MAP_SCREEN } from "../../../src/navigation/screens";
@@ -28,7 +28,7 @@ export const Login = () => {
     if ("data" in response) {
       dispatch(userSlice.actions.setToken(response.data.token));
       // TODO: Actually set the user in state as well
-      router.replace(HOME_MAP_SCREEN as Href<string>);
+      router.replace(HOME_MAP_SCREEN);
     } else if ("error" in response) {
       const errorMessage = getErrorMessage(response);
       setError(errorMessage);
