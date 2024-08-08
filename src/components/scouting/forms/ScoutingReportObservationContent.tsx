@@ -17,16 +17,18 @@ import {
 } from "../../../redux/scouting/scoutingApi";
 import type { Field } from "../../../redux/fields/types";
 import type { ScoutingReportForm } from "../types";
-import GeneralQuestionPrompt from "./GeneralQuestionPrompt";
+import AliasQuestionPrompt from "./AliasQuestionPrompt";
 import {
   getNewWeedObservationSet,
   getNewDiseaseObservationSet,
   getNewInsectObservationSet,
+  getNewGeneralObservation,
   getNumberOfObservationsFromScoutingArea,
   getRecentAliasesFromObservations,
-} from "./scoutReportUtils";
+} from "../utils/scoutReportUtils";
 import { AliasGrouping } from "./AliasGrouping";
-import { ScoutingImage } from "../../../redux/scouting/types";
+import { ScoutingImage, Alias } from "../../../redux/scouting/types";
+import GeneralQuestionPrompt from "./GeneralQuestionPrompt";
 
 interface ScoutingReportObservationContentProps {
   field: Field;
@@ -92,7 +94,7 @@ export const ScoutingReportObservationContent = (
             </Text>
           </View>
           <View key={"section-observation-questions"}>
-            <GeneralQuestionPrompt
+            <AliasQuestionPrompt
               type={"Weed"}
               recentlyObserved={getRecentAliasesFromObservations(
                 scoutingAreas,
@@ -121,7 +123,7 @@ export const ScoutingReportObservationContent = (
                 if (weedObservations) {
                   const newWeedObservations = [
                     ...weedObservations,
-                    ...getNewWeedObservationSet(alias),
+                    ...getNewWeedObservationSet(alias as Alias),
                   ];
                   formSetValue(
                     `scoutingAreas.${scoutingAreaFormIndex}.WeedObservations`,
@@ -147,7 +149,7 @@ export const ScoutingReportObservationContent = (
               )}
               name={`scoutingAreas.${scoutingAreaFormIndex}.WeedObservations`}
             />
-            <GeneralQuestionPrompt
+            <AliasQuestionPrompt
               type={"Insect"}
               recentlyObserved={getRecentAliasesFromObservations(
                 scoutingAreas,
@@ -176,7 +178,7 @@ export const ScoutingReportObservationContent = (
                 if (insectObservations) {
                   const newInsectObservations = [
                     ...insectObservations,
-                    ...getNewInsectObservationSet(alias),
+                    ...getNewInsectObservationSet(alias as Alias),
                   ];
                   formSetValue(
                     `scoutingAreas.${scoutingAreaFormIndex}.InsectObservations`,
@@ -202,7 +204,7 @@ export const ScoutingReportObservationContent = (
               )}
               name={`scoutingAreas.${scoutingAreaFormIndex}.InsectObservations`}
             />
-            <GeneralQuestionPrompt
+            <AliasQuestionPrompt
               type={"Disease"}
               recentlyObserved={getRecentAliasesFromObservations(
                 scoutingAreas,
@@ -231,7 +233,7 @@ export const ScoutingReportObservationContent = (
                 if (DiseaseObservations) {
                   const newDiseaseObservations = [
                     ...DiseaseObservations,
-                    ...getNewDiseaseObservationSet(alias),
+                    ...getNewDiseaseObservationSet(alias as Alias),
                   ];
                   formSetValue(
                     `scoutingAreas.${scoutingAreaFormIndex}.DiseaseObservations`,
@@ -256,6 +258,54 @@ export const ScoutingReportObservationContent = (
                 />
               )}
               name={`scoutingAreas.${scoutingAreaFormIndex}.DiseaseObservations`}
+            />
+            <Controller
+              control={formControl}
+              render={({ field: { value } }) => (
+                <AliasGrouping
+                  observationTypeFormPrefix={"General"}
+                  formControl={formControl}
+                  formGetValues={formGetValues}
+                  formSetValue={formSetValue}
+                  scoutingAreaFormIndex={scoutingAreaFormIndex}
+                  observations={value}
+                  setIsTakingPhoto={setIsTakingPhoto}
+                  setPhotoMetadata={setPhotoMetadata}
+                  watch={watch}
+                />
+              )}
+              name={`scoutingAreas.${scoutingAreaFormIndex}.GeneralObservations`}
+            />
+            <GeneralQuestionPrompt
+              type="General"
+              recentlyObserved={getRecentAliasesFromObservations(
+                scoutingAreas,
+                "General"
+              )}
+              createQuestion={(questionName: string) => {
+                const GeneralObservations = formGetValues(
+                  `scoutingAreas.${scoutingAreaFormIndex}.GeneralObservations`
+                );
+                if (GeneralObservations) {
+                  const newGeneralObservations = [
+                    ...GeneralObservations,
+                    getNewGeneralObservation(questionName),
+                  ];
+                  formSetValue(
+                    `scoutingAreas.${scoutingAreaFormIndex}.GeneralObservations`,
+                    newGeneralObservations
+                  );
+                }
+              }}
+              getAddedGeneralQuestionsForArea={() => {
+                const generalObservations = formGetValues(
+                  `scoutingAreas.${scoutingAreaFormIndex}.GeneralObservations`
+                );
+                if (generalObservations) {
+                  return generalObservations.map((obs) => obs.name);
+                }
+                return [];
+              }}
             />
           </View>
           <Button

@@ -9,6 +9,7 @@ import {
   UseFormHandleSubmit,
   UseFormSetValue,
   UseFormWatch,
+  set,
   useForm,
 } from "react-hook-form";
 import {
@@ -18,22 +19,24 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import { useDispatch, useSelector } from "react-redux";
+import { useDispatch } from "react-redux";
 import type { Field } from "../../redux/fields/types";
+import { getMostRecentCrop } from "../../redux/fields/utils";
 import { globalSelectionsSlice } from "../../redux/globalSelections/globalSelectionsSlice";
+import { drawingSlice } from "../../redux/map/drawingSlice";
 import {
-  MAP_DRAWING_REDUCER_KEY,
-  drawingSlice,
-} from "../../redux/map/drawingSlice";
-import { RootState } from "../../redux/store";
+  APIScoutingReport,
+  ScoutingImage,
+  ScoutingReportStatus,
+} from "../../redux/scouting/types";
 import { ScoutingReportMapView } from "./ScoutingReportMapView";
 import { ScoutingSideSheet } from "./ScoutingSideSheet";
-import { ScoutingReportSummaryContent } from "./forms/ScoutingReportSummaryContent";
-import { ScoutingReportObservationContent } from "./forms/ScoutingReportObservationContent";
-import { ScoutingReportForm } from "./types";
-import { APIScoutingReport, ScoutingImage } from "../../redux/scouting/types";
-import { convertObservationAreasToScoutingAreas } from "./forms/scoutReportUtils";
 import { ScoutingCameraView } from "./camera/ScoutingCameraView";
+import { ScoutingReportObservationContent } from "./forms/ScoutingReportObservationContent";
+import { ScoutingReportSummaryContent } from "./forms/ScoutingReportSummaryContent";
+import { ScoutingReportForm } from "./types";
+import { convertObservationAreasToScoutingAreas } from "./utils/scoutReportUtils";
+import { FinishWithScoutingReport } from "./forms/FinishWithReport";
 
 interface CreateScoutingReportPageProps {
   mode: "create" | "edit";
@@ -41,19 +44,27 @@ interface CreateScoutingReportPageProps {
   // Only useful if in edit mode
   isFetchingScoutingReport: boolean;
   fields: Field[];
+  growerName?: string;
+  farmName?: string;
 }
 
 export const CreateScoutingReportPage = (
   props: CreateScoutingReportPageProps
 ) => {
-  const { mode, existingScoutingReport, isFetchingScoutingReport, fields } =
-    props;
+  const {
+    mode,
+    existingScoutingReport,
+    isFetchingScoutingReport,
+    fields,
+    growerName,
+    farmName,
+  } = props;
   const router = useRouter();
   const navigation = useNavigation();
   const dispatch = useDispatch();
   // TODO: Convert this to be multiple selected fields if possible
   const selectedField = fields[0];
-
+  console.log("Grower and Farm Name", growerName, farmName);
   // Fetch existing scouting report if in edit mode
 
   const defaultFormValues =
@@ -69,15 +80,28 @@ export const CreateScoutingReportPage = (
           summaryText: existingScoutingReport.Summary,
           fieldIds: existingScoutingReport.FieldIds.map((obj) => obj.ID),
           images: existingScoutingReport?.Images || [],
+          recommendations: existingScoutingReport.Recommendation,
+          growthStage: existingScoutingReport.GrowthStage,
+          field: selectedField,
+          growerName,
+          farmName,
+          crop: existingScoutingReport.Crop,
+          status: existingScoutingReport.Status,
         }
       : {
           ID: 0,
           scoutingAreas: [],
           media: [],
           summaryText: "",
-          recommendationText: "",
+          recommendations: "",
+          growthStage: "",
           fieldIds: fields.map((field) => field.ID),
           images: [],
+          field: selectedField,
+          growerName,
+          farmName,
+          crop: getMostRecentCrop(selectedField.FieldCrops)?.Crop,
+          status: "draft" as ScoutingReportStatus,
         };
   const {
     control,
@@ -92,8 +116,8 @@ export const CreateScoutingReportPage = (
   });
 
   // Internal State
-  const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [isDrawingScoutingArea, setIsDrawingScoutingArea] = useState(false);
+  const [isDoneWithReport, setIsDoneWithReport] = useState(false);
   const [isTakingPhoto, setIsTakingPhoto] = useState(false);
   const [photoMetaData, setPhotoMetadata] = useState<ScoutingImage | null>(
     null
@@ -169,6 +193,18 @@ export const CreateScoutingReportPage = (
       />
     );
   }
+
+  if (isDoneWithReport) {
+    return (
+      <FinishWithScoutingReport
+        handleSubmitScoutingReport={handleSubmit}
+        onBackToForm={() => setIsDoneWithReport(false)}
+        control={control}
+        onSuccess={() => {}}
+      />
+    );
+  }
+
   return (
     <View style={{ flex: 1 }}>
       <Header
@@ -201,6 +237,7 @@ export const CreateScoutingReportPage = (
           sideSheetContentType={sideSheetContentType}
           setSideSheetContentType={setSideSheetContentType}
           isDrawingScoutingArea={isDrawingScoutingArea}
+          setIsDoneWithReport={setIsDoneWithReport}
           setIsDrawingScoutingArea={setIsDrawingScoutingArea}
           setIsTakingPhoto={setIsTakingPhoto}
           setPhotoMetadata={setPhotoMetadata}
@@ -208,11 +245,6 @@ export const CreateScoutingReportPage = (
           setSelectedScoutingAreaIndex={setSelectedScoutingAreaIndex}
         />
       </View>
-
-      <Dialog
-        isVisible={isDialogOpen}
-        onDismiss={() => setIsDialogOpen(false)}
-      ></Dialog>
     </View>
   );
 };
@@ -230,6 +262,7 @@ interface ScoutingReportFormProps {
   setIsDrawingScoutingArea: (isDrawing: boolean) => void;
   setIsTakingPhoto: (isTakingPhoto: boolean) => void;
   setPhotoMetadata: (metadata: ScoutingImage) => void;
+  setIsDoneWithReport: (isDone: boolean) => void;
   setSelectedScoutingAreaIndex: (index: number) => void;
   selectedScoutingAreaIndex: number;
 }
@@ -248,6 +281,7 @@ const CreateScoutReportForm = ({
   setPhotoMetadata,
   selectedScoutingAreaIndex,
   setSelectedScoutingAreaIndex,
+  setIsDoneWithReport,
 }: ScoutingReportFormProps) => {
   const { theme } = useTheme();
 
@@ -258,11 +292,11 @@ const CreateScoutReportForm = ({
           field={field}
           formControl={formControl}
           formGetValues={formGetValues}
-          handleSubmit={handleSubmit}
           watch={watch}
           setSelectedScoutingAreaIndex={setSelectedScoutingAreaIndex}
           setSideSheetContentType={setSideSheetContentType}
           setIsDrawingScoutingArea={setIsDrawingScoutingArea}
+          setIsDoneWithReport={setIsDoneWithReport}
           formSetValue={formSetValue}
           // setIsTakingPhoto={setIsTakingPhoto}
           // setPhotoMetadata={setPhotoMetadata}

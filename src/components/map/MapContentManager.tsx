@@ -77,8 +77,8 @@ export const MapContentManager = (props: MapContentManagerProps) => {
                       dispatch(globalSelectionsSlice.actions.setField(field));
                       const { coordinates } = geoJsonProps;
                       if (coordinates && mapRef.current) {
-                        console.log("Fitting to coordinates", coordinates);
                         // TODO: Figure out how to deal with this error
+                        // @ts-ignore
                         props.mapRef.current?.fitToCoordinates(coordinates, {
                           edgePadding: {
                             top: 20,

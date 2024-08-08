@@ -6,17 +6,19 @@ export const fieldsApi = baseApi.injectEndpoints({
   endpoints: (build) => ({
     getFields: build.query<
       APIResponse<Field[]>,
-      { growerId: number; farmId: number; withBoundaries: boolean | undefined }
+      {
+        growerId: number;
+        farmId: number;
+        withBoundaries: boolean | undefined;
+        withCrops: boolean | undefined;
+      }
     >({
       query: (params) => ({
         url: "/fields",
         method: "GET",
         params,
       }),
-      transformResponse: (response: { data: Field[]; message: string }) => {
-        return response;
-      },
-      providesTags: ["Fields"],
+      providesTags: ["Fields", "Crops"],
     }),
     createField: build.mutation<Field, Partial<Field>>({
       query: (data) => ({
@@ -26,7 +28,24 @@ export const fieldsApi = baseApi.injectEndpoints({
       }),
       invalidatesTags: ["Fields"],
     }),
+    getFieldDetail: build.query<
+      APIResponse<Field>,
+      {
+        fieldId: number;
+      }
+    >({
+      query: (params) => ({
+        url: `/fields/${params.fieldId}`,
+        method: "GET",
+      }),
+    }),
   }),
+  // TODO: Disable this in production
+  overrideExisting: true,
 });
 
-export const { useGetFieldsQuery, useCreateFieldMutation } = fieldsApi;
+export const {
+  useGetFieldsQuery,
+  useCreateFieldMutation,
+  useGetFieldDetailQuery,
+} = fieldsApi;

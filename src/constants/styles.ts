@@ -5,7 +5,8 @@ export const colors = {
   // primary: "#6B818D", // Blue green
   primary: "#00342B", // Dark green
   secondary: "#d3f0db",
-  tertiary: "#d3f0dbAA", // Light green with opacity???
+  tertiary: "rgba(187, 239, 198, 0.4)",
+  // tertiary: "#d3f0dbAA", // Light green with opacity???
   selectedFieldBoundaryFill: "#87CEFAAA", // Blue with opacity
 };
 

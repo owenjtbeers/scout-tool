@@ -11,11 +11,16 @@ export default () => {
   const selectedField = useSelector(
     (state: RootState) => state[GLOBAL_SELECTIONS_REDUCER_KEY].field
   ) as Field;
+  const globalSelections = useSelector(
+    (state: RootState) => state[GLOBAL_SELECTIONS_REDUCER_KEY]
+  );
   return (
     <CreateScoutingReportPage
       isFetchingScoutingReport={false}
       mode="create"
       fields={[selectedField]}
+      growerName={globalSelections?.grower?.Name}
+      farmName={globalSelections?.farm?.Name}
     />
   );
 };

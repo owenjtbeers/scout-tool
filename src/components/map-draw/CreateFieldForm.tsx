@@ -1,12 +1,12 @@
 import { Ionicons } from "@expo/vector-icons";
 import { BottomSheet, Button, Input } from "@rneui/themed";
 import { FeatureCollection, Units } from "@turf/helpers";
-import { Href, useRouter } from "expo-router";
+import { useRouter } from "expo-router";
 import React, { useCallback } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { Pressable, StyleSheet, TouchableOpacity, View } from "react-native";
 import { useSelector } from "react-redux";
-import { CustomDialogPicker } from "../../forms/components/DialogPicker";
+import { DialogPickerSelect } from "../../forms/components/DialogPicker";
 import { validation } from "../../forms/validationFunctions";
 import { validationRules } from "../../forms/validationRules";
 import { HOME_MAP_SCREEN } from "../../navigation/screens";
@@ -76,7 +76,7 @@ export function CreateFieldForm(props: FieldFormProps) {
     const response = await createField(fieldData);
     if ("data" in response) {
       setIsVisible(false);
-      router.push(HOME_MAP_SCREEN as Href<string>);
+      router.push(HOME_MAP_SCREEN);
     } else if ("error" in response) {
       // Error Modal on page?
       console.log(response.error);
@@ -140,7 +140,7 @@ export function CreateFieldForm(props: FieldFormProps) {
                     fieldState: { error },
                   }) => (
                     <>
-                      <CustomDialogPicker
+                      <DialogPickerSelect
                         options={farmsOfSelectedGrower?.map((farm) => ({
                           label: farm.Name,
                           value: farm.ID.toString(),
@@ -196,7 +196,7 @@ export function CreateFieldForm(props: FieldFormProps) {
                   defaultValue=""
                 />
               </View>
-              <View>
+              {/* <View>
                 <Controller
                   control={control}
                   rules={{ validate: validation.isNotPlaceholderValue("") }}
@@ -204,7 +204,7 @@ export function CreateFieldForm(props: FieldFormProps) {
                     field: { onChange, onBlur, value },
                     fieldState: { error },
                   }) => (
-                    <CustomDialogPicker
+                    <DialogPickerSelect
                       options={cropOptions.map((crop) => ({
                         label: crop,
                         value: crop,
@@ -218,7 +218,7 @@ export function CreateFieldForm(props: FieldFormProps) {
                   name="crop"
                   defaultValue=""
                 />
-              </View>
+              </View> */}
               <View>
                 <Controller
                   control={control}

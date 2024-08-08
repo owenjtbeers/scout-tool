@@ -11,6 +11,11 @@ export type APIResponse<T> = {
   message: string;
 };
 
+export type APIErrorResponse = {
+  status: number;
+  data: { error: string };
+};
+
 export const axiosBaseQuery =
   (
     {

@@ -27,6 +27,18 @@ export const userApi = baseApi.injectEndpoints({
       }),
       invalidatesTags: ["User"],
     }),
+    getOrgUsers: builder.query<
+      {
+        data: ScoutingAppUser[];
+        message: string;
+      },
+      string
+    >({
+      query: (organizationId) => ({
+        url: `/users/organization/${organizationId}`,
+      }),
+      providesTags: ["User"],
+    }),
   }),
 });
 

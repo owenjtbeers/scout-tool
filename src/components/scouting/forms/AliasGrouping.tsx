@@ -15,7 +15,7 @@ import type {
   UseFormSetValue,
   UseFormWatch,
 } from "react-hook-form";
-import { createScoutingImageMetadata } from "./scoutReportUtils";
+import { createScoutingImageMetadata } from "../utils/scoutReportUtils";
 import type { ScoutingReportForm } from "../types";
 import { Question } from "./Question";
 import DisplayScoutingImages from "../camera/DisplayScoutingImages";
@@ -70,11 +70,15 @@ export const AliasGrouping = (props: AliasGroupingProps) => {
   ) =>
     images.filter(
       (image) =>
-        (image.ObservationAreaUid === scoutingArea.UId ||
+        ((image.ObservationAreaUid === scoutingArea.UId ||
           image.ObservationAreaId === scoutingArea.ID) &&
-        (image?.WeedAlias?.Name === alias?.Name ||
-          image?.DiseaseAlias?.Name === alias?.Name ||
-          image?.InsectAlias?.Name === alias?.Name)
+          (image?.WeedAlias?.Name === alias?.Name ||
+            image?.DiseaseAlias?.Name === alias?.Name ||
+            image?.InsectAlias?.Name === alias?.Name)) ||
+        (image?.Type === observationTypeFormPrefix &&
+          (image?.WeedAliasId === alias.ID ||
+            image?.DiseaseAliasId === alias.ID ||
+            image?.InsectAliasId === alias.ID))
     );
   const scoutingArea = formGetValues(`scoutingAreas.${scoutingAreaFormIndex}`);
   return (

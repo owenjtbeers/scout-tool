@@ -15,12 +15,16 @@ type Option = {
 
 interface DialogPickerProps extends InputProps {
   options: Option[] | undefined;
+  onAddNewOption?: (value: string) => void;
   dialogTitle?: string;
 }
 
 export const CustomInput = React.forwardRef(
   (props: DialogPickerProps, ref: React.Ref<any>) => {
     const [dialogVisible, setDialogVisible] = useState(false);
+    const [isAddingOption, setIsAddingOption] = useState(false);
+    const [newOptionValue, setNewOptionValue] = useState("");
+    const [error, setError] = useState("");
     const { onChangeText } = props;
     const onPressIn = () => {
       setDialogVisible(true);
@@ -30,6 +34,15 @@ export const CustomInput = React.forwardRef(
         onChangeText(option.value);
         setDialogVisible(false);
       }
+    };
+    const onAddOption = () => {
+      setIsAddingOption(true);
+    };
+    const onCloseDialog = () => {
+      setDialogVisible(false);
+      setIsAddingOption(false);
+      setNewOptionValue("");
+      setError("");
     };
     return (
       <>
@@ -52,19 +65,56 @@ export const CustomInput = React.forwardRef(
         />
         <Dialog
           isVisible={dialogVisible}
-          onDismiss={() => setDialogVisible(false)}
-          onBackdropPress={() => setDialogVisible(false)}
+          onDismiss={onCloseDialog}
+          onBackdropPress={onCloseDialog}
         >
           <ScrollView>
             {props?.dialogTitle && (
               <Dialog.Title>{props.dialogTitle}</Dialog.Title>
             )}
+            {props.onAddNewOption && !isAddingOption && (
+              <Pressable onPress={onAddOption}>
+                <Text style={styles.dialogOption}>Add New Option</Text>
+              </Pressable>
+            )}
             {props.options &&
+              !isAddingOption &&
               props.options.map((option, index) => (
                 <Pressable key={index} onPress={() => onPressOption(option)}>
                   <Text style={styles.dialogOption}>{option.label}</Text>
                 </Pressable>
               ))}
+            {isAddingOption && props?.onAddNewOption && (
+              <>
+                <Input
+                  label="New Option"
+                  placeholder="Enter new option"
+                  value={newOptionValue}
+                  onChangeText={setNewOptionValue}
+                  errorMessage={error}
+                />
+                <Dialog.Actions>
+                  <Dialog.Button title="Cancel" onPress={onCloseDialog} />
+                  <Dialog.Button
+                    title="Add"
+                    onPress={() => {
+                      if (
+                        props.options?.find(
+                          (opt) => opt.value === newOptionValue
+                        )
+                      ) {
+                        setError("Option already exists");
+                        return;
+                      }
+                      if (props.onAddNewOption) {
+                        props.onAddNewOption(newOptionValue);
+                      }
+                      onCloseDialog();
+                    }}
+                  />
+                </Dialog.Actions>
+              </>
+            )}
           </ScrollView>
         </Dialog>
       </>
@@ -79,6 +129,7 @@ const styles = StyleSheet.create({
   },
 });
 
-export const CustomDialogPicker = (props: DialogPickerProps) => {
-  return <Input InputComponent={CustomInput} {...props} />;
+export const DialogPickerSelect = (props: DialogPickerProps) => {
+  // return <Input InputComponent={CustomInput} {...props} />;
+  return <CustomInput {...props} />;
 };
