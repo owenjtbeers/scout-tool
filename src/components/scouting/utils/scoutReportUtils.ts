@@ -16,6 +16,7 @@ const valueIsDefined = (value: string | number | null | undefined): boolean => {
   }
   return value !== null && value !== undefined;
 };
+
 export const getNumberOfObservationsFromScoutingArea = (
   scoutingArea: ScoutingArea
 ): number => {
@@ -128,6 +129,7 @@ export const getNewGeneralObservation = (questionName: string): Observation => {
     Alias: { ID: 0, Name: "" },
   };
 };
+
 /*
   This function is used to get a map of recent observations from a list of scouting areas.
   this will include a count of the number of times that alias has been observed in scouting areas.

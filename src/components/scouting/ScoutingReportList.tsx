@@ -7,17 +7,25 @@ import {
   ScrollView,
   View,
   RefreshControl,
+  Alert,
 } from "react-native";
 import { useSelector } from "react-redux";
 import { GLOBAL_SELECTIONS_REDUCER_KEY } from "../../redux/globalSelections/globalSelectionsSlice";
 import { useGetScoutingReportsQuery } from "../../redux/scouting/scoutingApi";
 import { RootState } from "../../redux/store";
+import { Ionicons } from "@expo/vector-icons";
+import { useDispatch } from "react-redux";
 import { SCOUT_REPORT_EDIT_SCREEN } from "../../navigation/screens";
 import {
   ScoutingReportStatus,
   APIScoutingReport,
 } from "../../redux/scouting/types";
 import { color } from "@rneui/base";
+import {
+  SCOUTING_SLICE_REDUCER_KEY,
+  removeDraftedReport,
+} from "../../redux/scouting/scoutingSlice";
+import { ScoutingReportForm } from "./types";
 
 export const ScoutingReportList: React.FC = () => {
   const { theme } = useTheme();
@@ -50,6 +58,9 @@ export const ScoutingReportList: React.FC = () => {
   const onRefresh = React.useCallback(() => {
     refetch();
   }, []);
+  const draftedReports = useSelector(
+    (state: RootState) => state[SCOUTING_SLICE_REDUCER_KEY].draftedReports
+  );
   const copiedData = data?.data?.slice();
   const sortedData = copiedData?.sort((a, b) => (a.ID - b.ID) * -1);
   return (
@@ -69,16 +80,14 @@ export const ScoutingReportList: React.FC = () => {
 
       <TabView value={tabIndex} onChange={setTabIndex} animationType="spring">
         <TabView.Item style={styles.container}>
-          <ScoutingReportListComponent
+          <DraftedScoutingReportListComponent
             key={"scout_list_draft"}
             isLoading={isLoading}
             onRefresh={onRefresh}
             isRefreshing={isRefreshing}
-            sortedData={
-              sortedData?.filter(
-                (scoutingReport) => scoutingReport.Status === "draft"
-              ) || []
-            }
+            sortedData={Object.keys(draftedReports).map(
+              (key) => draftedReports[key]
+            )}
           />
         </TabView.Item>
         <TabView.Item style={styles.container}>
@@ -177,6 +186,117 @@ const ScoutingReportListComponent = (
                   SCOUT_REPORT_EDIT_SCREEN.replace(
                     "[slug]",
                     `${scoutingReport.ID}`
+                  )
+                );
+              }}
+            />
+          </ListItem>
+        ))}
+      {!isLoading && !sortedData?.length && (
+        <Text h4 style={styles.emptyText}>
+          No scouting reports found with this status:{"\n"}
+          Please change the selected grower, farm, season, status filter{"\n"}or
+          create a new Scouting Report
+        </Text>
+      )}
+    </ScrollView>
+  );
+};
+
+interface DraftedScoutingReportListComponentProps
+  extends Omit<ScoutingReportListComponentProps, "sortedData"> {
+  sortedData: ScoutingReportForm[];
+}
+
+/**
+ * This component is used to display the drafted scouting reports, drafted scouting reports
+ * do not have the same dataset that the api scouting reports have, so we need to do slightly
+ * different things with the data
+ *
+ * @param props
+ * @returns Drafted List Component
+ */
+const DraftedScoutingReportListComponent = (
+  props: DraftedScoutingReportListComponentProps
+) => {
+  const { isLoading, sortedData, isRefreshing, onRefresh } = props;
+  const { theme } = useTheme();
+  const router = useRouter();
+  const dispatch = useDispatch();
+  return (
+    <ScrollView
+      refreshControl={
+        <RefreshControl refreshing={isRefreshing} onRefresh={onRefresh} />
+      }
+      style={styles.container}
+    >
+      {isLoading && <ActivityIndicator />}
+      {sortedData &&
+        sortedData.map((scoutingReport) => (
+          <ListItem
+            containerStyle={{
+              maxHeight: 150,
+            }}
+            bottomDivider
+            key={`scout-report-li-${scoutingReport.uniqueDraftID}`}
+          >
+            <ListItem.Content style={{ flex: 1, flexDirection: "column" }}>
+              <ListItem.Title>
+                {/* TODO: Needs to be revisited when we do multiple field scouting reports */}
+                {`Drafted Report - ${scoutingReport.field.Name}`}
+              </ListItem.Title>
+              <ListItem.Title right>
+                {`${new Date(scoutingReport.scoutedDate).toDateString()}`}
+              </ListItem.Title>
+              <ListItem.Content
+                style={{
+                  flex: 0,
+                  flexDirection: "row",
+                  width: "100%",
+                  justifyContent: "space-between",
+                }}
+              >
+                <ListItem.Subtitle>
+                  {`# Areas Scouted: ${
+                    scoutingReport.scoutingAreas?.length || 0
+                  }`}
+                </ListItem.Subtitle>
+              </ListItem.Content>
+            </ListItem.Content>
+            <Button
+              icon={{ name: "delete", size: 32, color: theme.colors.secondary }}
+              onPress={() => {
+                Alert.alert(
+                  "Delete Drafted Report",
+                  "Are you sure you want to delete this drafted report?",
+                  [
+                    {
+                      text: "Cancel",
+                      style: "cancel",
+                    },
+                    {
+                      text: "Delete",
+                      onPress: () => {
+                        dispatch(
+                          removeDraftedReport(
+                            scoutingReport.uniqueDraftID as string
+                          )
+                        );
+                      },
+                    },
+                  ]
+                );
+              }}
+            />
+            <ListItem.Chevron
+              size={50}
+              color={theme.colors.secondary}
+              backgroundColor={theme.colors.primary}
+              onPress={() => {
+                router.push(
+                  SCOUT_REPORT_EDIT_SCREEN.replace(
+                    "[slug]",
+                    `${scoutingReport.uniqueDraftID}`
                   )
                 );
               }}

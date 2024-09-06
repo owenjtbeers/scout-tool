@@ -46,7 +46,7 @@ export const cropsApi = baseApi.injectEndpoints({
     }),
   }),
   // TODO: Disable this in production
-  overrideExisting: true,
+  // overrideExisting: true,
 });
 
 export const {

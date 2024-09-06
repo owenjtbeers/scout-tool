@@ -15,6 +15,8 @@ import type {
   UseFormSetValue,
   UseFormWatch,
 } from "react-hook-form";
+import * as ImagePicker from "expo-image-picker";
+import { setPhotoFormValue } from "../camera/utils";
 import { createScoutingImageMetadata } from "../utils/scoutReportUtils";
 import type { ScoutingReportForm } from "../types";
 import { Question } from "./Question";
@@ -180,6 +182,38 @@ export const AliasGrouping = (props: AliasGroupingProps) => {
               }}
             >
               Take Photo
+            </Button>
+            <Button
+              icon={<Entypo name="attachment" color={theme.colors.secondary} />}
+              onPress={async () => {
+                const result = await ImagePicker.launchImageLibraryAsync({
+                  mediaTypes: ImagePicker.MediaTypeOptions.Images,
+                  allowsEditing: true,
+                  aspect: [4, 3],
+                  quality: 1,
+                  allowsMultipleSelection: false,
+                });
+
+                if (!result.canceled) {
+                  const scoutingArea = formGetValues(
+                    `scoutingAreas.${scoutingAreaFormIndex}`
+                  );
+                  const alias = aliasGroupings[aliasName][0].Alias;
+                  const metadata = createScoutingImageMetadata(
+                    scoutingArea,
+                    observationTypeFormPrefix,
+                    alias,
+                    undefined
+                  );
+                  setPhotoFormValue(
+                    formGetValues,
+                    formSetValue,
+                    metadata
+                  )(result.assets[0].uri);
+                }
+              }}
+            >
+              Attach
             </Button>
           </View>
         );

@@ -126,23 +126,25 @@ export const ScoutingReportSummaryContent = (
           <Text>Field: {field.Name}</Text>
           <Controller
             control={formControl}
-            render={({ field: { onChange, onBlur, value } }) => (
-              <>
-                {/* <Button onPress={onBlur} title={value.toDateString()} /> */}
-                <DatePickerInput
-                  label="Scouted Date"
-                  value={value}
-                  locale={"en"}
-                  inputMode={"end"}
-                  withDateFormatInLabel={false}
-                  presentationStyle="pageSheet"
-                  // date={value}
-                  // mode="single"
-                  onChange={onChange}
-                  style={{ backgroundColor: theme.colors.grey0 }}
-                />
-              </>
-            )}
+            render={({ field: { onChange, onBlur, value } }) => {
+              return (
+                <>
+                  {/* <Button onPress={onBlur} title={value.toDateString()} /> */}
+                  <DatePickerInput
+                    label="Scouted Date"
+                    value={typeof value === "string" ? new Date(value) : value}
+                    locale={"en"}
+                    inputMode={"end"}
+                    withDateFormatInLabel={false}
+                    presentationStyle="pageSheet"
+                    // date={value}
+                    // mode="single"
+                    onChange={onChange}
+                    style={{ backgroundColor: theme.colors.grey0 }}
+                  />
+                </>
+              );
+            }}
             name="scoutedDate"
             rules={{ required: true }}
             defaultValue={new Date()}

@@ -19,6 +19,8 @@ import type { ScoutingReportForm } from "../types";
 import { ScoutingReportStatus } from "../../../redux/scouting/types";
 import { DialogPickerSelect } from "../../../forms/components/DialogPicker";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { scoutingSlice } from "../../../redux/scouting/scoutingSlice";
+import { useDispatch } from "react-redux";
 
 interface FinishWithScoutingReportProps {
   onBackToForm: () => void;
@@ -33,6 +35,7 @@ export const FinishWithScoutingReport = (
   const { handleSubmitScoutingReport, onBackToForm, onSuccess, control } =
     props;
   const router = useRouter();
+  const dispatch = useDispatch();
   const { theme } = useTheme();
   const [updateScoutReport, updateResult] = useUpdateScoutingReportMutation();
   const [createScoutingReport, createResult] =
@@ -90,16 +93,26 @@ export const FinishWithScoutingReport = (
             const user = currentUserResponse?.data;
             const postData = mapFormDataToPostScoutReport(data, user);
             let scoutingReportResponse;
-            if (!!postData.ID) {
+            if (postData.ID) {
               scoutingReportResponse = await updateScoutReport({
                 id: postData.ID,
                 data: postData,
               });
             } else {
-              scoutingReportResponse = await createScoutingReport(postData);
+              if (postData.Status === "draft") {
+                // data.scoutedDate = data.scoutedDate.toDateString();
+                dispatch(
+                  scoutingSlice.actions.setDraftedReport({
+                    key: data.uniqueDraftID || "default",
+                    report: data,
+                  })
+                );
+              } else {
+                scoutingReportResponse = await createScoutingReport(postData);
+              }
             }
 
-            if ("error" in scoutingReportResponse) {
+            if (scoutingReportResponse?.error) {
               console.error(scoutingReportResponse.error);
             } else {
               if (data?.images?.length > 0) {

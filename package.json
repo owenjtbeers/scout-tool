@@ -63,7 +63,8 @@
     "redux-persist-expo-filesystem": "^2.0.1",
     "shpjs": "^4.0.4",
     "typescript": "~5.3.3",
-    "expo-mail-composer": "~13.0.1"
+    "expo-mail-composer": "~13.0.1",
+    "expo-image-picker": "~15.0.7"
   },
   "devDependencies": {
     "@babel/core": "^7.24.0",

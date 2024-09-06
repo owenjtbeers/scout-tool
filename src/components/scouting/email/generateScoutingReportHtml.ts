@@ -1,7 +1,11 @@
 import { getAliasesMapForScoutingAreas } from "../utils/scoutReportUtils";
 import { getAliasSummaryText } from "../utils/scoutReportFormatting";
 import { Asset } from "expo-asset";
-import { readAsStringAsync } from "expo-file-system";
+import {
+  downloadAsync,
+  readAsStringAsync,
+  cacheDirectory,
+} from "expo-file-system";
 import type { ScoutingReportForm } from "../types";
 import type { ScoutingAppUser } from "../../../redux/user/types";
 
@@ -15,15 +19,21 @@ export const generateScoutingReportHtml = async (
     mapScreenshotBase64,
     scoutedBy
   );
+
+  const imagesHtml = await generateImagesHtml(report);
   const output = `
-    <html>
-      ${generateHeadTag()}
-      <body>
-      ${firstPageHtml}
-      </body>
-    </html>
+  <html>
+  ${generateHeadTag()}
+  <body>
+  ${firstPageHtml}
+  <div class="images-page">
+    ${imagesHtml}
+  </div>
+  </body>
+  </html>
   `;
-  console.log(output);
+
+  // console.log(output, "output");
   return output;
 };
 
@@ -90,11 +100,11 @@ const getLogoSVGAsText = async () => {
   return svgText;
 };
 const generateMapHtml = (mapScreenshotBase64: string) => {
-  const mapScreenshotUri = `data:image/png;base64,${mapScreenshotBase64}`;
+  const mapScreenshotUri = `data:image/jpg;base64,${mapScreenshotBase64}`;
   // this needs to be an image but instead of a link, we are getting the base 64 string
   return `
     <div class="map-image">
-      <img src="${mapScreenshotUri}" alt="Map Screenshot"/>
+      <img src="${mapScreenshotUri}" alt="Map Screenshot" />
     </div>
     `;
 };
@@ -182,6 +192,47 @@ const generateAutoSummaryHtml = (report: ScoutingReportForm) => {
   return text.flat().join("");
 };
 
+const generateImagesHtml = async (report: ScoutingReportForm) => {
+  const images = report.images;
+  if (report.images.length === 0) {
+    return "";
+  }
+
+  const imagesHtml = report.images.map(async (image) => {
+    let stringifiedImage = "";
+    console.log("image url includes", image.Url.includes("file://"), image.Url);
+    // Stringify the image object to be able to pass it to the next page
+    if (image.Url.includes("http")) {
+      // We need to fetch the image from the URL
+      const asset = await downloadAsync(
+        image.Url,
+        (cacheDirectory as string) + image.ID
+      );
+      stringifiedImage = await readAsStringAsync(asset.uri, {
+        encoding: "base64",
+      });
+      // console.log("stringifiedImage", stringifiedImage);
+    } else if (
+      image.Url?.includes("file://") ||
+      image.Url?.includes("content://")
+    ) {
+      console.log("image local", "here");
+      stringifiedImage = await readAsStringAsync(image.Url, {
+        encoding: "base64",
+      });
+      console.log("stringifiedImage local", stringifiedImage.slice(0, 500));
+    }
+    stringifiedImage = `data:image/jpg;base64,${stringifiedImage}`;
+    return `
+    <div class="report-image">
+      <img src="${stringifiedImage}" />
+    </div>
+    `;
+  });
+  const result = await Promise.all(imagesHtml);
+  return result.join("");
+};
+
 const generateFooterHtml = () => {
   return `
   <footer>
@@ -209,6 +260,12 @@ const generateStyleTag = () => {
           box-sizing: border-box;
           break-inside: avoid;
           border: 1px solid #f1f1f1;
+      }
+      .images-page {
+        display: flex;
+        padding: 20px;
+        flex-wrap: wrap;
+        break-inside: avoid;
       }
       .header {
           text-align: center;
@@ -263,7 +320,7 @@ const generateStyleTag = () => {
           padding-bottom: 2px;
       }
       .map-image {
-          max-height: 550px;
+          height: 550px;
           max-width: 55%;
           text-align: center;
           border: 1px solid black;
@@ -271,6 +328,16 @@ const generateStyleTag = () => {
       .map-image img {
           width: 100%;
           height: 100%;
+      }
+      .report-image {
+        height: 325px;
+        width: 40%;
+        text-align: center;
+        padding: 10px;
+      }
+      .report-image img {
+        width: 100%;
+        height: 100%;
       }
       .full-width-section {
         width: 100%;
@@ -288,6 +355,7 @@ const generateStyleTag = () => {
     .long-string-content {
       white-space: pre-line;
       word-wrap: break-word;
+      padding-bottom: 10px;
     }
     .list-value-title {
       color: gray;

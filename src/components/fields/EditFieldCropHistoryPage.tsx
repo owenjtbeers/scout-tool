@@ -204,16 +204,15 @@ const FieldCropHistoryForm = (props: FieldCropHistoryFormProps) => {
                     // EndDate: null,
                     EndDate: formFieldCrop.EndDate?.toISOString() || undefined,
                   }));
-                  console.log("New Data", newData);
+
                   const response = await updateFieldCrops({
                     fieldId: selectedField?.ID as number,
                     data: newData,
                   });
-                  console.log("Response", response);
+                  
                   if (response?.data) {
                     onClose();
                   } else if (getErrorMessage(response)) {
-                    console.log("Error", getErrorMessage(response));
                     Alert.alert(
                       "Error saving field crops",
                       getErrorMessage(response)

@@ -39,7 +39,6 @@ const DisplayScoutingImages = (props: DisplayScoutingImagesProps) => {
       const success = await MediaLibrary.deleteAssetsAsync([
         scoutingImage.asset.id,
       ]);
-      console.log("Delete success", success);
     }
   };
   return (

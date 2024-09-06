@@ -46,15 +46,16 @@ export const EmailScoutReportButton = (props: EmailButtonProps) => {
             },
           }
         );
-        console.log("isReady", mapRef.current?.state.isReady);
+
         // TODO: Figure out a better way to wait for the map to finish rendering from the fitToCoordinates
         await new Promise((resolve) => setTimeout(resolve, 200));
         const user = currentUserResponse?.data;
         let mapScreenshotBase64 = "";
         if (mapRef?.current?.state?.isReady) {
           mapScreenshotBase64 = await mapRef.current.takeSnapshot({
-            format: "png",
+            format: "jpg",
             result: "base64",
+            quality: 0.3,
           });
         }
 
@@ -81,6 +82,7 @@ export const EmailScoutReportButton = (props: EmailButtonProps) => {
         });
         // Share the PDF via email
         const result = await MailComposer.composeAsync({
+          recipients: formValues.growerEmail ? [formValues.growerEmail] : [],
           subject: `Scouting Report - ${
             formValues.field.Name
           } - ${formValues.scoutedDate.toDateString()}`,
@@ -88,7 +90,7 @@ export const EmailScoutReportButton = (props: EmailButtonProps) => {
           attachments: [pdfName],
         });
         if (result.status === "sent") {
-          console.log("Email sent successfully");
+          // console.log("Email sent successfully");
         }
         setIsProcessingEmail(false);
       }}

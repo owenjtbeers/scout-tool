@@ -2,7 +2,7 @@ import React from "react";
 import { useRouter } from "expo-router";
 import { useDispatch } from "react-redux";
 
-import { View, StyleSheet } from "react-native";
+import { View, StyleSheet, Alert } from "react-native";
 import { Button } from "@rneui/themed";
 import { userSlice } from "../../../src/redux/user/userSlice";
 import { baseApi } from "../../../src/redux/baseApi";
@@ -19,10 +19,19 @@ export default () => {
     // Take user to login screen
     router.replace("/login");
   };
+
+  const onManageGrowers = () => {
+    router.push("/manage-growers");
+  };
+
   return (
     <>
       <View style={styles.container}>
         <Button onPress={onLogout}>Logout</Button>
+        <Button onPress={onManageGrowers}>Manage Growers</Button>
+        <Button onPress={() => Alert.alert("Not implemented yet")}>
+          Manage Organization
+        </Button>
       </View>
     </>
   );
@@ -32,7 +41,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     alignItems: "center",
-    justifyContent: "center",
+    justifyContent: "space-around",
     backgroundColor: "lightgray",
   },
 });

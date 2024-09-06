@@ -20,6 +20,7 @@ export default () => {
       mode="create"
       fields={[selectedField]}
       growerName={globalSelections?.grower?.Name}
+      growerEmail={globalSelections?.grower?.Email}
       farmName={globalSelections?.farm?.Name}
     />
   );
