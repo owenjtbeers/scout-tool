@@ -27,6 +27,7 @@ export const Login = () => {
     });
     if ("data" in response) {
       dispatch(userSlice.actions.setToken(response.data.token));
+      dispatch(userSlice.actions.setCurrentUser(response.data.user));
       // TODO: Actually set the user in state as well
       router.replace(HOME_MAP_SCREEN);
     } else if ("error" in response) {
@@ -83,6 +84,7 @@ export const Login = () => {
               onChangeText={onChange}
               value={value}
               placeholder="Password"
+              autoCapitalize="none"
               leftIcon={
                 <Entypo
                   name="lock"

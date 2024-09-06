@@ -8,10 +8,10 @@ import {
   useCreateFarmMutation,
   useCreateGrowerMutation,
   useEditGrowerMutation,
-} from "../../../src/redux/field-management/fieldManagementApi";
+} from "../../redux/field-management/fieldManagementApi";
 import { useRouter } from "expo-router";
 import { ScrollView, RefreshControl, Alert } from "react-native";
-import { Grower, Farm } from "../../../src/redux/field-management/types";
+import { Grower, Farm } from "../../redux/field-management/types";
 import { useForm, Controller, set } from "react-hook-form";
 
 export const ManageGrowers: React.FC = () => {
@@ -74,7 +74,10 @@ export const ManageGrowers: React.FC = () => {
           />
         )}
         {isAddingGrower && (
-          <AddSingleGrowerDialog onClose={() => setIsAddingGrower(false)} />
+          <AddSingleGrowerDialog
+            refetchFarms={refetchFarms}
+            onClose={() => setIsAddingGrower(false)}
+          />
         )}
         {!!growerError && <Text>Error fetching growers</Text>}
         {growerData?.map((grower) => (
@@ -254,20 +257,35 @@ const ManageSingleGrowerDialog = (props: ManageSingleGrowerDialogProps) => {
 
 interface AddSingleGrowerDialogProps {
   onClose: () => void;
+  refetchFarms: () => void;
+}
+
+interface GrowerForm {
+  Name: string;
+  Email: string;
+  ID: number;
+  Farm: { Name: string; ID: number; GrowerId: number };
 }
 const AddSingleGrowerDialog = (props: AddSingleGrowerDialogProps) => {
-  const { onClose } = props;
+  const { onClose, refetchFarms } = props;
   const { theme } = useTheme();
   const defaultFormValues = {
     Name: "",
     Email: "",
+    ID: 0,
+    Farm: { Name: "", ID: 0, GrowerId: 0 },
   };
   const [createGrower] = useCreateGrowerMutation();
-  const { handleSubmit, control } = useForm({
+  const { handleSubmit, control } = useForm<GrowerForm>({
     defaultValues: defaultFormValues,
   });
-  const onValidSubmit = async (data: { Name: string }) => {
-    // await
+  const onValidSubmit = async (data: GrowerForm) => {
+    const response = await createGrower(data);
+    if (response.error) {
+      Alert.alert("Error saving grower");
+    }
+    refetchFarms();
+    onClose();
   };
   return (
     <Dialog isVisible={true} onBackdropPress={props.onClose}>
@@ -283,7 +301,7 @@ const AddSingleGrowerDialog = (props: AddSingleGrowerDialogProps) => {
             onBlur={onBlur}
             onChangeText={onChange}
             value={value}
-            label={"Grower Name"}
+            label={"* Grower Name"}
             errorMessage={error?.message}
             // style={scoutFormStyles.largeTextInput}
           />
@@ -298,6 +316,40 @@ const AddSingleGrowerDialog = (props: AddSingleGrowerDialogProps) => {
         }}
         defaultValue=""
       />
+      <Text>
+        A new grower requires at least one farm to be created. You can add more
+        farms later
+      </Text>
+      <Controller
+        control={control}
+        render={({
+          field: { onChange, onBlur, value },
+          fieldState: { error },
+        }) => (
+          <Input
+            placeholder="Enter Farm Name"
+            onBlur={onBlur}
+            onChangeText={onChange}
+            value={value}
+            label={"* Farm Name"}
+            errorMessage={error?.message}
+            // style={scoutFormStyles.largeTextInput}
+          />
+        )}
+        name={`Farm.Name`}
+        rules={{
+          required: "Farm Name is required",
+          minLength: {
+            value: 2,
+            message: "Must be at least three characters long",
+          },
+        }}
+        defaultValue=""
+      />
+      <Text>
+        A growers email will be used to autofill as a recipient for scouting
+        reports
+      </Text>
       <Controller
         control={control}
         render={({
@@ -316,6 +368,7 @@ const AddSingleGrowerDialog = (props: AddSingleGrowerDialogProps) => {
         )}
         name={`Email`}
         rules={{
+          required: false,
           minLength: {
             value: 2,
             message: "Must be at least three characters long",

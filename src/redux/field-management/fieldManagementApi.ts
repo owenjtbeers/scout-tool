@@ -38,7 +38,7 @@ export const fieldManagementApi = baseApi.injectEndpoints({
         method: "POST",
         data: grower,
       }),
-      invalidatesTags: ["Growers"],
+      invalidatesTags: ["Growers", "Farms"],
     }),
     editGrower: builder.mutation<Grower, Grower>({
       query: (grower) => ({
@@ -46,7 +46,7 @@ export const fieldManagementApi = baseApi.injectEndpoints({
         method: "PUT",
         data: grower,
       }),
-      invalidatesTags: ["Growers"],
+      invalidatesTags: ["Growers", "Farms"],
     }),
   }),
   // TODO: Disable this in production

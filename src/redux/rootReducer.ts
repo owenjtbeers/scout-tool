@@ -1,5 +1,5 @@
 // Redux
-import { combineSlices } from "@reduxjs/toolkit";
+import { combineSlices, Dispatch } from "@reduxjs/toolkit";
 
 // Reducer Slices
 import { drawingSlice } from "./map/drawingSlice";
@@ -18,3 +18,11 @@ export const rootReducer = combineSlices(
   userSlice,
   baseApi
 );
+
+export const clearState = (dispatch: Dispatch) => {
+  dispatch(drawingSlice.actions.clearState());
+  dispatch(scoutingSlice.actions.clearState());
+  dispatch(mapSlice.actions.clearState());
+  dispatch(globalSelectionsSlice.actions.clearState());
+  dispatch(userSlice.actions.clearState());
+};

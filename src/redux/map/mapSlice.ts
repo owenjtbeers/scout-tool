@@ -2,15 +2,14 @@ import { createSlice } from "@reduxjs/toolkit";
 import type { Region } from "react-native-maps";
 
 export const MAP_REDUCER_KEY = "map";
+const initialState = {
+  region: null as Region | null,
+};
+
 export const mapSlice = createSlice({
   name: MAP_REDUCER_KEY,
 
-  initialState: {
-    // Not intended to reflect the current region of the map, but
-    // so we can save the region when the map is unmounted, and then initialize
-    // the map with the same region when it is mounted again.
-    region: null as Region | null,
-  },
+  initialState,
   reducers: {
     setRegion: (state, action) => ({
       ...state,
@@ -18,6 +17,9 @@ export const mapSlice = createSlice({
     }),
     clearRegion: (state) => {
       state.region = null;
+    },
+    clearState: (state) => {
+      return initialState;
     },
   },
 });

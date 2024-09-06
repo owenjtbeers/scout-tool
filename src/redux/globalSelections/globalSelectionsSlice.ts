@@ -54,6 +54,9 @@ export const globalSelectionsSlice = createSlice({
       ...state,
       shouldZoomToBbox: action.payload,
     }),
+    clearState: (state) => {
+      return initialState;
+    },
   },
 });
 

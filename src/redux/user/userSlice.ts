@@ -19,14 +19,20 @@ export const userSlice = createSlice({
   reducers: {
     setCurrentUser: (state, action: PayloadAction<ScoutingAppUser>) => {
       state.currentUser = action.payload;
+      return state;
     },
     setToken: (state, action: PayloadAction<string>) => {
       state.token = action.payload;
+      return state;
     },
     logout: (state) => {
       state.currentUser = null;
       state.token = null;
+      return state;
     },
+    clearState: (state) => {
+      return initialState;
+    }
   },
 });
 

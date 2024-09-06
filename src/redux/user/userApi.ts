@@ -1,5 +1,6 @@
 import { baseApi } from "../baseApi";
 import { ScoutingAppUser } from "./types";
+import { APIResponse } from "../query";
 
 export const USER_API_REDUCER_KEY = "userApi";
 export const userApi = baseApi.injectEndpoints({
@@ -17,13 +18,19 @@ export const userApi = baseApi.injectEndpoints({
       providesTags: ["User"],
     }),
     signupUser: builder.mutation<
-      ScoutingAppUser,
-      { email: string; password: string; organizationName: string }
+      APIResponse<{ user: ScoutingAppUser; token: string }>,
+      {
+        email: string;
+        password: string;
+        organizationName: string;
+        firstName: string;
+        lastName: string;
+      }
     >({
-      query: (body) => ({
+      query: (data) => ({
         url: "/users/signup",
         method: "POST",
-        body,
+        data,
       }),
       invalidatesTags: ["User"],
     }),
@@ -40,6 +47,8 @@ export const userApi = baseApi.injectEndpoints({
       providesTags: ["User"],
     }),
   }),
+  // TODO: Disable in production
+  // overrideExisting: true,
 });
 
 export const { useGetCurrentUserQuery, useSignupUserMutation } = userApi;

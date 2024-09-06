@@ -32,6 +32,9 @@ export const scoutingSlice = createSlice({
       delete newState.draftedReports[action.payload];
       return newState;
     },
+    clearState: (state) => {
+      return initialState;
+    },
   },
 });
 
