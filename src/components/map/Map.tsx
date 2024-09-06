@@ -34,11 +34,14 @@ import {
   GLOBAL_SELECTIONS_REDUCER_KEY,
   globalSelectionsSlice,
 } from "../../redux/globalSelections/globalSelectionsSlice";
+import { EditFieldCropHistoryPage } from "../fields/EditFieldCropHistoryPage";
 
 export const MapScreen = () => {
   const mapRef = React.useRef<MapView>(null);
   const dispatch = useAppDispatch();
 
+  const [isEditingFieldCropHistory, setIsEditingFieldCropHistory] =
+    React.useState(false);
   const [currentLocation, setCurrentLocation] = React.useState({} as LatLng);
   const onMapReady = useCallback(() => {
     PermissionsAndroid.request(
@@ -70,6 +73,7 @@ export const MapScreen = () => {
     growerId: selectedGrower?.ID as number,
     farmId: selectedFarm?.ID as number,
     withBoundaries: true,
+    withCrops: true,
   });
   const shouldZoomToBbox = useSelector((state: RootState) => {
     return state[GLOBAL_SELECTIONS_REDUCER_KEY].shouldZoomToBbox;
@@ -131,7 +135,15 @@ export const MapScreen = () => {
       </MapView>
       <MapUtilButtons mapRef={mapRef} fields={fieldResponse?.data} />
       <AnimatedMapActionButtons />
-      <SelectedFieldSpeedDial />
+      <SelectedFieldSpeedDial
+        onEditCropHistory={() => setIsEditingFieldCropHistory(true)}
+      />
+      {isEditingFieldCropHistory ? (
+        <EditFieldCropHistoryPage
+          isVisible={isEditingFieldCropHistory}
+          onClose={() => setIsEditingFieldCropHistory(false)}
+        />
+      ) : null}
     </View>
   );
 };

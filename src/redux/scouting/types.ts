@@ -2,6 +2,7 @@ import type { ScoutingToolUnits } from "../../constants/types";
 import type { FeatureCollection } from "@turf/helpers";
 import type { ScoutingAppUser } from "../user/types";
 import type { Asset } from "expo-media-library";
+import { OrgCrop } from "../crops/types";
 
 export type ObservationTypePrefix = "Weed" | "Insect" | "Disease" | "General";
 export type Observation = {
@@ -58,33 +59,28 @@ export type APIObservationArea = {
   WeedObservations: WeedObservation[];
   InsectObservations: InsectObservation[];
   DiseaseObservations: DiseaseObservation[];
-  GeneralObservations: Observation[];
+  GeneralObservations: APIQuestionVal[];
 };
 
 export type APIScoutingReport = {
   ID: number;
   Fields: number[];
   FieldIds: { ID: number; Name: string }[];
+  GrowthStage: string;
   Summary: string;
+  Recommendation: string;
   ScoutedDate: string;
   ScoutedById: number;
   ScoutedBy: ScoutingAppUser;
   ObservationAreas?: APIObservationArea[];
   Images: ScoutingImage[];
+  ImageUploads?: ScoutingImage[];
+  Crop: OrgCrop;
+  CropId: number;
+  Status: ScoutingReportStatus;
 };
 
-export type ScoutingReport = {
-  ID: number;
-  Fields: number[];
-  FieldIds: { ID: number; Name: string }[];
-  Summary: string;
-  ScoutedDate: string;
-  ScoutedById: number;
-  ScoutedBy: ScoutingAppUser;
-  ObservationAreas?: ScoutingArea[];
-  Images: ScoutingImage[];
-  ImageUploads?: ScoutingImage[];
-};
+export type ScoutingReportStatus = "draft" | "in_review" | "passed_review";
 
 export type ScoutingImage = {
   ID: number;

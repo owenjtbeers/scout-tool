@@ -1,7 +1,7 @@
 import React from "react";
 
 import { StyleSheet, Text } from "react-native";
-import { useRouter, usePathname, Href } from "expo-router";
+import { useRouter, usePathname } from "expo-router";
 import { MapTabIcon, FieldTabIcon, SettingsTabIcon } from "./BottomButtons";
 import { Tab } from "@rneui/themed";
 import { ScreenNames } from "../../../navigation/navigation";
@@ -50,7 +50,7 @@ export const BottomBar = () => {
   const onTabPress = (tabIndex: number) => {
     const activeTab = getActiveTab();
     const tab = TABS[tabIndex];
-    activeTab !== tab.name && router.push(tab.path as Href<string>);
+    activeTab !== tab.name && router.push(tab.path);
     setTabIndex(tabIndex);
   };
   return (

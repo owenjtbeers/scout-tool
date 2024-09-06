@@ -1,27 +1,47 @@
 import React, { useState } from "react";
-import { Button, Text, Dialog, ListItem } from "@rneui/themed";
-import { View, StyleSheet, GestureResponderEvent } from "react-native";
+import {
+  Button,
+  Text,
+  Dialog,
+  ListItem,
+  SearchBar,
+  ButtonGroup,
+  Input,
+} from "@rneui/themed";
+import {
+  View,
+  StyleSheet,
+  GestureResponderEvent,
+  ActivityIndicator,
+} from "react-native";
 import { scoutFormStyles } from "./styles";
 import { globalStyles } from "../../../constants/styles";
-import type { Alias } from "../../../redux/scouting/types";
-import { useTheme, SearchBar, Input } from "@rneui/themed";
+import { useTheme } from "@rneui/themed";
+import type {
+  Alias,
+  ObservationTypePrefix,
+} from "../../../redux/scouting/types";
 import { ErrorMessage } from "../../../forms/components/ErrorMessage";
 
 interface GeneralQuestionPromptProps {
-  type: "General";
+  type: ObservationTypePrefix;
+  picklist: Alias[];
+  isLoadingPicklist: boolean;
+  getAddedAliases: () => Alias[];
   recentlyObserved: Map<string, number>;
-  createQuestion: (questionName: string) => void;
-  getAddedGeneralQuestionsForArea: () => string[];
+  createQuestion: (alias: Alias|string) => void;
 }
 
-const GeneralQuestionPrompt = (props: GeneralQuestionPromptProps) => {
+export const AliasQuestionPrompt = (props: GeneralQuestionPromptProps) => {
   const {
     type,
+    picklist,
     createQuestion,
+    getAddedAliases,
+    isLoadingPicklist,
     recentlyObserved,
-    getAddedGeneralQuestionsForArea,
   } = props;
-  const [itemsAdded, setItemsAdded] = useState<string[]>([]);
+  const [itemsAdded, setItemsAdded] = useState<Alias[]>([]);
   const [newItemsAdded, setNewItemsAdded] = useState(false);
   const [showOptionsDialog, setShowOptionsDialog] = useState(false);
   const [showAddOptionDialog, setShowAddOptionDialog] = useState(false);
@@ -30,12 +50,12 @@ const GeneralQuestionPrompt = (props: GeneralQuestionPromptProps) => {
   const [searchValue, setSearchValue] = useState("");
   const [error, setError] = useState("");
 
-  const handleItemPress = (item: string) => (event: GestureResponderEvent) => {
+  const handleItemPress = (item: Alias) => (event: GestureResponderEvent) => {
     if (itemsAdded.includes(item)) {
       setItemsAdded(itemsAdded.filter((i) => i !== item));
     } else {
-      const generalQuestionNames = getAddedGeneralQuestionsForArea();
-      if (!generalQuestionNames.includes(item)) {
+      const addedAliases = getAddedAliases();
+      if (!addedAliases.map((alias) => alias.Name).includes(item.Name)) {
         setNewItemsAdded(true);
         setItemsAdded([...itemsAdded, item]);
       }
@@ -54,20 +74,25 @@ const GeneralQuestionPrompt = (props: GeneralQuestionPromptProps) => {
     setShowOptionsDialog(false);
     setShowAddOptionDialog(false);
 
-    itemsAdded.forEach((item) => {
-      const addedItems = getAddedGeneralQuestionsForArea();
-      if (!addedItems.includes(item)) {
-        createQuestion(item);
+    itemsAdded.forEach((alias) => {
+      const addedAliases = getAddedAliases();
+      if (!addedAliases.map((alias) => alias.Name).includes(alias.Name)) {
+        createQuestion(alias);
       }
     });
+    setIsAnswered(true);
     setNewItemsAdded(false);
     setItemsAdded([]);
     setSearchValue("");
   };
 
+  const handleAddOptionDialogClose = () => {
+    setShowAddOptionDialog(false);
+  };
+
   // Set the items clicked to the added aliases
   React.useEffect(() => {
-    const addedAliases = getAddedGeneralQuestionsForArea();
+    const addedAliases = getAddedAliases();
     if (addedAliases.length > 0) {
       setItemsAdded(addedAliases);
       setIsAnswered(true);
@@ -76,13 +101,13 @@ const GeneralQuestionPrompt = (props: GeneralQuestionPromptProps) => {
   return (
     <View style={scoutFormStyles.section}>
       <ListItem.Accordion
-        isExpanded={isAnswered}
+        isExpanded={!isAnswered}
         onPress={() => setIsAnswered(!isAnswered)}
         content={
           <View style={{ display: "flex", flex: 1, backgroundColor: "white" }}>
-            <Text
-              style={globalStyles.centerText}
-            >{`Is there anything else you would like to record?`}</Text>
+            <Text style={globalStyles.centerText}>{`Is there${
+              getAddedAliases().length ? " more" : ""
+            } ${type}s?`}</Text>
           </View>
         }
       >
@@ -98,7 +123,9 @@ const GeneralQuestionPrompt = (props: GeneralQuestionPromptProps) => {
           {!showAddOptionDialog && (
             <OptionsPicklist
               type={type}
-              getAddedItems={getAddedGeneralQuestionsForArea}
+              picklist={picklist}
+              isLoadingPicklist={isLoadingPicklist}
+              getAddedAliases={getAddedAliases}
               recentlyObserved={recentlyObserved}
               setShowAddOptionDialog={setShowAddOptionDialog}
               searchValue={searchValue}
@@ -124,7 +151,8 @@ const GeneralQuestionPrompt = (props: GeneralQuestionPromptProps) => {
               setShowAddOptionDialog={setShowAddOptionDialog}
               setShowOptionsDialog={setShowOptionsDialog}
               createQuestion={createQuestion}
-              getAddedItems={getAddedGeneralQuestionsForArea}
+              getAddedAliases={getAddedAliases}
+              picklist={picklist}
             />
           )}
         </Dialog>
@@ -134,26 +162,30 @@ const GeneralQuestionPrompt = (props: GeneralQuestionPromptProps) => {
 };
 
 interface OptionsPicklistProps {
-  type: "General";
-  getAddedItems: () => string[];
+  type: ObservationTypePrefix;
+  picklist: Alias[];
+  isLoadingPicklist: boolean;
+  getAddedAliases: () => Alias[];
   recentlyObserved: Map<string, number>;
   setShowAddOptionDialog: (show: boolean) => void;
   setAddValue: (value: string) => void;
   searchValue: string;
   setSearchValue: (value: string) => void;
-  itemsAdded: string[];
-  setItemsAdded: (value: string[]) => void;
+  itemsAdded: Alias[];
+  setItemsAdded: (value: Alias[]) => void;
   newItemsAdded: boolean;
   setNewItemsAdded: (value: boolean) => void;
   setShowOptionsDialog: (show: boolean) => void;
   showOptionsDialog: boolean;
-  handleItemPress: (item: string) => (event: GestureResponderEvent) => void;
+  handleItemPress: (item: Alias) => (event: GestureResponderEvent) => void;
   handleOptionsDialogClose: () => void;
 }
 export const OptionsPicklist = (props: OptionsPicklistProps) => {
   const {
     type,
-    getAddedItems,
+    isLoadingPicklist,
+    picklist,
+    getAddedAliases,
     recentlyObserved,
     setShowAddOptionDialog,
     setSearchValue,
@@ -196,13 +228,13 @@ export const OptionsPicklist = (props: OptionsPicklistProps) => {
       )}
       {recentlyObserved.size > 0 &&
         Array.from(recentlyObserved)
-          .filter(([item]) => item.includes(searchValue))
+          .filter(([alias]) => alias.includes(searchValue))
           .sort((a, b) => a[1] - b[1])
-          .map(([item, count]) => (
+          .map(([alias, count]) => (
             <ListItem
-              key={item}
+              key={alias}
               // TODO: This needs to have the correct ID
-              onPress={handleItemPress(item)}
+              onPress={handleItemPress({ ID: 0, Name: alias })}
               bottomDivider
             >
               <View
@@ -214,18 +246,53 @@ export const OptionsPicklist = (props: OptionsPicklistProps) => {
               >
                 <ListItem.CheckBox
                   checked={
-                    !!itemsAdded.find((clickeditem) => item === clickeditem) ||
-                    !!getAddedItems().find((a) => a === item)
+                    !!itemsAdded.find(
+                      (clickedAlias) => alias === clickedAlias.Name
+                    ) || !!getAddedAliases().find((a) => a.Name === alias)
                   }
                   // onPress={handleItemPress(question)}
                 />
-                <Text>{item}</Text>
+                <Text>{alias}</Text>
                 <Text>{`  ${count} times`}</Text>
               </View>
             </ListItem>
           ))}
+
+      {picklist && picklist.length > 0 && (
+        <ListItem bottomDivider>
+          <Text>Organization List</Text>
+        </ListItem>
+      )}
+      {isLoadingPicklist ? (
+        <ActivityIndicator size="large" color={theme.colors.primary} />
+      ) : (
+        // TODO: Make this search through potential scientific values as well
+        picklist
+          ?.filter((alias) => alias.Name.includes(searchValue))
+          .map((alias, index) => (
+            <ListItem key={alias.Name + index} onPress={handleItemPress(alias)}>
+              <View
+                style={{
+                  display: "flex",
+                  flexDirection: "row",
+                  justifyContent: "space-around",
+                }}
+              >
+                <ListItem.CheckBox
+                  checked={
+                    !!itemsAdded.find(
+                      (clickedAlias) => alias.Name === clickedAlias.Name
+                    )
+                  }
+                  // onPress={handleItemPress(question)}
+                />
+                <Text>{alias.Name}</Text>
+              </View>
+            </ListItem>
+          ))
+      )}
       <Button
-        title={newItemsAdded ? `Add new Question(s)` : "Close"}
+        title={newItemsAdded ? `Add new ${type}(s)` : "Close"}
         onPress={handleOptionsDialogClose}
       />
     </>
@@ -233,17 +300,18 @@ export const OptionsPicklist = (props: OptionsPicklistProps) => {
 };
 
 interface AddOptionMenuProps {
-  type: "General";
+  type: ObservationTypePrefix;
   error: string;
   addValue: string;
   setAddValue: (value: string) => void;
   setError: (value: string) => void;
   setShowAddOptionDialog: (show: boolean) => void;
   setShowOptionsDialog: (show: boolean) => void;
-  createQuestion: (itemName: string) => void;
-  getAddedItems: () => string[];
+  createQuestion: (alias: Alias|string) => void;
+  getAddedAliases: () => Alias[];
+  picklist: Alias[];
 }
-const AddOptionMenu = (props: AddOptionMenuProps) => {
+export const AddOptionMenu = (props: AddOptionMenuProps) => {
   const {
     type,
     error,
@@ -253,15 +321,16 @@ const AddOptionMenu = (props: AddOptionMenuProps) => {
     setShowAddOptionDialog,
     setShowOptionsDialog,
     createQuestion,
-    getAddedItems,
+    picklist,
+    getAddedAliases,
   } = props;
   return (
     <>
       <Dialog.Title title={`Add ${type}`} />
       {error !== "" && <ErrorMessage message={error} />}
       <Input
-        label={`Question Name`}
-        placeholder={`New Question name`}
+        label={`${type} Name`}
+        placeholder={`New ${type} Name`}
         onChangeText={setAddValue}
         value={addValue}
       />
@@ -269,16 +338,16 @@ const AddOptionMenu = (props: AddOptionMenuProps) => {
         title="Add"
         onPress={() => {
           const trimmedValue = addValue.trim();
-          const validationResult = validateNewItemName(
-            trimmedValue,
-            getAddedItems()
-          );
+          const validationResult = validateNewAliasName(trimmedValue, [
+            ...picklist,
+            ...getAddedAliases(),
+          ]);
           if (validationResult !== "") {
             setError(validationResult);
             return;
           }
           setError("");
-          createQuestion(trimmedValue);
+          createQuestion({ ID: 0, Name: trimmedValue });
           setShowAddOptionDialog(false);
           setShowOptionsDialog(false);
           setAddValue("");
@@ -286,16 +355,6 @@ const AddOptionMenu = (props: AddOptionMenuProps) => {
       />
     </>
   );
-};
-
-const validateNewItemName = (newItemName: string, picklist: string[]) => {
-  if (newItemName === "") {
-    return "Please enter a name for the new question";
-  }
-  if (picklist.includes(newItemName)) {
-    return "This question already exists, select from the list";
-  }
-  return "";
 };
 const styles = StyleSheet.create({
   buttonContainer: {
@@ -306,4 +365,14 @@ const styles = StyleSheet.create({
   },
 });
 
-export default GeneralQuestionPrompt;
+const validateNewAliasName = (newAliasName: string, addedAliases: Alias[]) => {
+  if (newAliasName === "") {
+    return "Please enter a value";
+  }
+  if (addedAliases.find((alias) => alias.Name.trim() === newAliasName)) {
+    return "This value already exists. Please enter a new value.";
+  }
+  return "";
+};
+
+export default AliasQuestionPrompt;

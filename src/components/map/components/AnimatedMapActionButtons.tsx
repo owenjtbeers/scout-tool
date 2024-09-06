@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 
 import { AntDesign, FontAwesome5 } from "@expo/vector-icons";
-import { Href, useRouter } from "expo-router";
+import { useRouter } from "expo-router";
 import { StyleSheet } from "react-native";
 import { SpeedDial } from "@rneui/themed";
 import { useDispatch } from "react-redux";
@@ -55,7 +55,7 @@ const AnimatedMapActionButtons = () => {
           dispatch(drawingSlice.actions.clearPolygons());
           dispatch(drawingSlice.actions.clearTempGeoJSON());
           dispatch(drawingSlice.actions.setOperation("add-field"));
-          router.push(MAP_DRAW_SCREEN as Href<string>);
+          router.push(MAP_DRAW_SCREEN);
         }}
         icon={<FontAwesome5 name="draw-polygon" size={24} />}
       />
@@ -69,16 +69,29 @@ const AnimatedMapActionButtons = () => {
   );
 };
 
-export const SelectedFieldSpeedDial = () => {
+interface SelectedFieldSpeedDialContentsProps {
+  onEditCropHistory: () => void;
+}
+
+export const SelectedFieldSpeedDial = (
+  props: SelectedFieldSpeedDialContentsProps
+) => {
   const selectedField = useSelector(
     (state: RootState) => state[GLOBAL_SELECTIONS_REDUCER_KEY].field
   );
   if (selectedField === null) {
     return null;
   }
-  return <SelectedFieldSpeedDialContents />;
+  return (
+    <SelectedFieldSpeedDialContents
+      onEditCropHistory={props.onEditCropHistory}
+    />
+  );
 };
-const SelectedFieldSpeedDialContents = () => {
+
+const SelectedFieldSpeedDialContents = (
+  props: SelectedFieldSpeedDialContentsProps
+) => {
   const dispatch = useDispatch();
   const router = useRouter();
   const [isExpanded, setIsExpanded] = useState<boolean>(true);
@@ -99,14 +112,14 @@ const SelectedFieldSpeedDialContents = () => {
         iconContainerStyle={styles.buttonPadding2}
         title="Add New Scouting Report For Single Field"
         onPress={() => {
-          router.push(SCOUT_CREATE_REPORT_SCREEN as Href<string>);
+          router.push(SCOUT_CREATE_REPORT_SCREEN);
         }}
         icon={<AntDesign name="addfile" size={24} />}
       />
       <SpeedDial.Action
         iconContainerStyle={styles.buttonPadding2}
         title="Edit Crop History"
-        onPress={() => {}}
+        onPress={props.onEditCropHistory}
         icon={<AntDesign name="edit" size={24} />}
       />
     </SpeedDial>

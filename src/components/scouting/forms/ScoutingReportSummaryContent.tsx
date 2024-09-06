@@ -1,38 +1,44 @@
-import React, { useState } from "react";
-import { ScrollView, StyleSheet, View, Alert } from "react-native";
-import { Button, Input, Text, FAB, Dialog, ListItem } from "@rneui/themed";
-import { DatePickerInput } from "react-native-paper-dates";
-import { FontAwesome5, Entypo } from "@expo/vector-icons";
-import { useTheme } from "@rneui/themed";
+import { Entypo, FontAwesome5 } from "@expo/vector-icons";
 import {
+  Button,
+  Dialog,
+  FAB,
+  Input,
+  ListItem,
+  Text,
+  useTheme,
+} from "@rneui/themed";
+import { useRouter } from "expo-router";
+import React, { useState } from "react";
+import {
+  Control,
   Controller,
-  UseFormHandleSubmit,
   UseFormGetValues,
   UseFormSetValue,
-  Control,
   UseFormWatch,
 } from "react-hook-form";
-import { useRouter } from "expo-router";
+import { ScrollView, View } from "react-native";
+import { DatePickerInput } from "react-native-paper-dates";
 import { useDispatch } from "react-redux";
-import { drawingSlice } from "../../../redux/map/drawingSlice";
-import { scoutFormStyles } from "./styles";
 import { Field } from "../../../redux/fields/types";
-import type { ScoutingReportForm } from "../types";
-import {
-  getNumberOfObservationsFromScoutingArea,
-  mapFormDataToPostScoutReport,
-} from "./scoutReportUtils";
-import { postScoutingImagesAsync } from "../../../utils/network/uploadToS3";
+import { drawingSlice } from "../../../redux/map/drawingSlice";
 import {
   useCreateScoutingReportMutation,
   useUpdateScoutingReportMutation,
 } from "../../../redux/scouting/scoutingApi";
 import { useGetCurrentUserQuery } from "../../../redux/user/userApi";
 import DisplayScoutingImages from "../camera/DisplayScoutingImages";
+import type { ScoutingReportForm } from "../types";
+import { getAliasSummaryText } from "../utils/scoutReportFormatting";
+import {
+  getAliasesMapForScoutingAreas,
+  getNumberOfObservationsFromScoutingArea,
+} from "../utils/scoutReportUtils";
+import { scoutFormStyles } from "./styles";
+import { DialogPickerSelect } from "../../../forms/components/DialogPicker";
 
 interface ScoutingReportSummaryContentProps {
   field: Field;
-  handleSubmit: UseFormHandleSubmit<ScoutingReportForm>;
   formControl: Control<ScoutingReportForm>;
   formGetValues: UseFormGetValues<ScoutingReportForm>;
   formSetValue: UseFormSetValue<ScoutingReportForm>;
@@ -40,19 +46,20 @@ interface ScoutingReportSummaryContentProps {
   setSelectedScoutingAreaIndex: (index: number) => void;
   setSideSheetContentType: (contentType: "summary" | "observation") => void;
   setIsDrawingScoutingArea: (isDrawing: boolean) => void;
+  setIsDoneWithReport: (isDone: boolean) => void;
 }
 export const ScoutingReportSummaryContent = (
   props: ScoutingReportSummaryContentProps
 ) => {
   const {
     field,
-    handleSubmit,
     formControl,
     formGetValues,
     watch,
     setSelectedScoutingAreaIndex,
     setSideSheetContentType,
     setIsDrawingScoutingArea,
+    setIsDoneWithReport,
     formSetValue,
   } = props;
   const { data: currentUserResponse } = useGetCurrentUserQuery("default");
@@ -66,6 +73,26 @@ export const ScoutingReportSummaryContent = (
   const [isViewingPhotos, setIsViewingPhotos] = useState(false);
 
   const scoutingAreas = watch("scoutingAreas");
+  const aliasMap = getAliasesMapForScoutingAreas(scoutingAreas);
+
+  const getCropOptions = () => {
+    const selectedField = formGetValues("field");
+    const fieldCropNames = selectedField?.FieldCrops?.map((fieldCrop) => {
+      return fieldCrop.Crop.Name;
+    });
+    const currentCropName = formGetValues("crop.Name");
+    if (currentCropName && currentCropName !== "") {
+      fieldCropNames.push(currentCropName);
+    }
+    // Remove duplicates
+    const uniqueFieldCropNames = Array.from(new Set(fieldCropNames));
+    return uniqueFieldCropNames.map((cropName) => {
+      return {
+        label: cropName,
+        value: cropName,
+      };
+    });
+  };
   return (
     <>
       <View
@@ -97,36 +124,75 @@ export const ScoutingReportSummaryContent = (
         <View key={"section-field-info"} style={scoutFormStyles.section}>
           {/* Section for Field information, selected field name, crop info, previous crops, current date */}
           <Text>Field: {field.Name}</Text>
-          <Text>
-            {/* TODO get this from the field object*/}
-            In-season Crop: {"CORN"}
-          </Text>
-          <Text>
-            {/* TODO get this from the field object*/}
-            Previous Crops: {"CORN, SOYBEAN"}
-          </Text>
           <Controller
             control={formControl}
-            render={({ field: { onChange, onBlur, value } }) => (
-              <>
-                {/* <Button onPress={onBlur} title={value.toDateString()} /> */}
-                <DatePickerInput
-                  label="Scouted Date"
-                  value={value}
-                  locale={"en"}
-                  inputMode={"end"}
-                  withDateFormatInLabel={false}
-                  presentationStyle="pageSheet"
-                  // date={value}
-                  // mode="single"
-                  onChange={onChange}
-                  style={{ backgroundColor: theme.colors.grey0 }}
-                />
-              </>
-            )}
+            render={({ field: { onChange, onBlur, value } }) => {
+              return (
+                <>
+                  {/* <Button onPress={onBlur} title={value.toDateString()} /> */}
+                  <DatePickerInput
+                    label="Scouted Date"
+                    value={typeof value === "string" ? new Date(value) : value}
+                    locale={"en"}
+                    inputMode={"end"}
+                    withDateFormatInLabel={false}
+                    presentationStyle="pageSheet"
+                    // date={value}
+                    // mode="single"
+                    onChange={onChange}
+                    style={{ backgroundColor: theme.colors.grey0 }}
+                  />
+                </>
+              );
+            }}
             name="scoutedDate"
             rules={{ required: true }}
             defaultValue={new Date()}
+          />
+          <Controller
+            control={formControl}
+            render={({
+              field: { onChange, onBlur, value },
+              fieldState: { error },
+            }) => (
+              <DialogPickerSelect
+                label={"Crop"}
+                options={getCropOptions()}
+                onChangeText={onChange}
+                value={value}
+                onAddNewOption={(value: string) => {
+                  onChange(value);
+                }}
+                errorMessage={error?.message}
+                style={{ height: 250 }}
+                inputStyle={{ maxHeight: 50 }}
+              />
+            )}
+            name="crop.Name"
+            rules={{
+              required: "Crop Name is required",
+              minLength: {
+                value: 3,
+                message: "Must be at least three characters",
+              },
+            }}
+            defaultValue=""
+          />
+          <Controller
+            control={formControl}
+            render={({ field: { onChange, onBlur, value } }) => (
+              <Input
+                placeholder="Enter Growth Stage..."
+                onBlur={onBlur}
+                onChangeText={onChange}
+                value={value}
+                label={"Growth Stage"}
+                // style={scoutFormStyles.largeTextInput}
+              />
+            )}
+            name="growthStage"
+            rules={{ required: false }}
+            defaultValue=""
           />
         </View>
         <View
@@ -201,12 +267,6 @@ export const ScoutingReportSummaryContent = (
               onPress={() => setIsViewingPhotos(!isViewingPhotos)}
             />
           ) : null}
-          {/* <Dialog
-            isVisible={isViewingPhotos}
-            onBackdropPress={() => {
-              setIsViewingPhotos(false);
-            }}
-          > */}
           {isViewingPhotos ? (
             <DisplayScoutingImages
               onClose={() => setIsViewingPhotos(false)}
@@ -215,8 +275,21 @@ export const ScoutingReportSummaryContent = (
               scoutingImages={formGetValues("images")}
             />
           ) : null}
-          {/* </Dialog> */}
         </View>
+        {Object.keys(aliasMap.Weeds).length ||
+        Object.keys(aliasMap.Diseases).length ||
+        Object.keys(aliasMap.Insects).length ||
+        Object.keys(aliasMap.General).length ? (
+          <View
+            key={"section-auto-generated-summary"}
+            style={scoutFormStyles.section}
+          >
+            {summaryListForAliases(aliasMap.Weeds)}
+            {summaryListForAliases(aliasMap.Diseases)}
+            {summaryListForAliases(aliasMap.Insects)}
+            {summaryListForAliases(aliasMap.General)}
+          </View>
+        ) : null}
         <View
           key={"section-summary-text-input"}
           style={scoutFormStyles.section}
@@ -229,7 +302,7 @@ export const ScoutingReportSummaryContent = (
                 onBlur={onBlur}
                 onChangeText={onChange}
                 value={value}
-                label={"Summary"}
+                label={"Comments"}
                 multiline
                 style={scoutFormStyles.largeTextInput}
               />
@@ -244,7 +317,7 @@ export const ScoutingReportSummaryContent = (
             control={formControl}
             render={({ field: { onChange, onBlur, value } }) => (
               <Input
-                placeholder="Recommendation text here..."
+                placeholder="Specify recommendation text here..."
                 onBlur={onBlur}
                 onChangeText={onChange}
                 value={value}
@@ -253,60 +326,30 @@ export const ScoutingReportSummaryContent = (
                 style={scoutFormStyles.largeTextInput}
               />
             )}
-            name="recommendationText"
+            name="recommendations"
             rules={{ required: false }}
             defaultValue=""
           />
         </View>
         <Button
           title={"FINISH SCOUTING REPORT"}
-          onPress={handleSubmit(async (data) => {
-            const user = currentUserResponse?.data;
-            const postData = mapFormDataToPostScoutReport(data, user);
-            let scoutingReportResponse;
-            if (!!postData.ID) {
-              scoutingReportResponse = await updateScoutReport({
-                id: postData.ID,
-                data: postData,
-              });
-            } else {
-              scoutingReportResponse = await createScoutingReport(postData);
-            }
-
-            if ("error" in scoutingReportResponse) {
-              console.error(scoutingReportResponse.error);
-            } else {
-              if (data?.images?.length > 0) {
-                Alert.alert(
-                  "Uploading Scouting Images",
-                  "Please wait while we upload your scouting images"
-                );
-                await postScoutingImagesAsync(
-                  // @ts-ignore TODO: Type this better
-                  scoutingReportResponse?.data?.ImageUploads,
-                  data.images
-                );
-              }
-
-              Alert.alert(
-                "Scouting Report saved successfully",
-                "Press continue to proceed",
-                [
-                  {
-                    text: "Continue",
-                    onPress: () => {
-                      router.back();
-                    },
-                  },
-                ]
-              );
-              // console.log(scoutingReportResponse.data);
-            }
-          })}
+          onPress={() => setIsDoneWithReport(true)}
           loading={createResult.isLoading || updateResult.isLoading}
         />
         <View key={"paddingBottomScrollView"} style={{ height: 50 }} />
       </ScrollView>
     </>
   );
+};
+
+const summaryListForAliases = (mapObject: { [key: string]: Set<string> }) => {
+  return Object.keys(mapObject).map((alias) => {
+    const areas = mapObject[alias];
+    const areaString = Array.from(areas).join(", ");
+    return (
+      <Text key={alias}>
+        {getAliasSummaryText(alias, areas.size, areaString)}
+      </Text>
+    );
+  });
 };

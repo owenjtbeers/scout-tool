@@ -1,11 +1,16 @@
 import { baseApi } from "../baseApi";
-import type { ScoutingReport, OrgWeed, OrgDisease, OrgInsect } from "./types";
+import type {
+  APIScoutingReport,
+  OrgWeed,
+  OrgDisease,
+  OrgInsect,
+} from "./types";
 import type { APIResponse } from "../query";
 
 export const scoutingApi = baseApi.injectEndpoints({
   endpoints: (build) => ({
     getScoutingReports: build.query<
-      APIResponse<ScoutingReport[]>,
+      APIResponse<APIScoutingReport[]>,
       {
         growerId: number | null;
         farmId: number | null;
@@ -21,8 +26,8 @@ export const scoutingApi = baseApi.injectEndpoints({
       providesTags: ["ScoutingReports"],
     }),
     createScoutingReport: build.mutation<
-      ScoutingReport,
-      Partial<ScoutingReport>
+      APIScoutingReport,
+      Partial<APIScoutingReport>
     >({
       query: (data) => ({
         url: "/scouting/scout-report",
@@ -61,7 +66,7 @@ export const scoutingApi = baseApi.injectEndpoints({
       providesTags: ["OrgInsects"],
     }),
     getScoutReportDetail: build.query<
-      APIResponse<ScoutingReport>,
+      APIResponse<APIScoutingReport>,
       { id: number }
     >({
       query: (params) => ({
@@ -71,8 +76,8 @@ export const scoutingApi = baseApi.injectEndpoints({
       providesTags: ["ScoutingReports"],
     }),
     updateScoutingReport: build.mutation<
-      APIResponse<ScoutingReport>,
-      { id: number; data: ScoutingReport }
+      APIResponse<APIScoutingReport>,
+      { id: number; data: APIScoutingReport }
     >({
       query: ({ id, data }) => ({
         url: `/scouting/scout-report/${id}`,

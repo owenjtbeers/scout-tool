@@ -11,7 +11,6 @@ import { UseFormGetValues, UseFormSetValue, set } from "react-hook-form";
 import { ErrorMessage } from "../../../forms/components/ErrorMessage";
 import { ScoutingReportForm } from "../types";
 
-
 interface DisplayScoutingImagesProps {
   scoutingImages: ScoutingImage[];
   formSetValue: UseFormSetValue<ScoutingReportForm>;
@@ -40,7 +39,6 @@ const DisplayScoutingImages = (props: DisplayScoutingImagesProps) => {
       const success = await MediaLibrary.deleteAssetsAsync([
         scoutingImage.asset.id,
       ]);
-      console.log("Delete success", success);
     }
   };
   return (
@@ -77,6 +75,7 @@ const DisplayScoutingImages = (props: DisplayScoutingImagesProps) => {
                 contentFit="contain"
                 source={{ uri: item.Url }}
                 style={styles.image}
+                cachePolicy={"memory-disk"}
               />
               <Button
                 title={"Delete Image from Report"}

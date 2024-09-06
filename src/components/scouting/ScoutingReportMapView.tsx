@@ -1,11 +1,11 @@
 import React from "react";
 import { View } from "react-native";
 import MapView from "react-native-maps";
-import { PROVIDER_GOOGLE } from "react-native-maps";
 import { Field } from "../../redux/fields/types";
 import { RootState, store } from "../../redux/store";
 import { useSelector } from "react-redux";
 import { defaultRegion } from "../../constants/constants";
+import { MaterialIcons } from "@expo/vector-icons";
 import { ScoutingMapContentManager } from "./ScoutingMapContentManager";
 import { ScoutingDrawingManager } from "./scout-draw/ScoutingDrawingManager";
 import { ScoutingDrawingButtons } from "./scout-draw/ScoutingDrawingButtons";
@@ -18,8 +18,13 @@ import {
   convertRNMapsPolygonToTurfFeature,
   mapLatLngToCoordinates,
 } from "../../utils/latLngConversions";
+import { EmailScoutReportButton } from "./email/EmailScoutReportButton";
 
-import type { UseFormGetValues, UseFormSetValue } from "react-hook-form";
+import {
+  set,
+  type UseFormGetValues,
+  type UseFormSetValue,
+} from "react-hook-form";
 import type { ScoutingReportForm } from "./types";
 
 interface ScoutingReportMapViewProps {
@@ -43,6 +48,8 @@ export const ScoutingReportMapView = (props: ScoutingReportMapViewProps) => {
   const dispatch = useDispatch();
   const initialRegion = useSelector((state: RootState) => state.map.region);
   const mapRef = React.useRef<MapView>(null);
+
+  const [isProcessingEmail, setIsProcessingEmail] = React.useState(false);
 
   const isDrawing = useSelector(
     (state: RootState) => state["map-drawing"].isDrawing
@@ -76,7 +83,6 @@ export const ScoutingReportMapView = (props: ScoutingReportMapViewProps) => {
       <MapView
         style={styles.map}
         ref={mapRef}
-        // provider={PROVIDER_GOOGLE}
         region={initialRegion || defaultRegion}
         mapType={"hybrid"}
         showsUserLocation={true}
@@ -158,6 +164,9 @@ export const ScoutingReportMapView = (props: ScoutingReportMapViewProps) => {
           }}
           title={"Finish with Scouting Area"}
         ></Button>
+      ) : null}
+      {!isDrawingScoutingArea ? (
+        <EmailScoutReportButton mapRef={mapRef} getFormValues={getFormValues}/>
       ) : null}
     </View>
   );

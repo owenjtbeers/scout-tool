@@ -4,7 +4,7 @@ export type ScoutingAppUser = {
   FirstName: string;
   LastName: string;
   AccountType: "org_admin" | "sys_admin" | "employee";
-  Organization: string;
+  Organization: { ID: number; Name: string };
   OrganizationId: string;
   createdAt: string;
   updatedAt: string;

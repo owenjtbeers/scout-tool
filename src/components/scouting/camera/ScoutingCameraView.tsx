@@ -19,6 +19,7 @@ import { Entypo, MaterialIcons } from "@expo/vector-icons";
 import { ScoutingImage } from "../../../redux/scouting/types";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Asset } from "expo-media-library";
+import { setPhotoFormValue } from "./utils";
 
 interface ScoutingCameraViewProps {
   setIsTakingPhoto: (isTakingPhoto: boolean) => void;
@@ -84,44 +85,11 @@ export function ScoutingCameraView(props: ScoutingCameraViewProps) {
     setFacing((current) => (current === "back" ? "front" : "back"));
   }
 
-  /* Takes in a maybe saved to camera roll asset in case the user enables that */
-  const setPhotoFormValue = (uri: string, asset?: Asset): void => {
-    let images = formGetValues(`images`);
-    let newScoutImage = photoMetadata;
-    if (!newScoutImage) {
-      // default metadata
-      newScoutImage = {
-        ID: 0,
-        ObservationAreaId: 0,
-        WeedAliasId: 0,
-        DiseaseAliasId: 0,
-        InsectAliasId: 0,
-        AddedById: 0,
-        ObservationAreaUid: "",
-        QuestionValId: 0,
-        Url: asset?.uri || uri,
-        Filename: asset?.filename || "",
-        asset,
-      };
-    }
-    // Destructure to cause the rest of the form to reupdate
-    images = [
-      ...images,
-      {
-        ...newScoutImage,
-        Url: asset?.uri || uri,
-        Filename: asset?.filename || "",
-        asset,
-      },
-    ];
-    formSetValue("images", images);
-  };
   async function takePicture() {
-    const photo = await cameraRef.current?.takePictureAsync();
+    const photo = await cameraRef.current?.takePictureAsync({ quality: 0.5 });
     if (photo) {
       // formSetValue(pathToFormValue, photo.uri);
       // setIsTakingPhoto(false);
-      console.log("Photo taken", photo);
       setCurrentPhoto(photo);
     } else {
       Alert.alert("Failed to take picture");
@@ -131,7 +99,11 @@ export function ScoutingCameraView(props: ScoutingCameraViewProps) {
     return (
       <DisplayRecentPhotoView
         photo={currentPhoto}
-        setPhotoFormValue={setPhotoFormValue}
+        setPhotoFormValue={setPhotoFormValue(
+          formGetValues,
+          formSetValue,
+          photoMetadata
+        )}
         onClose={() => {
           setCurrentPhoto(null);
           setIsTakingPhoto(false);

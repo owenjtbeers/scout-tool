@@ -3,8 +3,8 @@ import type {
   Alias,
   Observation,
   ObservationTypePrefix,
-  ScoutingReport,
   APIObservationArea,
+  APIScoutingReport,
   ScoutingImage,
 } from "../../../redux/scouting/types";
 import { ScoutingAppUser } from "../../../redux/user/types";
@@ -16,6 +16,7 @@ const valueIsDefined = (value: string | number | null | undefined): boolean => {
   }
   return value !== null && value !== undefined;
 };
+
 export const getNumberOfObservationsFromScoutingArea = (
   scoutingArea: ScoutingArea
 ): number => {
@@ -117,6 +118,18 @@ export const getNewDiseaseObservationSet = (alias: Alias): Observation[] => {
     },
   ];
 };
+
+export const getNewGeneralObservation = (questionName: string): Observation => {
+  return {
+    questionType: "text",
+    name: questionName,
+    value: "",
+    tags: null,
+    ScoutingAreaId: 0,
+    Alias: { ID: 0, Name: "" },
+  };
+};
+
 /*
   This function is used to get a map of recent observations from a list of scouting areas.
   this will include a count of the number of times that alias has been observed in scouting areas.
@@ -151,7 +164,12 @@ export const getRecentAliasesFromObservations = (
     );
     // We want to create a unique list of the alias names found at this scouting area
     recentObservations.forEach((observation) => {
-      const alias = observation?.Alias?.Name;
+      let alias;
+      if (type === "General") {
+        alias = observation?.name;
+      } else {
+        alias = observation?.Alias?.Name;
+      }
       const count = scoutingAreaMap.get(alias || "");
       if (count === undefined && !!alias) {
         scoutingAreaMap.set(alias, 1);
@@ -174,9 +192,16 @@ export const getRecentAliasesFromObservations = (
 export const mapFormDataToPostScoutReport = (
   scoutReportForm: ScoutingReportForm,
   currentUser?: ScoutingAppUser
-): ScoutingReport => {
-  const { summaryText, scoutingAreas, fieldIds, scoutedById, scoutedDate } =
-    scoutReportForm;
+): APIScoutingReport => {
+  const {
+    summaryText,
+    scoutingAreas,
+    fieldIds,
+    scoutedById,
+    scoutedDate,
+    recommendations,
+    growthStage,
+  } = scoutReportForm;
   return {
     ID: scoutReportForm.ID || 0,
     // TODO: Record the date properly through the UI
@@ -184,6 +209,8 @@ export const mapFormDataToPostScoutReport = (
     // TODO: Record the scouted by properly through the UI
     ScoutedById: scoutedById || currentUser?.ID || 0,
     Summary: summaryText,
+    Recommendation: recommendations,
+    GrowthStage: growthStage,
     Fields: fieldIds,
     // @ts-ignore TODO: Type this better. The input type to the api is not the same as the output type
     ObservationAreas: scoutingAreas.map((scoutingArea) => {
@@ -207,6 +234,8 @@ export const mapFormDataToPostScoutReport = (
       };
     }),
     Images: scoutReportForm.images,
+    Crop: scoutReportForm.crop,
+    Status: scoutReportForm.status,
   };
 };
 
@@ -313,7 +342,20 @@ export const convertObservationAreasToScoutingAreas = (
       ).flat(),
       // InsectObservations: observationArea.InsectObservations,
       // DiseaseObservations: observationArea.DiseaseObservations,
-      GeneralObservations: observationArea.GeneralObservations,
+      GeneralObservations: observationArea.GeneralObservations.map(
+        (generalQuestionVal) => {
+          return {
+            ID: generalQuestionVal.ID,
+            Alias: { ID: 0, Name: "" },
+            questionType: generalQuestionVal.RenderType,
+            name: generalQuestionVal.Question,
+            options: generalQuestionVal.Options.split(","),
+            value: generalQuestionVal.Value,
+            tags: null,
+            ScoutingAreaId: observationArea.ID,
+          };
+        }
+      ),
     } as ScoutingArea;
   });
 
@@ -356,4 +398,70 @@ export const createScoutingImageMetadata = (
     QuestionVal:
       typePrefix === "General" && questionVal ? questionVal : undefined,
   };
+};
+
+interface ReturnAliasMap {
+  Weeds: { [key: string]: Set<string> };
+  Diseases: { [key: string]: Set<string> };
+  Insects: { [key: string]: Set<string> };
+  General: { [key: string]: Set<string> };
+}
+
+/*
+  This function will be used to get a map for all the unique alias names across all
+  passed scouting areas.
+  @param scoutingAreas: a list of scouting areas
+  @returns a map of Weeds, Diseases, and Insects alias names to their Alias object
+*/
+export const getAliasesMapForScoutingAreas = (
+  scoutingAreas: ScoutingArea[]
+): ReturnAliasMap => {
+  const aliasMap = {
+    Weeds: {},
+    Diseases: {},
+    Insects: {},
+    General: {},
+  } as ReturnAliasMap;
+
+  scoutingAreas.forEach((scoutingArea) => {
+    const {
+      WeedObservations,
+      DiseaseObservations,
+      InsectObservations,
+      GeneralObservations,
+    } = scoutingArea;
+    WeedObservations.forEach((weedObs) => {
+      const { Alias } = weedObs;
+      if (aliasMap.Weeds[Alias.Name] === undefined) {
+        aliasMap.Weeds[Alias.Name] = new Set([scoutingArea.UId]);
+      } else {
+        aliasMap.Weeds[Alias.Name].add(scoutingArea.UId);
+      }
+    });
+    DiseaseObservations.forEach((diseaseObs) => {
+      const { Alias } = diseaseObs;
+      if (aliasMap.Diseases[Alias.Name] === undefined) {
+        aliasMap.Diseases[Alias.Name] = new Set([scoutingArea.UId]);
+      } else {
+        aliasMap.Diseases[Alias.Name].add(scoutingArea.UId);
+      }
+    });
+    InsectObservations.forEach((insectObs) => {
+      const { Alias } = insectObs;
+      if (aliasMap.Insects[Alias.Name] === undefined) {
+        aliasMap.Insects[Alias.Name] = new Set([scoutingArea.UId]);
+      } else {
+        aliasMap.Insects[Alias.Name].add(scoutingArea.UId);
+      }
+    });
+    GeneralObservations.forEach((generalObs) => {
+      if (aliasMap.General[generalObs.name] === undefined) {
+        aliasMap.General[generalObs.name] = new Set([scoutingArea.UId]);
+      } else {
+        aliasMap.General[generalObs.name].add(scoutingArea.UId);
+      }
+    });
+  });
+
+  return aliasMap;
 };
