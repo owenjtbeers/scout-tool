@@ -8,6 +8,7 @@
       "distribution": "internal"
     },
     "preview": {
+      "autoIncrement": true,
       "env": {
         "EXPO_PUBLIC_BACKEND_API_URL": "https://gat-backend-api-m5ju9.ondigitalocean.app/"
       },

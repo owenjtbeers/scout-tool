@@ -116,7 +116,7 @@ export const MapScreen = () => {
         showsCompass={true}
         showsMyLocationButton={false}
         showsPointsOfInterest={false}
-        followsUserLocation={true}
+        followsUserLocation={false}
         onMapReady={onMapReady}
         toolbarEnabled={false}
         // provider={PROVIDER_GOOGLE}
