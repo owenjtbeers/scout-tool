@@ -14,7 +14,7 @@ export const RNMapsPolygonArea = (
   unit: Units = "meters",
   precision: number | undefined = undefined
 ) => {
-  if (polygon.length < 4) {
+  if (polygon?.length < 4) {
     return 0;
   }
   const convertedPolygon = polygon.map(

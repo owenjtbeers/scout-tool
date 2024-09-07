@@ -4,7 +4,7 @@ import { FeatureCollection, Units } from "@turf/helpers";
 import { useRouter } from "expo-router";
 import React, { useCallback } from "react";
 import { Controller, useForm } from "react-hook-form";
-import { Pressable, StyleSheet, TouchableOpacity, View } from "react-native";
+import { Pressable, StyleSheet, TouchableOpacity, View, KeyboardAvoidingView } from "react-native";
 import { useSelector } from "react-redux";
 import { DialogPickerSelect } from "../../forms/components/DialogPicker";
 import { validation } from "../../forms/validationFunctions";
@@ -112,7 +112,7 @@ export function CreateFieldForm(props: FieldFormProps) {
           animationType: "slide",
         }}
       >
-        <View style={styles.modalView}>
+        <KeyboardAvoidingView style={styles.modalView}>
           <View style={styles.formBackground}>
             <View style={styles.topBar}>
               <TouchableOpacity style={styles.closeButton} onPress={onClose}>
@@ -251,7 +251,7 @@ export function CreateFieldForm(props: FieldFormProps) {
               </Pressable>
             </View>
           </View>
-        </View>
+        </KeyboardAvoidingView>
       </BottomSheet>
     </View>
   );

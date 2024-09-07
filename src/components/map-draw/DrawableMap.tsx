@@ -1,8 +1,8 @@
 import React, { useRef, useState } from "react";
 import MapView, { MapPressEvent, PROVIDER_GOOGLE } from "react-native-maps";
 import { useSelector, useDispatch } from "react-redux";
-import { StyleSheet, View } from "react-native";
-
+import { StyleSheet, View, KeyboardAvoidingView } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 import { defaultRegion } from "../../constants/constants";
 import { RootState } from "../../redux/store";
 import { DrawingManager } from "./DrawingManager";
@@ -44,35 +44,38 @@ export const DrawableMapScreen = () => {
     growerId: selectedGrower?.ID as number,
     farmId: selectedFarm?.ID as number,
     withBoundaries: true,
+    withCrops: true,
   });
   return (
-    <View style={styles.container}>
-      <DrawingButtons setModalVisible={setModalVisible} />
-      <MapView
-        style={styles.map}
-        ref={mapRef}
-        // provider={PROVIDER_GOOGLE}
-        region={initialRegion || defaultRegion}
-        onPress={onPress}
-        onMapReady={() => { }}
-        mapType={"hybrid"}
-        showsUserLocation={true}
-        showsMyLocationButton={false}
-        toolbarEnabled={false}
-      >
-        <MapContentManager mapRef={mapRef} fields={fieldResponse?.data} />
-        <DrawingManager mapRef={mapRef} />
-      </MapView>
-      <DrawingInfoText />
-      <MapUtilButtons mapRef={mapRef} />
-      <SubmitButton operation={operation} setModalVisible={setModalVisible} />
-      <OperationsModal
-        operation={operation}
-        setModalVisible={setModalVisible}
-        visible={modalVisible}
-        mapRef={mapRef}
-      />
-    </View>
+    <SafeAreaView style={styles.container}>
+      <KeyboardAvoidingView style={styles.container}>
+        <DrawingButtons setModalVisible={setModalVisible} />
+        <MapView
+          style={styles.map}
+          ref={mapRef}
+          // provider={PROVIDER_GOOGLE}
+          region={initialRegion || defaultRegion}
+          onPress={onPress}
+          onMapReady={() => { }}
+          mapType={"hybrid"}
+          showsUserLocation={true}
+          showsMyLocationButton={false}
+          toolbarEnabled={false}
+        >
+          <MapContentManager mapRef={mapRef} fields={fieldResponse?.data} />
+          <DrawingManager mapRef={mapRef} />
+        </MapView>
+        <DrawingInfoText />
+        <MapUtilButtons mapRef={mapRef} />
+        <SubmitButton operation={operation} setModalVisible={setModalVisible} />
+        <OperationsModal
+          operation={operation}
+          setModalVisible={setModalVisible}
+          visible={modalVisible}
+          mapRef={mapRef}
+        />
+      </KeyboardAvoidingView>
+    </SafeAreaView>
   );
 };
 
