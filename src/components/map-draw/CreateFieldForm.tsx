@@ -4,7 +4,7 @@ import { FeatureCollection, Units } from "@turf/helpers";
 import { useRouter } from "expo-router";
 import React, { useCallback } from "react";
 import { Controller, useForm } from "react-hook-form";
-import { Pressable, StyleSheet, TouchableOpacity, View, KeyboardAvoidingView } from "react-native";
+import { Pressable, StyleSheet, TouchableOpacity, View, InputAccessoryView } from "react-native";
 import { useSelector } from "react-redux";
 import { DialogPickerSelect } from "../../forms/components/DialogPicker";
 import { validation } from "../../forms/validationFunctions";
@@ -108,11 +108,12 @@ export function CreateFieldForm(props: FieldFormProps) {
         onBackdropPress={onClose}
         modalProps={{
           statusBarTranslucent: true,
-          transparent: true,
+          // transparent: true,
           animationType: "slide",
+          presentationStyle: "fullScreen",
         }}
       >
-        <KeyboardAvoidingView style={styles.modalView}>
+        <View style={styles.modalView}>
           <View style={styles.formBackground}>
             <View style={styles.topBar}>
               <TouchableOpacity style={styles.closeButton} onPress={onClose}>
@@ -170,8 +171,17 @@ export function CreateFieldForm(props: FieldFormProps) {
                         onBlur={onBlur}
                         onChangeText={onChange}
                         value={value}
+                        inputAccessoryViewID="fieldname"
                         errorMessage={error?.message}
                       />
+                      <InputAccessoryView nativeID={'fieldname'}>
+                        <Input
+                          value={value}
+                          focusable={false}
+                          style={styles.input}
+                        // disabled={true}
+                        />
+                      </InputAccessoryView>
                     </>
                   )}
                   name="name"
@@ -183,13 +193,24 @@ export function CreateFieldForm(props: FieldFormProps) {
                 <Controller
                   control={control}
                   render={({ field: { onChange, onBlur, value } }) => (
-                    <Input
-                      placeholder="Legal Description"
-                      onBlur={onBlur}
-                      onChangeText={onChange}
-                      value={value}
-                      label={"Legal Description"}
-                    />
+                    <>
+                      <Input
+                        placeholder="Legal Description"
+                        onBlur={onBlur}
+                        onChangeText={onChange}
+                        value={value}
+                        label={"Legal Description"}
+                        inputAccessoryViewID="legaldescription"
+                      />
+                      <InputAccessoryView nativeID={'legaldescription'}>
+                        <Input
+                          value={value}
+                          focusable={false}
+                          style={styles.input}
+                        // disabled={true}
+                        />
+                      </InputAccessoryView>
+                    </>
                   )}
                   name="legalDescription"
                   rules={{ required: false }}
@@ -225,19 +246,30 @@ export function CreateFieldForm(props: FieldFormProps) {
                   render={({ field: { onChange, onBlur, value } }) => {
                     const calculatedArea = getPolygonArea();
                     return (
-                      <Input
-                        label={`Area in ${areaUnit} (optional) `}
-                        placeholder="Area"
-                        defaultValue={calculatedArea?.toString()}
-                        onBlur={onBlur}
-                        onChangeText={onChange}
-                        value={
-                          value === undefined
-                            ? calculatedArea?.toString()
-                            : value.toString()
-                        }
-                        keyboardType="numeric"
-                      />
+                      <>
+                        <Input
+                          label={`Area in ${areaUnit} (optional) `}
+                          placeholder="Area"
+                          defaultValue={calculatedArea?.toString()}
+                          onBlur={onBlur}
+                          onChangeText={onChange}
+                          value={
+                            value === undefined
+                              ? calculatedArea?.toString()
+                              : value.toString()
+                          }
+                          keyboardType="numeric"
+                          inputAccessoryViewID="area"
+                        />
+                        <InputAccessoryView nativeID={'area'}>
+                          <Input
+                            value={value?.toString()}
+                            focusable={false}
+                            style={styles.input}
+                          // disabled={true}
+                          />
+                        </InputAccessoryView>
+                      </>
                     );
                   }}
                   name="area"
@@ -251,7 +283,7 @@ export function CreateFieldForm(props: FieldFormProps) {
               </Pressable>
             </View>
           </View>
-        </KeyboardAvoidingView>
+        </View>
       </BottomSheet>
     </View>
   );

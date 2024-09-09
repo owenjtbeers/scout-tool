@@ -1,7 +1,7 @@
 import React, { useRef, useState } from "react";
 import MapView, { MapPressEvent, PROVIDER_GOOGLE } from "react-native-maps";
 import { useSelector, useDispatch } from "react-redux";
-import { StyleSheet, View, KeyboardAvoidingView } from "react-native";
+import { StyleSheet, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { defaultRegion } from "../../constants/constants";
 import { RootState } from "../../redux/store";
@@ -48,7 +48,7 @@ export const DrawableMapScreen = () => {
   });
   return (
     <SafeAreaView style={styles.container}>
-      <KeyboardAvoidingView style={styles.container}>
+      <View style={styles.container}>
         <DrawingButtons setModalVisible={setModalVisible} />
         <MapView
           style={styles.map}
@@ -74,7 +74,7 @@ export const DrawableMapScreen = () => {
           visible={modalVisible}
           mapRef={mapRef}
         />
-      </KeyboardAvoidingView>
+      </View>
     </SafeAreaView>
   );
 };

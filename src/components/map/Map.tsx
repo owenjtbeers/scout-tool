@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect } from "react";
-import { View, StyleSheet, PermissionsAndroid } from "react-native";
+import { View, StyleSheet, PermissionsAndroid, Platform } from "react-native";
 import MapView, { LatLng, PROVIDER_GOOGLE, Region } from "react-native-maps";
 // TODO Revisit this on another day
 // import MapBoxGL from "@rnmapbox/maps"
@@ -44,21 +44,24 @@ export const MapScreen = () => {
     React.useState(false);
   const [currentLocation, setCurrentLocation] = React.useState({} as LatLng);
   const onMapReady = useCallback(() => {
-    PermissionsAndroid.request(
-      PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION
-    ).then((granted) => {
-      (async () => {
-        let { status } = await Location.requestForegroundPermissionsAsync();
-        if (status !== "granted") {
-          alert(
-            "Permission to access location was denied, some features may not work correctly"
-          );
-          return;
-        }
-        let location = await Location.getCurrentPositionAsync({});
-        setCurrentLocation(location.coords as LatLng);
-      })();
-    });
+    if (Platform.OS === "android") {
+      PermissionsAndroid.request(
+        PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION
+      ).then((granted) => {
+        (async () => {
+          let { status } = await Location.requestForegroundPermissionsAsync();
+          if (status !== "granted") {
+            alert(
+              "Permission to access location was denied, some features may not work correctly"
+            );
+            return;
+          }
+          let location = await Location.getCurrentPositionAsync({});
+          setCurrentLocation(location.coords as LatLng);
+        })();
+      });
+    }
+
   }, []);
 
   const onRegionChange = useCallback((region: Region) => {
@@ -116,7 +119,6 @@ export const MapScreen = () => {
         showsCompass={true}
         showsMyLocationButton={false}
         showsPointsOfInterest={false}
-        followsUserLocation={false}
         onMapReady={onMapReady}
         toolbarEnabled={false}
         // provider={PROVIDER_GOOGLE}

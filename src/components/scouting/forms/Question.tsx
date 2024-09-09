@@ -1,5 +1,5 @@
 import React from "react";
-import { View } from "react-native";
+import { View, InputAccessoryView } from "react-native";
 import { Controller, Control } from "react-hook-form";
 import { Input, Text, ButtonGroup, Slider } from "@rneui/themed";
 import { scoutFormStyles } from "./styles";
@@ -43,12 +43,21 @@ export const Question = (props: QuestionProps) => {
       ) : valueType === "text" ? (
         <Controller
           control={formControl}
-          render={({ field: { onChange, value } }) => (
-            <Input
-              value={value}
-              onChangeText={onChange}
-              placeholder="Enter text here..."
-            />
+          render={({ field: { onChange, value, name } }) => (
+            <>
+              <Input
+                value={value}
+                onChangeText={onChange}
+                placeholder="Enter text here..."
+                inputAccessoryViewID={name}
+              />
+              <InputAccessoryView nativeID={name}>
+                <Input
+                  value={value}
+                  focusable={false}
+                />
+              </InputAccessoryView>
+            </>
           )}
           name={formValueName}
         />

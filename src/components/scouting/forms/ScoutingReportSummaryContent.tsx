@@ -17,7 +17,7 @@ import {
   UseFormSetValue,
   UseFormWatch,
 } from "react-hook-form";
-import { ScrollView, View } from "react-native";
+import { ScrollView, View, InputAccessoryView } from "react-native";
 import { DatePickerInput } from "react-native-paper-dates";
 import { useDispatch } from "react-redux";
 import { Field } from "../../../redux/fields/types";
@@ -180,15 +180,24 @@ export const ScoutingReportSummaryContent = (
           />
           <Controller
             control={formControl}
-            render={({ field: { onChange, onBlur, value } }) => (
-              <Input
-                placeholder="Enter Growth Stage..."
-                onBlur={onBlur}
-                onChangeText={onChange}
-                value={value}
-                label={"Growth Stage"}
+            render={({ field: { onChange, onBlur, value, name } }) => (
+              <>
+                <Input
+                  placeholder="Enter Growth Stage..."
+                  onBlur={onBlur}
+                  onChangeText={onChange}
+                  value={value}
+                  label={"Growth Stage"}
+                  inputAccessoryViewID={name}
                 // style={scoutFormStyles.largeTextInput}
-              />
+                />
+                <InputAccessoryView nativeID={name}>
+                  <Input
+                    value={value}
+                    focusable={false}
+                  />
+                </InputAccessoryView>
+              </>
             )}
             name="growthStage"
             rules={{ required: false }}
@@ -277,9 +286,9 @@ export const ScoutingReportSummaryContent = (
           ) : null}
         </View>
         {Object.keys(aliasMap.Weeds).length ||
-        Object.keys(aliasMap.Diseases).length ||
-        Object.keys(aliasMap.Insects).length ||
-        Object.keys(aliasMap.General).length ? (
+          Object.keys(aliasMap.Diseases).length ||
+          Object.keys(aliasMap.Insects).length ||
+          Object.keys(aliasMap.General).length ? (
           <View
             key={"section-auto-generated-summary"}
             style={scoutFormStyles.section}
@@ -296,16 +305,27 @@ export const ScoutingReportSummaryContent = (
         >
           <Controller
             control={formControl}
-            render={({ field: { onChange, onBlur, value } }) => (
-              <Input
-                placeholder="Summary here..."
-                onBlur={onBlur}
-                onChangeText={onChange}
-                value={value}
-                label={"Comments"}
-                multiline
-                style={scoutFormStyles.largeTextInput}
-              />
+            render={({ field: { onChange, onBlur, value, name } }) => (
+              <>
+                <Input
+                  placeholder="Summary here..."
+                  onBlur={onBlur}
+                  onChangeText={onChange}
+                  value={value}
+                  label={"Comments"}
+                  multiline
+                  inputAccessoryViewID={name}
+                  style={scoutFormStyles.largeTextInput}
+                />
+                <InputAccessoryView nativeID={name}>
+                  <Input
+                    value={value}
+                    focusable={false}
+                    multiline
+                    style={scoutFormStyles.largeTextInput}
+                  />
+                </InputAccessoryView>
+              </>
             )}
             name="summaryText"
             rules={{ required: false }}
@@ -315,16 +335,27 @@ export const ScoutingReportSummaryContent = (
         <View key={"section-recommendations"} style={scoutFormStyles.section}>
           <Controller
             control={formControl}
-            render={({ field: { onChange, onBlur, value } }) => (
-              <Input
-                placeholder="Specify recommendation text here..."
-                onBlur={onBlur}
-                onChangeText={onChange}
-                value={value}
-                label={"Recommendations"}
-                multiline
-                style={scoutFormStyles.largeTextInput}
-              />
+            render={({ field: { onChange, onBlur, value, name } }) => (
+              <>
+                <Input
+                  placeholder="Specify recommendation text here..."
+                  onBlur={onBlur}
+                  onChangeText={onChange}
+                  value={value}
+                  label={"Recommendations"}
+                  multiline
+                  inputAccessoryViewID={name}
+                  style={scoutFormStyles.largeTextInput}
+                />
+                <InputAccessoryView nativeID={name}>
+                  <Input
+                    value={value}
+                    focusable={false}
+                    style={scoutFormStyles.largeTextInput}
+                    multiline
+                  />
+                </InputAccessoryView>
+              </>
             )}
             name="recommendations"
             rules={{ required: false }}

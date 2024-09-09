@@ -1,5 +1,5 @@
 import React from "react";
-import { View, StyleSheet, Image } from "react-native";
+import { View, StyleSheet, Image, KeyboardAvoidingView, Platform } from "react-native";
 import { Button, Input, Text } from "@rneui/themed";
 import { useForm, Controller } from "react-hook-form";
 import { useDispatch } from "react-redux";
@@ -10,6 +10,7 @@ import { HOME_MAP_SCREEN } from "../../../src/navigation/screens";
 import { userSlice } from "../../../src/redux/user/userSlice";
 import { Dialog, useTheme } from "@rneui/themed";
 import { getErrorMessage } from "../../utils/errors";
+import { keyboardBehavior } from "../../utils/formatting/keyboardBehavior";
 
 export const Login = () => {
   const dispatch = useDispatch();
@@ -37,7 +38,7 @@ export const Login = () => {
   };
 
   return (
-    <View style={styles.container}>
+    <KeyboardAvoidingView behavior={keyboardBehavior()} style={styles.container}>
       <View style={styles.logoContainer}>
         <Image
           source={require("../../../assets/icon.png")}
@@ -113,7 +114,7 @@ export const Login = () => {
       >
         <Text>{`Error Logging in:\n${error}\nPlease try again`}</Text>
       </Dialog>
-    </View>
+    </KeyboardAvoidingView>
   );
 };
 
