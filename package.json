@@ -12,7 +12,8 @@
     "web": "expo start --web",
     "android:development:build": "eas build --profile development --platform android",
     "android:apk:build": "eas build --profile preview --platform android",
-    "ios:store:build": "eas build --profile preview --platform ios"
+    "ios:store:build": "eas build --profile preview --platform ios",
+    "ios:submit": "eas submit -p ios"
   },
   "dependencies": {
     "@expo/metro-runtime": "~3.2.1",

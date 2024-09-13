@@ -162,7 +162,7 @@ export const ScoutingReportMapView = (props: ScoutingReportMapViewProps) => {
             setIsDrawingScoutingArea(false);
             setSideSheetContentType("observation");
           }}
-          title={"Finish with Scouting Area"}
+          title={"Exit Drawing Mode"}
         ></Button>
       ) : null}
       {!isDrawingScoutingArea ? (

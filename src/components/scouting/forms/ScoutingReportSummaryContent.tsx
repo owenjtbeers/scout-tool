@@ -17,7 +17,7 @@ import {
   UseFormSetValue,
   UseFormWatch,
 } from "react-hook-form";
-import { ScrollView, View, InputAccessoryView } from "react-native";
+import { ScrollView, View, InputAccessoryView, Platform } from "react-native";
 import { DatePickerInput } from "react-native-paper-dates";
 import { useDispatch } from "react-redux";
 import { Field } from "../../../redux/fields/types";
@@ -102,7 +102,7 @@ export const ScoutingReportSummaryContent = (
         }}
       >
         <Button
-          title={"SCOUT AN AREA"}
+          title={"SCOUT MODE"}
           color={"secondary"}
           titleStyle={{ color: theme.colors.primary }}
           onPress={() => {
@@ -189,14 +189,13 @@ export const ScoutingReportSummaryContent = (
                   value={value}
                   label={"Growth Stage"}
                   inputAccessoryViewID={name}
-                // style={scoutFormStyles.largeTextInput}
+                  // style={scoutFormStyles.largeTextInput}
                 />
-                <InputAccessoryView nativeID={name}>
-                  <Input
-                    value={value}
-                    focusable={false}
-                  />
-                </InputAccessoryView>
+                {Platform.OS === "ios" && (
+                  <InputAccessoryView nativeID={name}>
+                    <Input value={value} focusable={false} />
+                  </InputAccessoryView>
+                )}
               </>
             )}
             name="growthStage"
@@ -286,9 +285,9 @@ export const ScoutingReportSummaryContent = (
           ) : null}
         </View>
         {Object.keys(aliasMap.Weeds).length ||
-          Object.keys(aliasMap.Diseases).length ||
-          Object.keys(aliasMap.Insects).length ||
-          Object.keys(aliasMap.General).length ? (
+        Object.keys(aliasMap.Diseases).length ||
+        Object.keys(aliasMap.Insects).length ||
+        Object.keys(aliasMap.General).length ? (
           <View
             key={"section-auto-generated-summary"}
             style={scoutFormStyles.section}
@@ -317,14 +316,16 @@ export const ScoutingReportSummaryContent = (
                   inputAccessoryViewID={name}
                   style={scoutFormStyles.largeTextInput}
                 />
-                <InputAccessoryView nativeID={name}>
-                  <Input
-                    value={value}
-                    focusable={false}
-                    multiline
-                    style={scoutFormStyles.largeTextInput}
-                  />
-                </InputAccessoryView>
+                {Platform.OS === "ios" && (
+                  <InputAccessoryView nativeID={name}>
+                    <Input
+                      value={value}
+                      focusable={false}
+                      multiline
+                      style={scoutFormStyles.largeTextInput}
+                    />
+                  </InputAccessoryView>
+                )}
               </>
             )}
             name="summaryText"
@@ -347,14 +348,16 @@ export const ScoutingReportSummaryContent = (
                   inputAccessoryViewID={name}
                   style={scoutFormStyles.largeTextInput}
                 />
-                <InputAccessoryView nativeID={name}>
-                  <Input
-                    value={value}
-                    focusable={false}
-                    style={scoutFormStyles.largeTextInput}
-                    multiline
-                  />
-                </InputAccessoryView>
+                {Platform.OS === "ios" && (
+                  <InputAccessoryView nativeID={name}>
+                    <Input
+                      value={value}
+                      focusable={false}
+                      multiline
+                      style={scoutFormStyles.largeTextInput}
+                    />
+                  </InputAccessoryView>
+                )}
               </>
             )}
             name="recommendations"

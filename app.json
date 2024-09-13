@@ -12,16 +12,15 @@
       "backgroundColor": "#ffffff"
     },
     "jsEngine": "hermes",
-    "plugins": [
-      /* Moved to app.config.ts */
-    ],
+    "plugins": [],
     "assetBundlePatterns": [
       "**/*"
     ],
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.owenbeers.scouttool",
-      "jsEngine": "jsc"
+      "jsEngine": "jsc",
+      "buildNumber": "3"
     },
     "android": {
       "adaptiveIcon": {

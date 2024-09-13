@@ -1,5 +1,5 @@
 import React from "react";
-import { View, InputAccessoryView } from "react-native";
+import { View, InputAccessoryView, Platform } from "react-native";
 import { Controller, Control } from "react-hook-form";
 import { Input, Text, ButtonGroup, Slider } from "@rneui/themed";
 import { scoutFormStyles } from "./styles";
@@ -51,12 +51,11 @@ export const Question = (props: QuestionProps) => {
                 placeholder="Enter text here..."
                 inputAccessoryViewID={name}
               />
-              <InputAccessoryView nativeID={name}>
-                <Input
-                  value={value}
-                  focusable={false}
-                />
-              </InputAccessoryView>
+              {Platform.OS === "ios" && (
+                <InputAccessoryView nativeID={name}>
+                  <Input value={value} focusable={false} />
+                </InputAccessoryView>
+              )}
             </>
           )}
           name={formValueName}

@@ -4,7 +4,14 @@ import { FeatureCollection, Units } from "@turf/helpers";
 import { useRouter } from "expo-router";
 import React, { useCallback } from "react";
 import { Controller, useForm } from "react-hook-form";
-import { Pressable, StyleSheet, TouchableOpacity, View, InputAccessoryView } from "react-native";
+import {
+  Pressable,
+  StyleSheet,
+  TouchableOpacity,
+  View,
+  InputAccessoryView,
+  Platform,
+} from "react-native";
 import { useSelector } from "react-redux";
 import { DialogPickerSelect } from "../../forms/components/DialogPicker";
 import { validation } from "../../forms/validationFunctions";
@@ -174,14 +181,16 @@ export function CreateFieldForm(props: FieldFormProps) {
                         inputAccessoryViewID="fieldname"
                         errorMessage={error?.message}
                       />
-                      <InputAccessoryView nativeID={'fieldname'}>
-                        <Input
-                          value={value}
-                          focusable={false}
-                          style={styles.input}
-                        // disabled={true}
-                        />
-                      </InputAccessoryView>
+                      {Platform.OS === "ios" && (
+                        <InputAccessoryView nativeID={"fieldname"}>
+                          <Input
+                            value={value}
+                            focusable={false}
+                            style={styles.input}
+                            // disabled={true}
+                          />
+                        </InputAccessoryView>
+                      )}
                     </>
                   )}
                   name="name"
@@ -202,77 +211,19 @@ export function CreateFieldForm(props: FieldFormProps) {
                         label={"Legal Description"}
                         inputAccessoryViewID="legaldescription"
                       />
-                      <InputAccessoryView nativeID={'legaldescription'}>
-                        <Input
-                          value={value}
-                          focusable={false}
-                          style={styles.input}
-                        // disabled={true}
-                        />
-                      </InputAccessoryView>
-                    </>
-                  )}
-                  name="legalDescription"
-                  rules={{ required: false }}
-                  defaultValue=""
-                />
-              </View>
-              {/* <View>
-                <Controller
-                  control={control}
-                  rules={{ validate: validation.isNotPlaceholderValue("") }}
-                  render={({
-                    field: { onChange, onBlur, value },
-                    fieldState: { error },
-                  }) => (
-                    <DialogPickerSelect
-                      options={cropOptions.map((crop) => ({
-                        label: crop,
-                        value: crop,
-                      }))}
-                      value={value}
-                      onChangeText={onChange}
-                      label="Crop"
-                      errorMessage={error?.message}
-                    />
-                  )}
-                  name="crop"
-                  defaultValue=""
-                />
-              </View> */}
-              <View>
-                <Controller
-                  control={control}
-                  render={({ field: { onChange, onBlur, value } }) => {
-                    const calculatedArea = getPolygonArea();
-                    return (
-                      <>
-                        <Input
-                          label={`Area in ${areaUnit} (optional) `}
-                          placeholder="Area"
-                          defaultValue={calculatedArea?.toString()}
-                          onBlur={onBlur}
-                          onChangeText={onChange}
-                          value={
-                            value === undefined
-                              ? calculatedArea?.toString()
-                              : value.toString()
-                          }
-                          keyboardType="numeric"
-                          inputAccessoryViewID="area"
-                        />
-                        <InputAccessoryView nativeID={'area'}>
+                      {Platform.OS === "ios" && (
+                        <InputAccessoryView nativeID={"legaldescription"}>
                           <Input
                             value={value?.toString()}
                             focusable={false}
                             style={styles.input}
-                          // disabled={true}
+                            // disabled={true}
                           />
                         </InputAccessoryView>
-                      </>
-                    );
-                  }}
-                  name="area"
+                      )}
+                    </>
+                  )}
+                  name="legalDescription"
                 />
               </View>
               <Pressable style={styles.button}>

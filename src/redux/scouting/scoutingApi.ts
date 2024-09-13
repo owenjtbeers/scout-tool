@@ -12,8 +12,8 @@ export const scoutingApi = baseApi.injectEndpoints({
     getScoutingReports: build.query<
       APIResponse<APIScoutingReport[]>,
       {
-        growerId: number | null;
-        farmId: number | null;
+        grower_id: number | null;
+        farm_id: number | null;
         start_date: string;
         end_date: string;
       }

@@ -48,8 +48,8 @@ export const ScoutingReportList: React.FC = () => {
   });
 
   const queryParams = {
-    growerId: growerId || null,
-    farmId: farmId || null,
+    grower_id: growerId || null,
+    farm_id: farmId || null,
     start_date: `${season}-01-01`,
     end_date: `${season}-12-31`,
   };
