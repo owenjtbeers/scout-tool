@@ -310,16 +310,18 @@ const AddObservationAnswerQuestionsStep = (
         * You can leave blank and continue if you so please. You can edit later
         by selecting from the left hand panel *
       </Text>
-      {questionsForAlias.map((observation, index) => {
-        return (
-          <Question
-            key={`${props.newPestName}-observation-${index}`}
-            observation={observation}
-            formControl={formControl}
-            formValueName={`scoutingAreas.0.${selectedType}Observations.${observation.formIndex}.value`}
-          />
-        );
-      })}
+      <ScrollView style={{ maxHeight: "90%" }}>
+        {questionsForAlias.map((observation, index) => {
+          return (
+            <Question
+              key={`${props.newPestName}-observation-${index}`}
+              observation={observation}
+              formControl={formControl}
+              formValueName={`scoutingAreas.0.${selectedType}Observations.${observation.formIndex}.value`}
+            />
+          );
+        })}
+      </ScrollView>
       <Button title={"CONTINUE"} onPress={onClose} />
     </>
   );
