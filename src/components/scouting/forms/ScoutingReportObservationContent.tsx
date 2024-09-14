@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useCallback } from "react";
 import { ScrollView, View } from "react-native";
 import { Button, Input, Text, ButtonGroup } from "@rneui/themed";
 import { useTheme } from "@rneui/themed";
@@ -18,17 +18,15 @@ import {
 import type { Field } from "../../../redux/fields/types";
 import type { ScoutingReportForm } from "../types";
 import AliasQuestionPrompt from "./AliasQuestionPrompt";
-import {
-  getNewWeedObservationSet,
-  getNewDiseaseObservationSet,
-  getNewInsectObservationSet,
-  getNewGeneralObservation,
-  getNumberOfObservationsFromScoutingArea,
-  getRecentAliasesFromObservations,
-} from "../utils/scoutReportUtils";
+import { getNumberOfUniqueAliasesFromScoutingArea } from "../utils/scoutReportUtils";
 import { AliasGrouping } from "./AliasGrouping";
-import { ScoutingImage, Alias } from "../../../redux/scouting/types";
+import {
+  ScoutingImage,
+  Alias,
+  ObservationTypePrefix,
+} from "../../../redux/scouting/types";
 import GeneralQuestionPrompt from "./GeneralQuestionPrompt";
+import { AddObservation } from "./AddObservation";
 
 interface ScoutingReportObservationContentProps {
   field: Field;
@@ -67,13 +65,50 @@ export const ScoutingReportObservationContent = (
 
   const scoutingAreas = formGetValues(`scoutingAreas`);
   const scoutingArea = watch(`scoutingAreas.${scoutingAreaFormIndex}`);
-
   const handleSubmit = () => {
     setSideSheetContentType("summary");
   };
+  const getAliasList = useCallback(() => {
+    const weedAliases =
+      orgWeeds?.data?.map((orgWeed) => ({
+        ID: orgWeed.WeedAliasId,
+        Name: orgWeed?.WeedAlias?.Name || "",
+        Type: "Weed" as ObservationTypePrefix,
+      })) || [];
+    const diseaseAliases =
+      orgDiseases?.data?.map((orgDisease) => ({
+        ID: orgDisease.DiseaseAliasId,
+        Name: orgDisease?.DiseaseAlias?.Name || "",
+        Type: "Disease" as ObservationTypePrefix,
+      })) || [];
+    const insectAliases =
+      orgInsects?.data?.map((orgInsect) => ({
+        ID: orgInsect.InsectAliasId,
+        Name: orgInsect?.InsectAlias?.Name || "",
+        Type: "Insect" as ObservationTypePrefix,
+      })) || [];
+    return weedAliases.concat(diseaseAliases).concat(insectAliases);
+  }, [orgWeeds, orgDiseases, orgInsects]);
   // const recentWeeds = scoutingArea?.weedObservations?.filter()
   return (
     <View style={{ flex: 1 }}>
+      <View
+        style={{
+          paddingTop: 10,
+          paddingBottom: 10,
+        }}
+      >
+        <AddObservation
+          formGetValues={formGetValues}
+          formSetValue={formSetValue}
+          aliasList={getAliasList()}
+          isLoadingAliasList={
+            isLoadingOrgDiseases || isLoadingOrgInsects || isLoadingOrgWeeds
+          }
+          formControl={formControl}
+        />
+      </View>
+
       <ScrollView
         style={{
           // ...scoutFormStyles.page,
@@ -89,12 +124,12 @@ export const ScoutingReportObservationContent = (
             {/* Section for Field information, selected field name, crop info, previous crops, current date */}
 
             <Text>
-              # of Observations:{" "}
-              {getNumberOfObservationsFromScoutingArea(scoutingArea)}
+              # of Pests:{" "}
+              {getNumberOfUniqueAliasesFromScoutingArea(scoutingArea)}
             </Text>
           </View>
           <View key={"section-observation-questions"}>
-            <AliasQuestionPrompt
+            {/* <AliasQuestionPrompt
               type={"Weed"}
               recentlyObserved={getRecentAliasesFromObservations(
                 scoutingAreas,
@@ -131,7 +166,7 @@ export const ScoutingReportObservationContent = (
                   );
                 }
               }}
-            />
+            /> */}
             <Controller
               control={formControl}
               render={({ field: { value } }) => (
@@ -149,7 +184,7 @@ export const ScoutingReportObservationContent = (
               )}
               name={`scoutingAreas.${scoutingAreaFormIndex}.WeedObservations`}
             />
-            <AliasQuestionPrompt
+            {/* <AliasQuestionPrompt
               type={"Insect"}
               recentlyObserved={getRecentAliasesFromObservations(
                 scoutingAreas,
@@ -186,7 +221,7 @@ export const ScoutingReportObservationContent = (
                   );
                 }
               }}
-            />
+            /> */}
             <Controller
               control={formControl}
               render={({ field: { value } }) => (
@@ -204,7 +239,7 @@ export const ScoutingReportObservationContent = (
               )}
               name={`scoutingAreas.${scoutingAreaFormIndex}.InsectObservations`}
             />
-            <AliasQuestionPrompt
+            {/* <AliasQuestionPrompt
               type={"Disease"}
               recentlyObserved={getRecentAliasesFromObservations(
                 scoutingAreas,
@@ -241,7 +276,7 @@ export const ScoutingReportObservationContent = (
                   );
                 }
               }}
-            />
+            /> */}
             <Controller
               control={formControl}
               render={({ field: { value } }) => (
@@ -276,7 +311,7 @@ export const ScoutingReportObservationContent = (
               )}
               name={`scoutingAreas.${scoutingAreaFormIndex}.GeneralObservations`}
             />
-            <GeneralQuestionPrompt
+            {/* <GeneralQuestionPrompt
               type="General"
               recentlyObserved={getRecentAliasesFromObservations(
                 scoutingAreas,
@@ -306,14 +341,22 @@ export const ScoutingReportObservationContent = (
                 }
                 return [];
               }}
-            />
+            /> */}
           </View>
-          <Button
-            title={"FINISH WITH OBSERVATIONS FOR AREA"}
-            onPress={handleSubmit}
-          />
         </View>
       </ScrollView>
+      <Button
+        title={"BACK TO SUMMARY"}
+        containerStyle={{
+          maxWidth: "95%",
+          minWidth: "85%",
+          margin: "auto",
+          backgroundColor: "transparent",
+          overflow: "hidden",
+        }}
+        radius={20}
+        onPress={handleSubmit}
+      />
     </View>
   );
 };

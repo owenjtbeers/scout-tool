@@ -36,6 +36,27 @@ export const getNumberOfObservationsFromScoutingArea = (
   );
 };
 
+export const getNumberOfUniqueAliasesFromScoutingArea = (
+  scoutingArea: ScoutingArea
+): number => {
+  const uniqueAliases = new Set<string>();
+
+  scoutingArea?.WeedObservations?.forEach((weedObs) =>
+    uniqueAliases.add(weedObs.Alias.Name)
+  );
+  scoutingArea?.InsectObservations?.forEach((insectObs) =>
+    uniqueAliases.add(insectObs.Alias.Name)
+  );
+  scoutingArea?.DiseaseObservations?.forEach((diseaseObs) =>
+    uniqueAliases.add(diseaseObs.Alias.Name)
+  );
+  scoutingArea?.GeneralObservations?.forEach((generalObs) =>
+    uniqueAliases.add(generalObs.name)
+  );
+
+  return uniqueAliases.size;
+};
+
 export const getNewWeedObservationSet = (alias: Alias): Observation[] => {
   return [
     {
@@ -126,10 +147,25 @@ export const getNewGeneralObservation = (questionName: string): Observation => {
     value: "",
     tags: null,
     ScoutingAreaId: 0,
-    Alias: { ID: 0, Name: "" },
+    Alias: { ID: 0, Name: questionName },
   };
 };
 
+export const getObservationSetForAlias = (alias: Alias): Observation[] => {
+  let observations = [] as Observation[];
+  if (alias.Type) {
+    if (alias.Type === "Weed") {
+      observations = getNewWeedObservationSet(alias);
+    } else if (alias.Type === "Insect") {
+      observations = getNewInsectObservationSet(alias);
+    } else if (alias.Type === "Disease") {
+      observations = getNewDiseaseObservationSet(alias);
+    } else if (alias.Type === "General") {
+      observations = [getNewGeneralObservation(alias.Name)];
+    }
+  }
+  return observations;
+};
 /*
   This function is used to get a map of recent observations from a list of scouting areas.
   this will include a count of the number of times that alias has been observed in scouting areas.
@@ -359,6 +395,9 @@ export const convertObservationAreasToScoutingAreas = (
     } as ScoutingArea;
   });
 
+  const mainAreas = returnVal.filter(
+    (observationArea) => observationArea.Type === "Main"
+  );
   return returnVal;
 };
 
@@ -464,4 +503,16 @@ export const getAliasesMapForScoutingAreas = (
   });
 
   return aliasMap;
+};
+
+export const createGenericObservation = (alias: Alias): Observation => {
+  return {
+    Alias: alias,
+    questionType: "text",
+    name: "Found",
+    options: [],
+    value: "yes",
+    tags: null,
+    ScoutingAreaId: 0,
+  };
 };

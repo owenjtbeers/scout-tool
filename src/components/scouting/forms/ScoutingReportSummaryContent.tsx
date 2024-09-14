@@ -106,15 +106,10 @@ export const ScoutingReportSummaryContent = (
           color={"secondary"}
           titleStyle={{ color: theme.colors.primary }}
           onPress={() => {
-            dispatch(
-              drawingSlice.actions.setIsDrawing({
-                isDrawing: true,
-                drawMode: null,
-              })
-            );
-            dispatch(drawingSlice.actions.clearAllShapes());
-            setIsDrawingScoutingArea(true);
-            setSelectedScoutingAreaIndex(scoutingAreas.length);
+            setSideSheetContentType("observation");
+            // setIsDrawingScoutingArea(true);
+            // TODO: Ensure this is the main area
+            setSelectedScoutingAreaIndex(0);
           }}
         />
       </View>
