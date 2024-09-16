@@ -20,7 +20,7 @@ export type Observation = {
   valueUnit2?: ScoutingToolUnits;
   tags: string | null;
   ScoutingAreaId: number;
-  Alias: { ID: number; Name: string };
+  Alias: Alias;
 };
 
 export type APIQuestionVal = {
@@ -35,6 +35,7 @@ export type APIQuestionVal = {
   Options: string;
 };
 
+type ObservationAreaType = "Main" | "PointOfInterest";
 export type ScoutingArea = {
   ID: number;
   UId: string;
@@ -44,6 +45,7 @@ export type ScoutingArea = {
   InsectObservations: Observation[];
   DiseaseObservations: Observation[];
   GeneralObservations: Observation[];
+  Type: ObservationAreaType;
 };
 
 /*
@@ -60,6 +62,7 @@ export type APIObservationArea = {
   InsectObservations: InsectObservation[];
   DiseaseObservations: DiseaseObservation[];
   GeneralObservations: APIQuestionVal[];
+  Type: ObservationAreaType;
 };
 
 export type APIScoutingReport = {
@@ -116,6 +119,7 @@ export type OrgWeed = {
 export interface Alias {
   ID: number;
   Name: string;
+  Type?: ObservationTypePrefix;
 }
 
 export type WeedAlias = {

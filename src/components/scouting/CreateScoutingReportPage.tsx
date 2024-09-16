@@ -111,7 +111,19 @@ export const CreateScoutingReportPage = (
           }
         : {
             ID: 0,
-            scoutingAreas: [],
+            scoutingAreas: [
+              {
+                ID: 0,
+                UId: "Main",
+                ScoutReportId: 0,
+                Geometry: null,
+                WeedObservations: [],
+                InsectObservations: [],
+                DiseaseObservations: [],
+                GeneralObservations: [],
+                Type: "Main",
+              },
+            ],
             scoutedDate: new Date(),
             scoutedBy: undefined,
             media: [],

@@ -128,7 +128,7 @@ export const AliasGrouping = (props: AliasGroupingProps) => {
                 }
               />
             </View>
-            {aliasGroupings[aliasName].map((observation, index) => {
+            {/* {aliasGroupings[aliasName].map((observation, index) => {
               return (
                 <Question
                   key={`${aliasName}-observation-${index}`}
@@ -137,7 +137,7 @@ export const AliasGrouping = (props: AliasGroupingProps) => {
                   formValueName={`scoutingAreas.${scoutingAreaFormIndex}.${observationTypeFormPrefix}Observations.${observation.formIndex}.value`}
                 />
               );
-            })}
+            })} */}
             {aliasImages?.length ? (
               <View
                 style={{
@@ -163,58 +163,64 @@ export const AliasGrouping = (props: AliasGroupingProps) => {
                 onClose={() => setIsViewingImages(false)}
               />
             )}
-            <Button
-              icon={<Entypo name="camera" color={theme.colors.secondary} />}
-              onPress={() => {
-                const scoutingArea = formGetValues(
-                  `scoutingAreas.${scoutingAreaFormIndex}`
-                );
-                const alias = aliasGroupings[aliasName][0].Alias;
-                setPhotoMetadata(
-                  createScoutingImageMetadata(
-                    scoutingArea,
-                    observationTypeFormPrefix,
-                    alias,
-                    undefined
-                  )
-                );
-                setIsTakingPhoto(true);
-              }}
+            <View
+              style={{ flexDirection: "row", justifyContent: "space-between" }}
             >
-              Take Photo
-            </Button>
-            <Button
-              icon={<Entypo name="attachment" color={theme.colors.secondary} />}
-              onPress={async () => {
-                const result = await ImagePicker.launchImageLibraryAsync({
-                  mediaTypes: ImagePicker.MediaTypeOptions.Images,
-                  allowsEditing: true,
-                  aspect: [4, 3],
-                  quality: 1,
-                  allowsMultipleSelection: false,
-                });
-
-                if (!result.canceled) {
+              <Button
+                icon={<Entypo name="camera" color={theme.colors.secondary} />}
+                onPress={() => {
                   const scoutingArea = formGetValues(
                     `scoutingAreas.${scoutingAreaFormIndex}`
                   );
                   const alias = aliasGroupings[aliasName][0].Alias;
-                  const metadata = createScoutingImageMetadata(
-                    scoutingArea,
-                    observationTypeFormPrefix,
-                    alias,
-                    undefined
+                  setPhotoMetadata(
+                    createScoutingImageMetadata(
+                      scoutingArea,
+                      observationTypeFormPrefix,
+                      alias,
+                      undefined
+                    )
                   );
-                  setPhotoFormValue(
-                    formGetValues,
-                    formSetValue,
-                    metadata
-                  )(result.assets[0].uri);
+                  setIsTakingPhoto(true);
+                }}
+              >
+                Take Photo
+              </Button>
+              <Button
+                icon={
+                  <Entypo name="attachment" color={theme.colors.secondary} />
                 }
-              }}
-            >
-              Attach
-            </Button>
+                onPress={async () => {
+                  const result = await ImagePicker.launchImageLibraryAsync({
+                    mediaTypes: ImagePicker.MediaTypeOptions.Images,
+                    allowsEditing: true,
+                    aspect: [4, 3],
+                    quality: 1,
+                    allowsMultipleSelection: false,
+                  });
+
+                  if (!result.canceled) {
+                    const scoutingArea = formGetValues(
+                      `scoutingAreas.${scoutingAreaFormIndex}`
+                    );
+                    const alias = aliasGroupings[aliasName][0].Alias;
+                    const metadata = createScoutingImageMetadata(
+                      scoutingArea,
+                      observationTypeFormPrefix,
+                      alias,
+                      undefined
+                    );
+                    setPhotoFormValue(
+                      formGetValues,
+                      formSetValue,
+                      metadata
+                    )(result.assets[0].uri);
+                  }
+                }}
+              >
+                Attach
+              </Button>
+            </View>
           </View>
         );
       })}
