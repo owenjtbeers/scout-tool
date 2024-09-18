@@ -2,7 +2,7 @@
   "expo": {
     "name": "scout-tool",
     "slug": "scout-tool",
-    "version": "1.0.4",
+    "version": "1.0.5",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
@@ -18,7 +18,7 @@
       "supportsTablet": true,
       "bundleIdentifier": "com.owenbeers.scouttool",
       "jsEngine": "jsc",
-      "buildNumber": "1"
+      "buildNumber": "0"
     },
     "android": {
       "adaptiveIcon": {
