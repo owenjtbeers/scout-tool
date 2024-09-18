@@ -6,6 +6,8 @@ interface ScoutingSideSheetProps {
   children?: ReactNode;
   isDrawing?: boolean;
 }
+
+const MAX_SIDE_SHEET_WIDTH = 425;
 export const ScoutingSideSheet = (props: ScoutingSideSheetProps) => {
   const [animation] = useState(new Animated.Value(0));
   const [isSideSheetOpen, setIsSideSheetOpen] = useState(false);
@@ -43,7 +45,7 @@ export const ScoutingSideSheet = (props: ScoutingSideSheetProps) => {
             {
               translateX: animation.interpolate({
                 inputRange: [0, 1],
-                outputRange: [0, Math.max(-windowWidth * 0.8, -500)],
+                outputRange: [0, Math.max(-windowWidth * 0.8, -MAX_SIDE_SHEET_WIDTH)],
               }),
             },
           ],
@@ -92,7 +94,7 @@ const styles = StyleSheet.create({
     top: 0,
     bottom: 0,
     width: "80%",
-    maxWidth: 500,
+    maxWidth: MAX_SIDE_SHEET_WIDTH,
     backgroundColor: "white",
     zIndex: 30,
   },
