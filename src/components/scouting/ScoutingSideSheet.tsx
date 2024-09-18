@@ -81,7 +81,6 @@ export const ScoutingSideSheet = (props: ScoutingSideSheetProps) => {
         </Animated.View>
         {props.children}
       </Animated.View>
-
     </>
   );
 };
@@ -95,7 +94,7 @@ const styles = StyleSheet.create({
     width: "80%",
     maxWidth: 500,
     backgroundColor: "white",
-    zIndex: 1,
+    zIndex: 30,
   },
   floatingSideSheetCollapseButton: {
     padding: 5,

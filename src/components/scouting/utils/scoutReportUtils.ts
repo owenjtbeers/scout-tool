@@ -315,7 +315,8 @@ export const convertObservationAreasToScoutingAreas = (
       ID: observationArea.ID,
       UId: observationArea.UId,
       ScoutReportId: observationArea.ScoutReportId,
-      Geometry: observationArea.Geometry,
+      // @ts-ignore
+      Geometry: observationArea.Geometry.Json,
       WeedObservations: observationArea.WeedObservations.map((weedObs) => {
         return weedObs.WeedQuestionVals.map((weedQuestionVal) => {
           const questionVal = weedQuestionVal.QuestionVal;

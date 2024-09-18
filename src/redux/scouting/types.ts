@@ -40,7 +40,7 @@ export type ScoutingArea = {
   ID: number;
   UId: string;
   ScoutReportId: number;
-  Geometry: { Json: FeatureCollection } | FeatureCollection;
+  Geometry: FeatureCollection;
   WeedObservations: Observation[];
   InsectObservations: Observation[];
   DiseaseObservations: Observation[];
@@ -57,7 +57,7 @@ export type APIObservationArea = {
   ID: number;
   UId: string;
   ScoutReportId: number;
-  Geometry: { Json: FeatureCollection } | FeatureCollection;
+  Geometry: { Json: FeatureCollection };
   WeedObservations: WeedObservation[];
   InsectObservations: InsectObservation[];
   DiseaseObservations: DiseaseObservation[];

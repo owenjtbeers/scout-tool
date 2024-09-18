@@ -94,6 +94,7 @@ export const CreateScoutingReportPage = (
             scoutingAreas: convertObservationAreasToScoutingAreas(
               existingScoutingReport.ObservationAreas
             ),
+            // @ts-ignore TODO: Fix this
             scoutedBy: existingScoutingReport.ScoutedBy,
             scoutedById: existingScoutingReport.ScoutedById,
             scoutedDate: new Date(existingScoutingReport.ScoutedDate),
@@ -116,7 +117,10 @@ export const CreateScoutingReportPage = (
                 ID: 0,
                 UId: "Main",
                 ScoutReportId: 0,
-                Geometry: null,
+                Geometry: {
+                  type: "FeatureCollection",
+                  features: [],
+                },
                 WeedObservations: [],
                 InsectObservations: [],
                 DiseaseObservations: [],

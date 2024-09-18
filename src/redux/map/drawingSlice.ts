@@ -1,5 +1,7 @@
 import { PayloadAction, createSlice } from "@reduxjs/toolkit";
 import { FeatureCollection } from "@turf/helpers";
+import React from "react";
+import { set } from "react-hook-form";
 import { LatLng } from "react-native-maps";
 
 export type DrawingOperation =
@@ -8,21 +10,27 @@ export type DrawingOperation =
   | "upload-shapefile"
   | null;
 
+interface ColoredShape {
+  coordinates: LatLng[];
+  strokeColor?: React.CSSProperties["color"];
+}
 export type DrawMode = "polygon" | "polyline" | "point" | null;
 interface DrawingState {
   polygons: LatLng[][];
   points: LatLng[];
-  polylines: LatLng[][];
+  polylines: ColoredShape[];
   tempGeoJSON: FeatureCollection | null;
   isDrawing: boolean;
   operation: DrawingOperation;
   drawMode: DrawMode;
+  drawColor: React.CSSProperties["color"];
 }
 
 const initialState: DrawingState = {
   polygons: [],
   points: [],
   polylines: [],
+  drawColor: "red",
   tempGeoJSON: null,
   isDrawing: false,
   drawMode: null,
@@ -85,6 +93,26 @@ export const drawingSlice = createSlice({
         points: newPoints,
       };
     },
+    addPolyline: (state, action: PayloadAction<ColoredShape>) => ({
+      ...state,
+      polylines: [...state.polylines, action.payload],
+    }),
+    setPolylines: (state, action: PayloadAction<ColoredShape[]>) => ({
+      ...state,
+      polylines: action.payload,
+    }),
+    undoPolyline: (state) => {
+      const newPolylines = [...state.polylines];
+      newPolylines.pop();
+      return {
+        ...state,
+        polylines: newPolylines,
+      };
+    },
+    clearPolylines: (state) => ({
+      ...state,
+      polylines: [],
+    }),
     clearPolygons: (state) => ({
       ...state,
       polygons: [],
@@ -108,6 +136,13 @@ export const drawingSlice = createSlice({
     setTempGeoJSON: (state, action: PayloadAction<FeatureCollection>) => ({
       ...state,
       tempGeoJSON: action.payload,
+    }),
+    setDrawColor: (
+      state,
+      action: PayloadAction<React.CSSProperties["color"]>
+    ) => ({
+      ...state,
+      drawColor: action.payload,
     }),
     clearTempGeoJSON: (state) => ({
       ...state,

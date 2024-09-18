@@ -1,5 +1,11 @@
 import React, { useState } from "react";
-import { ScrollView, View, ActivityIndicator, Touchable } from "react-native";
+import {
+  ScrollView,
+  View,
+  ActivityIndicator,
+  InputAccessoryView,
+  Platform,
+} from "react-native";
 import {
   Button,
   useTheme,
@@ -195,12 +201,10 @@ const AddObservationSearchStep = (props: AddObservationSearchProps) => {
               }
             }}
           >
-            <ListItem.Content>
-              <ListItem.Title>
-                {pick.Name}
-                <ListItem.Subtitle right>{pick.Type}</ListItem.Subtitle>
-              </ListItem.Title>
-            </ListItem.Content>
+            <ListItem.Title>
+              {pick.Name}
+              <ListItem.Subtitle right>{pick.Type}</ListItem.Subtitle>
+            </ListItem.Title>
           </ListItem>
         ))}
     </ScrollView>
@@ -223,7 +227,17 @@ const AddObservationSpecifyNameStep = (
         label="New Pest Name"
         value={props.newPestName}
         onChangeText={props.setNewPestName}
+        inputAccessoryViewID="pestName"
       />
+      {Platform.OS === "ios" && (
+        <InputAccessoryView nativeID={"pestName"}>
+          <Input
+            value={props.newPestName}
+            focusable={false}
+            // disabled={true}
+          />
+        </InputAccessoryView>
+      )}
       <Button title="Back" onPress={() => setWizardStep("search")} />
       <Button title="Next" onPress={() => setWizardStep("select-type")} />
     </View>

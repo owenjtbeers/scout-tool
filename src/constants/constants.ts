@@ -5,3 +5,5 @@ export const defaultRegion: Region = {
   latitudeDelta: 0.001395240108024609,
   longitudeDelta: 0.0012214109301567078,
 };
+
+export const DEFAULT_POLYLINE_STROKE_WIDTH = 4;

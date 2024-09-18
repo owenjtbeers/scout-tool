@@ -3,7 +3,7 @@ import { View, Text } from "react-native";
 import { FontAwesome5 } from "@expo/vector-icons";
 import { Field } from "../../redux/fields/types";
 import centroid from "@turf/centroid";
-import MapView, { Marker, Geojson } from "react-native-maps";
+import MapView, { Marker, Geojson, Polyline } from "react-native-maps";
 import { useTheme } from "@rneui/themed";
 import { colors } from "../../constants/styles";
 import {
@@ -13,6 +13,11 @@ import {
 } from "@turf/helpers";
 import { mapCoordinatesToLatLng } from "../../utils/latLngConversions";
 import { ScoutingArea } from "../../redux/scouting/types";
+import { RootState } from "../../redux/store";
+import { useSelector } from "react-redux";
+import { MAP_DRAWING_REDUCER_KEY } from "../../redux/map/drawingSlice";
+import type { Feature, LineString } from "@turf/helpers";
+import { DEFAULT_POLYLINE_STROKE_WIDTH } from "../../constants/constants";
 
 type MapContentManagerProps = {
   mapRef: RefObject<MapView>;
@@ -23,6 +28,12 @@ type MapContentManagerProps = {
 export const ScoutingMapContentManager = (props: MapContentManagerProps) => {
   const { fields, scoutingAreas } = props;
   const { theme } = useTheme();
+  const isDrawing = useSelector(
+    (state: RootState) => state[MAP_DRAWING_REDUCER_KEY].isDrawing
+  );
+  const drawMode = useSelector(
+    (state: RootState) => state[MAP_DRAWING_REDUCER_KEY].drawMode
+  );
   return (
     <>
       {fields &&
@@ -64,21 +75,52 @@ export const ScoutingMapContentManager = (props: MapContentManagerProps) => {
             </React.Fragment>
           );
         })}
-      {scoutingAreas.map((scoutArea) => {
-        const area: FeatureCollection =
-          // @ts-ignore TODO: Figure out how to resolve having the JSON in two different places potentially
-          scoutArea.Geometry?.Json || scoutArea.Geometry;
+      {scoutingAreas.map((scoutArea, index) => {
+        const area: FeatureCollection = scoutArea.Geometry;
+        // @ts-ignore TODO: Figure out how to resolve having the JSON in two different places potentially ;
         if (!area?.features?.length) {
           return null;
         }
+        if (isDrawing && drawMode === "polyline" && scoutArea.UId === "Main") {
+          // Don't draw the main area while we are editing
+          return null;
+        } else if (!isDrawing && scoutArea.UId === "Main") {
+          // Loop through the features and draw them instead so we can control strokeColor
+          return (
+            <React.Fragment key={`${scoutArea.UId}-${index}`}>
+              {area.features.map((feature, index) => {
+                const feature2 = feature as Feature<LineString>;
+                return (
+                  <Polyline
+                    // @ts-ignore TODO: Figure out how to resolve this between the two libraries
+                    coordinates={mapCoordinatesToLatLng(
+                      feature2.geometry.coordinates
+                    )}
+                    strokeColor={
+                      feature.properties?.strokeColor || theme.colors.primary
+                    }
+                    strokeWidth={DEFAULT_POLYLINE_STROKE_WIDTH}
+                    // tracksViewChanges={false}
+                    // fillColor={colors.tertiary}
+                    key={`${scoutArea.UId}-${index}`}
+                  />
+                );
+              })}
+            </React.Fragment>
+          );
+        }
+
         return (
-          <React.Fragment key={scoutArea.UId}>
+          <React.Fragment key={`${scoutArea.UId}-${index}`}>
             {area && (
               <Geojson
                 // @ts-ignore TODO: Figure out how to resolve this between the two libraries
                 geojson={area}
-                strokeColor={theme.colors.primary}
-                fillColor={colors.tertiary}
+                strokeColor={
+                  area.features[0].properties?.strokeColor ||
+                  theme.colors.primary
+                }
+                // fillColor={colors.tertiary}
                 title={scoutArea.UId}
                 tracksViewChanges={false}
                 markerComponent={<CustomMarkerComponent text={scoutArea.UId} />}

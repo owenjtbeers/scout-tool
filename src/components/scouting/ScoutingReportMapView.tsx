@@ -11,11 +11,17 @@ import { ScoutingDrawingManager } from "./scout-draw/ScoutingDrawingManager";
 import { ScoutingDrawingButtons } from "./scout-draw/ScoutingDrawingButtons";
 import { Button } from "@rneui/themed";
 import { useDispatch } from "react-redux";
-import { drawingSlice } from "../../redux/map/drawingSlice";
+import { drawingSlice, DrawMode } from "../../redux/map/drawingSlice";
 import DrawingInfoText from "../map-draw/DrawingInfoText";
-import { featureCollection } from "@turf/helpers";
+import {
+  featureCollection,
+  Feature,
+  LineString,
+  Properties,
+} from "@turf/helpers";
 import {
   convertRNMapsPolygonToTurfFeature,
+  mapCoordinatesToLatLng,
   mapLatLngToCoordinates,
 } from "../../utils/latLngConversions";
 import { EmailScoutReportButton } from "./email/EmailScoutReportButton";
@@ -26,6 +32,8 @@ import {
   type UseFormSetValue,
 } from "react-hook-form";
 import type { ScoutingReportForm } from "./types";
+import FreehandDrawing from "../map-draw/FreeHandDraw";
+import { color } from "@rneui/base";
 
 interface ScoutingReportMapViewProps {
   fields: Field[];
@@ -72,14 +80,51 @@ export const ScoutingReportMapView = (props: ScoutingReportMapViewProps) => {
         case "point":
           dispatch(drawingSlice.actions.addPoint(event.nativeEvent.coordinate));
           break;
+        // case "polyline":
+        // This is handled elsewhere
+      }
+    }
+  };
+
+  const onDrawPress = (isDrawing: boolean, drawMode: DrawMode) => {
+    if (isDrawing && drawMode === "polyline") {
+      // Save the drawn polylines to form state
+      // Grab the polylines from the drawing state
+      const drawingState = drawingSlice.selectSlice(store.getState());
+      const convertedPolylines = drawingState.polylines.map((polyline) => {
+        return {
+          type: "Feature",
+          properties: {
+            strokeColor: polyline.strokeColor,
+          },
+          geometry: {
+            type: "LineString",
+            coordinates: mapLatLngToCoordinates(polyline.coordinates),
+          },
+        } as Feature<LineString, Properties>;
+      });
+      setFormValue("scoutingAreas.0.Geometry.features", convertedPolylines);
+      dispatch(drawingSlice.actions.clearAllShapes());
+    } else if (!isDrawing) {
+      // Put existing polylines back into drawing state for editing
+      const geoJsonFeatures = getFormValues(
+        "scoutingAreas.0.Geometry.features"
+      );
+      if (geoJsonFeatures?.length > 0) {
+        const convertedFeatures = geoJsonFeatures.map((feature: Feature) => {
+          const feature2 = feature as Feature<LineString, Properties>;
+          return {
+            coordinates: mapCoordinatesToLatLng(feature2.geometry.coordinates),
+            strokeColor: feature2?.properties?.strokeColor,
+          };
+        });
+        dispatch(drawingSlice.actions.setPolylines(convertedFeatures));
       }
     }
   };
   return (
     <View style={{ flex: 1 }}>
-      {isDrawingScoutingArea ? (
-        <ScoutingDrawingButtons mapRef={mapRef} />
-      ) : null}
+      <ScoutingDrawingButtons mapRef={mapRef} onDrawPress={onDrawPress} />
       <MapView
         style={styles.map}
         ref={mapRef}
@@ -89,6 +134,8 @@ export const ScoutingReportMapView = (props: ScoutingReportMapViewProps) => {
         showsMyLocationButton={false}
         toolbarEnabled={false}
         onPress={onPress}
+        scrollEnabled={!isDrawing}
+        zoomEnabled={!isDrawing}
       >
         <ScoutingMapContentManager
           mapRef={mapRef}
@@ -97,6 +144,9 @@ export const ScoutingReportMapView = (props: ScoutingReportMapViewProps) => {
         />
         <ScoutingDrawingManager mapRef={mapRef} />
       </MapView>
+      {isDrawing && drawMode === "polyline" ? (
+        <FreehandDrawing mapRef={mapRef} />
+      ) : null}
       <DrawingInfoText />
       {isDrawingScoutingArea ? (
         <Button
@@ -129,10 +179,12 @@ export const ScoutingReportMapView = (props: ScoutingReportMapViewProps) => {
               drawingState.polylines.forEach((polyline) => {
                 fc.features.push({
                   type: "Feature",
-                  properties: {},
+                  properties: {
+                    strokeColor: polyline.strokeColor,
+                  },
                   geometry: {
                     type: "LineString",
-                    coordinates: mapLatLngToCoordinates(polyline),
+                    coordinates: mapLatLngToCoordinates(polyline.coordinates),
                   },
                 });
               });
@@ -147,6 +199,7 @@ export const ScoutingReportMapView = (props: ScoutingReportMapViewProps) => {
                 InsectObservations: [],
                 DiseaseObservations: [],
                 GeneralObservations: [],
+                Type: "PointOfInterest",
               });
             } else {
               // If no shapes were drawn, display error message
@@ -165,8 +218,8 @@ export const ScoutingReportMapView = (props: ScoutingReportMapViewProps) => {
           title={"Exit Drawing Mode"}
         ></Button>
       ) : null}
-      {!isDrawingScoutingArea ? (
-        <EmailScoutReportButton mapRef={mapRef} getFormValues={getFormValues}/>
+      {!isDrawing ? (
+        <EmailScoutReportButton mapRef={mapRef} getFormValues={getFormValues} />
       ) : null}
     </View>
   );

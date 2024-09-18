@@ -1,7 +1,13 @@
 import React from "react";
 import { TouchableOpacity, StyleSheet } from "react-native";
 // import { TouchableOpacity } from "react-native-gesture-handler";
-import MapView, { Polygon, Marker, Geojson, LatLng } from "react-native-maps";
+import MapView, {
+  Polygon,
+  Marker,
+  Geojson,
+  LatLng,
+  Polyline,
+} from "react-native-maps";
 import { useSelector, useDispatch } from "react-redux";
 import {
   MAP_DRAWING_REDUCER_KEY,
@@ -9,33 +15,29 @@ import {
 } from "../../redux/map/drawingSlice";
 import { RootState } from "../../redux/store";
 import { colors } from "../../constants/styles";
+import { DEFAULT_POLYLINE_STROKE_WIDTH } from "../../constants/constants";
 
+/**
+ * This component is responsible for rendering all the shapes drawn on the map
+ * This component DOES NOT HANDLE the input for drawing shapes
+ * @param props
+ * @returns all the currently drawn shapes on the map
+ */
 export const DrawingManager = (props: { mapRef: React.RefObject<MapView> }) => {
-  const dispatch = useDispatch();
   const { mapRef } = props;
   const isDrawing = useSelector(
     (state: RootState) => state[MAP_DRAWING_REDUCER_KEY].isDrawing
   );
 
-  const polygons = useSelector(
-    (state: RootState) => state[MAP_DRAWING_REDUCER_KEY].polygons
-  );
-
-  const points = useSelector(
-    (state: RootState) => state[MAP_DRAWING_REDUCER_KEY].points
-  );
   const tempGeoJSON = useSelector(
     (state: RootState) => state[MAP_DRAWING_REDUCER_KEY].tempGeoJSON
   );
 
-  return polygons.length || points.length || tempGeoJSON !== null ? (
+  return (
     <>
-      <DrawingPolygons polygons={polygons} isDrawing={isDrawing} />
-      <DrawingPoints
-        points={points}
-        isDrawing={isDrawing}
-        dispatch={dispatch}
-      />
+      <DrawingPolygons isDrawing={isDrawing} />
+      <DrawingPoints isDrawing={isDrawing} />
+      <DrawingPolylines isDrawing={isDrawing} />
       {tempGeoJSON !== null && (
         <Geojson
           key={"tempGeoJSON"}
@@ -46,13 +48,13 @@ export const DrawingManager = (props: { mapRef: React.RefObject<MapView> }) => {
         />
       )}
     </>
-  ) : null;
+  );
 };
-export const DrawingPolygons = (props: {
-  polygons: LatLng[][];
-  isDrawing: boolean;
-}) => {
-  const { polygons, isDrawing } = props;
+export const DrawingPolygons = (props: { isDrawing: boolean }) => {
+  const polygons = useSelector(
+    (state: RootState) => state[MAP_DRAWING_REDUCER_KEY].polygons
+  );
+  const { isDrawing } = props;
   return (
     <>
       {polygons?.length > 0 &&
@@ -136,12 +138,29 @@ export const DrawingPointForPolygon = (props: {
   );
 };
 
-export const DrawingPoints = (props: {
-  points: LatLng[];
-  isDrawing: boolean;
-  dispatch: any;
-}) => {
-  const { points, isDrawing, dispatch } = props;
+export const DrawingPolylines = (props: { isDrawing: boolean }) => {
+  const polylines = useSelector(
+    (state: RootState) => state[MAP_DRAWING_REDUCER_KEY].polylines
+  );
+  if (!polylines || polylines?.length === 0) {
+    return null;
+  }
+  return polylines.map((polyline, index) => {
+    return (
+      <Polyline
+        key={`Polyline-${index}`}
+        coordinates={polyline.coordinates}
+        strokeColor={polyline?.strokeColor || "black"}
+        strokeWidth={DEFAULT_POLYLINE_STROKE_WIDTH}
+      />
+    );
+  });
+};
+export const DrawingPoints = (props: { isDrawing: boolean }) => {
+  const dispatch = useDispatch();
+  const points = useSelector(
+    (state: RootState) => state[MAP_DRAWING_REDUCER_KEY].points
+  );
   if (!points || points?.length === 0) {
     return null;
   }
