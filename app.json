@@ -13,12 +13,17 @@
     },
     "jsEngine": "hermes",
     "plugins": [],
-    "assetBundlePatterns": ["**/*"],
+    "assetBundlePatterns": [
+      "**/*"
+    ],
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.owenbeers.scouttool",
       "jsEngine": "jsc",
-      "buildNumber": "0"
+      "buildNumber": "4",
+      "config": {
+        "usesNonExemptEncryption": false
+      }
     },
     "android": {
       "adaptiveIcon": {
