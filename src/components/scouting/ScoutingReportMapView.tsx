@@ -1,39 +1,39 @@
-import React from "react";
-import { View } from "react-native";
-import MapView from "react-native-maps";
-import { Field } from "../../redux/fields/types";
-import { RootState, store } from "../../redux/store";
-import { useSelector } from "react-redux";
-import { defaultRegion } from "../../constants/constants";
-import { MaterialIcons } from "@expo/vector-icons";
-import { ScoutingMapContentManager } from "./ScoutingMapContentManager";
-import { ScoutingDrawingManager } from "./scout-draw/ScoutingDrawingManager";
-import { ScoutingDrawingButtons } from "./scout-draw/ScoutingDrawingButtons";
 import { Button } from "@rneui/themed";
-import { useDispatch } from "react-redux";
-import { drawingSlice, DrawMode } from "../../redux/map/drawingSlice";
-import DrawingInfoText from "../map-draw/DrawingInfoText";
 import {
-  featureCollection,
   Feature,
+  featureCollection,
   LineString,
   Properties,
 } from "@turf/helpers";
+import React, { useEffect } from "react";
+import { View } from "react-native";
+import MapView from "react-native-maps";
+import { useDispatch, useSelector } from "react-redux";
+import { defaultRegion } from "../../constants/constants";
+import { Field } from "../../redux/fields/types";
+import { drawingSlice, DrawMode } from "../../redux/map/drawingSlice";
+import { RootState, store } from "../../redux/store";
 import {
   convertRNMapsPolygonToTurfFeature,
   mapCoordinatesToLatLng,
   mapLatLngToCoordinates,
 } from "../../utils/latLngConversions";
+import DrawingInfoText from "../map-draw/DrawingInfoText";
+import { ScoutingMapContentManager } from "./ScoutingMapContentManager";
 import { EmailScoutReportButton } from "./email/EmailScoutReportButton";
+import { ScoutingDrawingButtons } from "./scout-draw/ScoutingDrawingButtons";
+import { ScoutingDrawingManager } from "./scout-draw/ScoutingDrawingManager";
 
+import bbox from "@turf/bbox";
 import {
-  set,
   type UseFormGetValues,
-  type UseFormSetValue,
+  type UseFormSetValue
 } from "react-hook-form";
-import type { ScoutingReportForm } from "./types";
+import { convertTurfBBoxToLatLng } from "../../utils/latLngConversions";
 import FreehandDrawing from "../map-draw/FreeHandDraw";
-import { color } from "@rneui/base";
+import { MapUtilButtons } from "../map/components/MapUtilButtons";
+import { fitToBoundsForMapView } from "../map/utils";
+import type { ScoutingReportForm } from "./types";
 
 interface ScoutingReportMapViewProps {
   fields: Field[];
@@ -53,6 +53,7 @@ export const ScoutingReportMapView = (props: ScoutingReportMapViewProps) => {
     isDrawingScoutingArea,
     setIsDrawingScoutingArea,
   } = props;
+
   const dispatch = useDispatch();
   const initialRegion = useSelector((state: RootState) => state.map.region);
   const mapRef = React.useRef<MapView>(null);
@@ -103,7 +104,9 @@ export const ScoutingReportMapView = (props: ScoutingReportMapViewProps) => {
           },
         } as Feature<LineString, Properties>;
       });
-      setFormValue("scoutingAreas.0.Geometry.features", convertedPolylines, { shouldDirty: true });
+      setFormValue("scoutingAreas.0.Geometry.features", convertedPolylines, {
+        shouldDirty: true,
+      });
       dispatch(drawingSlice.actions.clearAllShapes());
     } else if (!isDrawing) {
       // Put existing polylines back into drawing state for editing
@@ -122,6 +125,17 @@ export const ScoutingReportMapView = (props: ScoutingReportMapViewProps) => {
       }
     }
   };
+  useEffect(() => {
+    // Center the map on the field boundary
+    const fieldBoundary = getFormValues("field.ActiveBoundary.Json");
+    if (fieldBoundary && mapRef.current !== null) {
+      const fc = featureCollection(fieldBoundary.features);
+      const bboxOfFields = bbox(fc);
+      console.log("bboxOfFields", bboxOfFields);
+      fitToBoundsForMapView(mapRef, convertTurfBBoxToLatLng(bboxOfFields));
+    }
+  }, [mapRef.current]);
+
   return (
     <View style={{ flex: 1 }}>
       <ScoutingDrawingButtons mapRef={mapRef} onDrawPress={onDrawPress} />
@@ -144,6 +158,7 @@ export const ScoutingReportMapView = (props: ScoutingReportMapViewProps) => {
         />
         <ScoutingDrawingManager mapRef={mapRef} />
       </MapView>
+      <MapUtilButtons mapRef={mapRef} fields={fields} />
       {isDrawing && drawMode === "polyline" ? (
         <FreehandDrawing mapRef={mapRef} />
       ) : null}

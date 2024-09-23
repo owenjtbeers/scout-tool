@@ -171,7 +171,11 @@ const AddObservationSearchStep = (props: AddObservationSearchProps) => {
         placeholder="Search, or specify new name of pest"
         onChangeText={setSearchValue}
         value={searchValue}
+        inputAccessoryViewID="search"
       />
+      <InputAccessoryView nativeID={"search"}>
+        <Input value={searchValue} focusable={false} />
+      </InputAccessoryView>
       {searchValue.length > 1 && (
         <Button
           onPress={() => {

@@ -200,7 +200,6 @@ const generateImagesHtml = async (report: ScoutingReportForm) => {
 
   const imagesHtml = report.images.map(async (image) => {
     let stringifiedImage = "";
-    console.log("image url includes", image.Url.includes("file://"), image.Url);
     // Stringify the image object to be able to pass it to the next page
     if (image.Url.includes("http")) {
       // We need to fetch the image from the URL
@@ -216,7 +215,6 @@ const generateImagesHtml = async (report: ScoutingReportForm) => {
       image.Url?.includes("file://") ||
       image.Url?.includes("content://")
     ) {
-      console.log("image local", "here");
       stringifiedImage = await readAsStringAsync(image.Url, {
         encoding: "base64",
       });

@@ -9,7 +9,7 @@ interface Props {
   mapRef: React.RefObject<MapView>;
   fields: Field[] | undefined;
 }
-const MapUtilButtons = (props: Props) => {
+export const MapUtilButtons = (props: Props) => {
   const { mapRef, fields } = props;
   return (
     <View style={styles.positioningContainer}>
@@ -33,4 +33,3 @@ const styles = StyleSheet.create({
     gap: 10,
   },
 });
-export default MapUtilButtons;

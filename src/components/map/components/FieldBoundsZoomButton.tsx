@@ -10,6 +10,7 @@ import { Field } from "../../../redux/fields/types";
 import { Feature, featureCollection } from "@turf/helpers";
 import bbox from "@turf/bbox";
 import { convertTurfBBoxToLatLng } from "../../../utils/latLngConversions";
+import { fitToBoundsForMapView } from "../utils";
 
 interface Props {
   mapRef: React.RefObject<MapView>;
@@ -31,17 +32,7 @@ const FieldBoundsZoomButton = (props: Props) => {
       const fc = featureCollection(features);
       const bboxOfFields = bbox(fc);
       if (bboxOfFields) {
-        mapRef.current?.fitToCoordinates(
-          convertTurfBBoxToLatLng(bboxOfFields),
-          {
-            edgePadding: {
-              top: 50,
-              right: 50,
-              bottom: 50,
-              left: 50,
-            },
-          }
-        );
+        fitToBoundsForMapView(mapRef, convertTurfBBoxToLatLng(bboxOfFields));
       }
     }
   };

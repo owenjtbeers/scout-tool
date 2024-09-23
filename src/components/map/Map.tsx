@@ -9,8 +9,6 @@ import * as Location from "expo-location";
 
 // Components
 import { MapContentManager } from "./MapContentManager";
-import UserLocationButton from "./components/UserLocationButton";
-import FieldBoundsZoomButton from "./components/FieldBoundsZoomButton";
 
 // Data
 import { RootState } from "../../redux/store";
@@ -25,16 +23,14 @@ import { useGetFieldsQuery } from "../../redux/fields/fieldsApi";
 import { useSelectedGrowerAndFarm } from "../layout/topBar/selectionHooks";
 import { Feature, FeatureCollection, featureCollection } from "@turf/helpers";
 import bbox from "@turf/bbox";
-import {
-  convertTurfBBoxToLatLng,
-  mapCoordinatesToLatLng,
-} from "../../utils/latLngConversions";
-import MapUtilButtons from "./components/MapUtilButtons";
+import { convertTurfBBoxToLatLng } from "../../utils/latLngConversions";
+import { MapUtilButtons } from "./components/MapUtilButtons";
 import {
   GLOBAL_SELECTIONS_REDUCER_KEY,
   globalSelectionsSlice,
 } from "../../redux/globalSelections/globalSelectionsSlice";
 import { EditFieldCropHistoryPage } from "../fields/EditFieldCropHistoryPage";
+import { fitToBoundsForMapView } from "./utils";
 
 export const MapScreen = () => {
   const mapRef = React.useRef<MapView>(null);
@@ -61,7 +57,6 @@ export const MapScreen = () => {
         })();
       });
     }
-
   }, []);
 
   const onRegionChange = useCallback((region: Region) => {
@@ -95,17 +90,7 @@ export const MapScreen = () => {
       const fc = featureCollection(features);
       const bboxOfFields = bbox(fc);
       if (bboxOfFields) {
-        mapRef.current?.fitToCoordinates(
-          convertTurfBBoxToLatLng(bboxOfFields),
-          {
-            edgePadding: {
-              top: 50,
-              right: 50,
-              bottom: 50,
-              left: 50,
-            },
-          }
-        );
+        fitToBoundsForMapView(mapRef, convertTurfBBoxToLatLng(bboxOfFields));
         dispatch(globalSelectionsSlice.actions.setShouldZoomToBbox(false));
       }
     }

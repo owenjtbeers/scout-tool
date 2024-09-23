@@ -68,7 +68,7 @@ export const CreateScoutingReportPage = (
     growerEmail,
   } = props;
   const router = useRouter();
-  let listener = () => { };
+  let listener = () => {};
   const navigation = useNavigation();
   const dispatch = useDispatch();
   const draftedReports = useSelector(
@@ -83,73 +83,73 @@ export const CreateScoutingReportPage = (
     const draftedReport = draftedReports[draftedReportKey];
     if (draftedReport) {
       // @ts-ignore not worth fixing
-      defaultFormValues = { ...draftedReport, scoutedDate: new Date(draftedReport.scoutedDate) };
-      console.log("Drafted Report", draftedReport);
-      console.log("Scouted Date", draftedReport.scoutedDate);
+      defaultFormValues = {
+        ...draftedReport,
+        scoutedDate: new Date(draftedReport.scoutedDate),
+      };
     }
   }
   console.log(draftedReportKey);
 
   if (!draftedReportKey) {
-    console.log("No Drafted Report Key");
     defaultFormValues =
       mode === "edit" && existingScoutingReport
         ? {
-          ID: existingScoutingReport.ID,
-          scoutingAreas: convertObservationAreasToScoutingAreas(
-            existingScoutingReport.ObservationAreas
-          ),
-          // @ts-ignore TODO: Fix this
-          scoutedBy: existingScoutingReport.ScoutedBy,
-          scoutedById: existingScoutingReport.ScoutedById,
-          scoutedDate: new Date(existingScoutingReport.ScoutedDate),
-          summaryText: existingScoutingReport.Summary,
-          fieldIds: existingScoutingReport.FieldIds.map((obj) => obj.ID),
-          images: existingScoutingReport?.Images || [],
-          recommendations: existingScoutingReport.Recommendation,
-          growthStage: existingScoutingReport.GrowthStage,
-          field: selectedField,
-          growerName,
-          growerEmail,
-          farmName,
-          crop: existingScoutingReport.Crop,
-          status: existingScoutingReport.Status,
-        }
+            ID: existingScoutingReport.ID,
+            scoutingAreas: convertObservationAreasToScoutingAreas(
+              existingScoutingReport.ObservationAreas
+            ),
+            // @ts-ignore TODO: Fix this
+            scoutedBy: existingScoutingReport.ScoutedBy,
+            scoutedById: existingScoutingReport.ScoutedById,
+            scoutedDate: new Date(existingScoutingReport.ScoutedDate),
+            summaryText: existingScoutingReport.Summary,
+            fieldIds: existingScoutingReport.FieldIds.map((obj) => obj.ID),
+            images: existingScoutingReport?.Images || [],
+            recommendations: existingScoutingReport.Recommendation,
+            growthStage: existingScoutingReport.GrowthStage,
+            field: selectedField,
+            growerName,
+            growerEmail,
+            farmName,
+            crop: existingScoutingReport.Crop,
+            status: existingScoutingReport.Status,
+          }
         : {
-          ID: 0,
-          scoutingAreas: [
-            {
-              ID: 0,
-              UId: "Main",
-              ScoutReportId: 0,
-              Geometry: {
-                type: "FeatureCollection",
-                features: [],
+            ID: 0,
+            scoutingAreas: [
+              {
+                ID: 0,
+                UId: "Main",
+                ScoutReportId: 0,
+                Geometry: {
+                  type: "FeatureCollection",
+                  features: [],
+                },
+                WeedObservations: [],
+                InsectObservations: [],
+                DiseaseObservations: [],
+                GeneralObservations: [],
+                Type: "Main",
               },
-              WeedObservations: [],
-              InsectObservations: [],
-              DiseaseObservations: [],
-              GeneralObservations: [],
-              Type: "Main",
-            },
-          ],
-          scoutedDate: new Date(),
-          scoutedBy: undefined,
-          media: [],
-          summaryText: "",
-          recommendations: "",
-          growthStage: "",
-          fieldIds: fields.map((field) => field.ID),
-          images: [],
-          field: selectedField,
-          growerName,
-          growerEmail,
-          farmName,
-          crop: getMostRecentCrop(selectedField.FieldCrops)?.Crop,
-          status: "draft" as ScoutingReportStatus,
-          uniqueDraftID:
-            fields.map((field) => field.ID).join(",") + "-" + Date.now(),
-        };
+            ],
+            scoutedDate: new Date(),
+            scoutedBy: undefined,
+            media: [],
+            summaryText: "",
+            recommendations: "",
+            growthStage: "",
+            fieldIds: fields?.map((field) => field?.ID),
+            images: [],
+            field: selectedField,
+            growerName,
+            growerEmail,
+            farmName,
+            crop: getMostRecentCrop(selectedField?.FieldCrops || [])?.Crop,
+            status: "draft" as ScoutingReportStatus,
+            uniqueDraftID:
+              fields.map((field) => field?.ID).join(",") + "-" + Date.now(),
+          };
   }
 
   const {
@@ -182,13 +182,12 @@ export const CreateScoutingReportPage = (
     return () => navigation.removeListener("beforeRemove", handleBeforeRemove);
   }, []);
 
-
   // Callback definitions
   const onLeavePage = () => {
     reset();
     dispatch(drawingSlice.actions.clearState());
     dispatch(globalSelectionsSlice.actions.setField(null));
-    navigation.removeListener("beforeRemove", () => { });
+    navigation.removeListener("beforeRemove", () => {});
     router.back();
   };
 
@@ -351,8 +350,8 @@ const CreateScoutReportForm = ({
           setIsDrawingScoutingArea={setIsDrawingScoutingArea}
           setIsDoneWithReport={setIsDoneWithReport}
           formSetValue={formSetValue}
-        // setIsTakingPhoto={setIsTakingPhoto}
-        // setPhotoMetadata={setPhotoMetadata}
+          // setIsTakingPhoto={setIsTakingPhoto}
+          // setPhotoMetadata={setPhotoMetadata}
         />
       ) : (
         <ScoutingReportObservationContent
