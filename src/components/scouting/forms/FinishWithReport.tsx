@@ -94,6 +94,7 @@ export const FinishWithScoutingReport = (
             const postData = mapFormDataToPostScoutReport(data, user);
             let scoutingReportResponse;
             if (postData.ID) {
+              console.log(postData?.ObservationAreas?.[0].Geometry)
               scoutingReportResponse = await updateScoutReport({
                 id: postData.ID,
                 data: postData,
@@ -126,7 +127,11 @@ export const FinishWithScoutingReport = (
                   data.images
                 );
               }
-
+              if (data.uniqueDraftID) {
+                dispatch(
+                  scoutingSlice.actions.removeDraftedReport(data.uniqueDraftID)
+                );
+              }
               Alert.alert(
                 "Scouting Report saved successfully",
                 "Press continue to proceed",
@@ -134,14 +139,14 @@ export const FinishWithScoutingReport = (
                   {
                     text: "Continue",
                     onPress: () => {
-                      router.back();
+
                     },
                   },
                 ]
               );
-              // console.log(scoutingReportResponse.data);
+              onSuccess && onSuccess();
             }
-            onSuccess && onSuccess();
+
           },
           // Go back to form if there is an error
           onBackToForm

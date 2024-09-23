@@ -103,7 +103,7 @@ export const ScoutingReportMapView = (props: ScoutingReportMapViewProps) => {
           },
         } as Feature<LineString, Properties>;
       });
-      setFormValue("scoutingAreas.0.Geometry.features", convertedPolylines);
+      setFormValue("scoutingAreas.0.Geometry.features", convertedPolylines, { shouldDirty: true });
       dispatch(drawingSlice.actions.clearAllShapes());
     } else if (!isDrawing) {
       // Put existing polylines back into drawing state for editing
