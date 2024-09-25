@@ -237,6 +237,8 @@ export const mapFormDataToPostScoutReport = (
     scoutedDate,
     recommendations,
     growthStage,
+    fieldArea,
+    fieldAreaUnit,
   } = scoutReportForm;
   return {
     ID: scoutReportForm.ID || 0,
@@ -244,6 +246,8 @@ export const mapFormDataToPostScoutReport = (
     ScoutedDate: scoutedDate.toISOString(),
     // TODO: Record the scouted by properly through the UI
     ScoutedById: scoutedById || currentUser?.ID || 0,
+    FieldArea: fieldArea,
+    FieldAreaUnit: fieldAreaUnit,
     Summary: summaryText,
     Recommendation: recommendations,
     GrowthStage: growthStage,
@@ -315,7 +319,8 @@ export const convertObservationAreasToScoutingAreas = (
       ID: observationArea.ID,
       UId: observationArea.UId,
       ScoutReportId: observationArea.ScoutReportId,
-      Geometry: observationArea.Geometry,
+      // @ts-ignore
+      Geometry: observationArea.Geometry.Json,
       WeedObservations: observationArea.WeedObservations.map((weedObs) => {
         return weedObs.WeedQuestionVals.map((weedQuestionVal) => {
           const questionVal = weedQuestionVal.QuestionVal;

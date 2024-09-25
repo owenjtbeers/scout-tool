@@ -126,22 +126,23 @@ export const FinishWithScoutingReport = (
                   data.images
                 );
               }
-
+              if (data.status !== "draft" && data.uniqueDraftID) {
+                dispatch(
+                  scoutingSlice.actions.removeDraftedReport(data.uniqueDraftID)
+                );
+              }
               Alert.alert(
                 "Scouting Report saved successfully",
                 "Press continue to proceed",
                 [
                   {
                     text: "Continue",
-                    onPress: () => {
-                      router.back();
-                    },
+                    onPress: () => {},
                   },
                 ]
               );
-              // console.log(scoutingReportResponse.data);
+              onSuccess && onSuccess();
             }
-            onSuccess && onSuccess();
           },
           // Go back to form if there is an error
           onBackToForm

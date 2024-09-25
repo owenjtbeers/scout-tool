@@ -96,6 +96,7 @@ export const ScoutingReportObservationContent = (
         style={{
           paddingTop: 10,
           paddingBottom: 10,
+          backgroundColor: theme.colors.grey0,
         }}
       >
         <AddObservation
@@ -108,7 +109,6 @@ export const ScoutingReportObservationContent = (
           formControl={formControl}
         />
       </View>
-
       <ScrollView
         style={{
           // ...scoutFormStyles.page,
@@ -345,18 +345,20 @@ export const ScoutingReportObservationContent = (
           </View>
         </View>
       </ScrollView>
-      <Button
-        title={"BACK TO SUMMARY"}
-        containerStyle={{
-          maxWidth: "95%",
-          minWidth: "85%",
-          margin: "auto",
-          backgroundColor: "transparent",
-          overflow: "hidden",
-        }}
-        radius={20}
-        onPress={handleSubmit}
-      />
+      <View style={{ backgroundColor: "lightgray", paddingBottom: 7 }}>
+        <Button
+          title={"BACK TO SUMMARY"}
+          containerStyle={{
+            maxWidth: "95%",
+            minWidth: "85%",
+            margin: "auto",
+            backgroundColor: "transparent",
+            overflow: "hidden",
+          }}
+          radius={20}
+          onPress={handleSubmit}
+        />
+      </View>
     </View>
   );
 };

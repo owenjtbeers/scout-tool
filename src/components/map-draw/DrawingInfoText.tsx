@@ -5,7 +5,6 @@ import { RootState } from "../../redux/store";
 import { MAP_DRAWING_REDUCER_KEY } from "../../redux/map/drawingSlice";
 import { Ionicons } from "@expo/vector-icons";
 
-
 const DrawingInfoText = () => {
   const isDrawing = useSelector(
     (state: RootState) => state[MAP_DRAWING_REDUCER_KEY].isDrawing
@@ -19,7 +18,14 @@ const DrawingInfoText = () => {
         <DrawPolygonText />
       </View>
     );
+  } else if (isDrawing && drawMode === "polyline") {
+    return (
+      <View style={styles.positioningContainer}>
+        <DrawPolylineText />
+      </View>
+    );
   }
+
   return (
     <>
       {isDrawing && (
@@ -36,18 +42,30 @@ const DrawPolygonText = () => {
 
   if (isCollapsed) {
     return (
-      <TouchableOpacity style={styles.positioningContainer} onPress={() => setIsCollapsed(false)}>
+      <TouchableOpacity
+        style={styles.positioningContainer}
+        onPress={() => setIsCollapsed(false)}
+      >
         <Text>Stuck? Need Info?</Text>
-        <Ionicons name="information-circle" size={24} color="black" style={{ margin: "auto" }} />
+        <Ionicons
+          name="information-circle"
+          size={24}
+          color="black"
+          style={{ margin: "auto" }}
+        />
       </TouchableOpacity>
     );
   }
   return (
     <View style={styles.positioningContainer}>
-      <View style={{ flex: 1, justifyContent: "space-between", flexDirection: "row" }}>
-        <Text>
-          Drawing a Polygon
-        </Text>
+      <View
+        style={{
+          flex: 1,
+          justifyContent: "space-between",
+          flexDirection: "row",
+        }}
+      >
+        <Text>Drawing a Polygon</Text>
         <TouchableOpacity onPress={() => setIsCollapsed(true)}>
           <Ionicons name="close-sharp" size={24} color="black" />
         </TouchableOpacity>
@@ -57,12 +75,22 @@ const DrawPolygonText = () => {
         2. Tap a different point{"\n"}
         2a. Tap and hold a point to move it
       </Text>
-      <Text style={{ fontWeight: "bold", fontSize: 24, flex: 1, flexWrap: "wrap" }}>
-        3. Tap the first point to close the polygon or exit polygon drawing mode.
+      <Text
+        style={{ fontWeight: "bold", fontSize: 24, flex: 1, flexWrap: "wrap" }}
+      >
+        3. Tap the first point to close the polygon or exit polygon drawing
+        mode.
       </Text>
-      <Text>
-        4. Then submit field by pressing the button at the bottom
-      </Text>
+      <Text>4. Then submit field by pressing the button at the bottom</Text>
+    </View>
+  );
+};
+
+const DrawPolylineText = () => {
+  return (
+    <View style={styles.positioningContainer}>
+      <Text>Draw a line by tapping on the map</Text>
+      <Text>Exit by tapping the Draw Button</Text>
     </View>
   );
 };

@@ -13,7 +13,7 @@ import { OperationsModal } from "./OperationsModal";
 import { MapContentManager } from "../map/MapContentManager";
 import { useSelectedGrowerAndFarm } from "../layout/topBar/selectionHooks";
 import { useGetFieldsQuery } from "../../redux/fields/fieldsApi";
-import MapUtilButtons from "./MapUtilButtons";
+import { MapUtilButtons } from "./MapUtilButtons";
 import DrawingInfoText from "./DrawingInfoText";
 
 export const DrawableMapScreen = () => {
@@ -56,7 +56,7 @@ export const DrawableMapScreen = () => {
           // provider={PROVIDER_GOOGLE}
           region={initialRegion || defaultRegion}
           onPress={onPress}
-          onMapReady={() => { }}
+          onMapReady={() => {}}
           mapType={"hybrid"}
           showsUserLocation={true}
           showsMyLocationButton={false}

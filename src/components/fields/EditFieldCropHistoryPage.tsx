@@ -209,7 +209,7 @@ const FieldCropHistoryForm = (props: FieldCropHistoryFormProps) => {
                     fieldId: selectedField?.ID as number,
                     data: newData,
                   });
-                  
+
                   if (response?.data) {
                     onClose();
                   } else if (getErrorMessage(response)) {
@@ -355,7 +355,6 @@ const EditingFieldCropForm = (props: EditingFieldCropFormProps) => {
         <Dialog.Button
           title={"Save"}
           onPress={handleSubmit((data) => {
-            console.log("Data in form", data);
             onSave(data);
           })}
         />

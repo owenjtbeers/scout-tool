@@ -34,21 +34,21 @@ export const EmailScoutReportButton = (props: EmailButtonProps) => {
           ?.Json as FeatureCollection;
         const fc = featureCollection(fieldBoundary.features);
         const bboxOfFields = bbox(fc);
-        mapRef.current?.fitToCoordinates(
-          convertTurfBBoxToLatLng(bboxOfFields),
-          {
-            animated: false,
-            edgePadding: {
-              top: 10,
-              right: 10,
-              bottom: 10,
-              left: 10,
-            },
-          }
-        );
+        // mapRef.current?.fitToCoordinates(
+        //   convertTurfBBoxToLatLng(bboxOfFields),
+        //   {
+        //     animated: false,
+        //     edgePadding: {
+        //       top: 10,
+        //       right: 10,
+        //       bottom: 10,
+        //       left: 10,
+        //     },
+        //   }
+        // );
 
         // TODO: Figure out a better way to wait for the map to finish rendering from the fitToCoordinates
-        await new Promise((resolve) => setTimeout(resolve, 200));
+        // await new Promise((resolve) => setTimeout(resolve, 200));
         const user = currentUserResponse?.data;
         let mapScreenshotBase64 = "";
         if (mapRef?.current?.state?.isReady) {

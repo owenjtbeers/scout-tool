@@ -36,7 +36,6 @@ export const Signup = () => {
     formData.email = formData.email.toLowerCase();
     const response = await signupUser(formData);
     const { data: responseData, error } = response;
-    console.log
     if (responseData && responseData.data) {
       if (responseData.data.token) {
         dispatch(userSlice.actions.setToken(responseData.data.token));

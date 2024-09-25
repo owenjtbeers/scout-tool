@@ -84,7 +84,6 @@ export default () => {
   const globalSelections = useSelector(
     (state: RootState) => state[GLOBAL_SELECTIONS_REDUCER_KEY]
   );
-  console.log("globalSelections", globalSelections);
   // TODO: This is very excessive and way too expensive
   const {
     data: fieldResponse,
@@ -111,7 +110,7 @@ export default () => {
         growerEmail={globalSelections?.grower?.Email}
         growerName={globalSelections?.grower?.Name}
         farmName={globalSelections?.farm?.Name}
-        fields={fieldResponse?.data}
+        fields={fieldResponse?.data as Field[]}
         slug={stringifiedSlug}
       />
     );
@@ -121,7 +120,7 @@ export default () => {
         growerEmail={globalSelections?.grower?.Email}
         growerName={globalSelections?.grower?.Name}
         farmName={globalSelections?.farm?.Name}
-        fields={fieldResponse?.data}
+        fields={fieldResponse?.data as Field[]}
         slug={stringifiedSlug}
       />
     );

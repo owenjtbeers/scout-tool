@@ -33,10 +33,13 @@ export const RNMapsPolygonArea = (
 };
 
 export const FeatureCollectionArea = (
-  fc: FeatureCollection,
+  fc: FeatureCollection | undefined,
   unit: Units,
   precision: number | undefined
 ) => {
+  if (fc === undefined || fc.features.length === 0) {
+    return 0;
+  }
   let calculatedArea = area(fc);
   if (unit !== "meters" && calculatedArea !== undefined) {
     calculatedArea = convertArea(calculatedArea, "meters", unit);
