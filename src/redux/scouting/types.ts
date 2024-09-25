@@ -70,6 +70,8 @@ export type APIScoutingReport = {
   Fields: number[];
   FieldIds: { ID: number; Name: string }[];
   GrowthStage: string;
+  FieldArea: number;
+  FieldAreaUnit: ScoutingToolUnits;
   Summary: string;
   Recommendation: string;
   ScoutedDate: string;

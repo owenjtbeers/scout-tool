@@ -146,6 +146,30 @@ export const ScoutingReportSummaryContent = (
           />
           <Controller
             control={formControl}
+            name="fieldArea"
+            defaultValue={0}
+            render={({
+              field: { onChange, onBlur, value },
+              fieldState: { error },
+            }) => (
+              <Input
+                label={`Field Area (${
+                  formGetValues("fieldAreaUnit") || "acres"
+                })`}
+                placeholder={"Enter Area"}
+                keyboardType={"numeric"}
+                onChangeText={(value) => {
+                  onChange(value.replace(/[^0-9]/g, ""));
+                }}
+                value={value.toString()}
+                errorMessage={error?.message}
+                autoCapitalize={"none"}
+              />
+            )}
+          />
+
+          <Controller
+            control={formControl}
             render={({
               field: { onChange, onBlur, value },
               fieldState: { error },

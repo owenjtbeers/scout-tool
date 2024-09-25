@@ -25,10 +25,7 @@ import { ScoutingDrawingButtons } from "./scout-draw/ScoutingDrawingButtons";
 import { ScoutingDrawingManager } from "./scout-draw/ScoutingDrawingManager";
 
 import bbox from "@turf/bbox";
-import {
-  type UseFormGetValues,
-  type UseFormSetValue
-} from "react-hook-form";
+import { type UseFormGetValues, type UseFormSetValue } from "react-hook-form";
 import { convertTurfBBoxToLatLng } from "../../utils/latLngConversions";
 import FreehandDrawing from "../map-draw/FreeHandDraw";
 import { MapUtilButtons } from "../map/components/MapUtilButtons";
@@ -131,7 +128,6 @@ export const ScoutingReportMapView = (props: ScoutingReportMapViewProps) => {
     if (fieldBoundary && mapRef.current !== null) {
       const fc = featureCollection(fieldBoundary.features);
       const bboxOfFields = bbox(fc);
-      console.log("bboxOfFields", bboxOfFields);
       fitToBoundsForMapView(mapRef, convertTurfBBoxToLatLng(bboxOfFields));
     }
   }, [mapRef.current]);

@@ -4,7 +4,8 @@ import type {
   ScoutingReportStatus,
 } from "../../redux/scouting/types";
 import type { Field } from "../../redux/fields/types";
-import type { Crop, OrgCrop } from "../../redux/crops/types";
+import type { OrgCrop } from "../../redux/crops/types";
+import { ScoutingToolUnits } from "../../constants/types";
 
 export interface ScoutingReportForm {
   ID?: number; // ID of the scouting report
@@ -13,6 +14,8 @@ export interface ScoutingReportForm {
   scoutedDate: Date;
   title: string;
   scoutingAreas: ScoutingArea[];
+  fieldArea: number;
+  fieldAreaUnit: ScoutingToolUnits;
   summaryText: string;
   recommendations: string;
   growthStage: string;

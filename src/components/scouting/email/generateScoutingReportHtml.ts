@@ -154,6 +154,13 @@ const generateTextListHtml = (
     </li>
     <li>
       <div class="list-value-title">
+        <strong>Field Area:</strong>
+      </div> <div class="list-value-content">${report.fieldArea} ${
+    report.fieldAreaUnit
+  }</div>
+    </li>
+    <li>
+      <div class="list-value-title">
         <strong>Growth Stage:</strong>
       </div> <div class="list-value-content">${report.growthStage}</div>
     </li>

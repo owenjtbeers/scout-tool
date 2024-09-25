@@ -40,7 +40,7 @@ import { FinishWithScoutingReport } from "./forms/FinishWithReport";
 import { RootState } from "../../redux/store";
 import { useSelector } from "react-redux";
 import { SCOUTING_SLICE_REDUCER_KEY } from "../../redux/scouting/scoutingSlice";
-import { de } from "react-native-paper-dates";
+import { FeatureCollectionArea } from "../../utils/area";
 
 interface CreateScoutingReportPageProps {
   mode: "create" | "edit";
@@ -77,80 +77,17 @@ export const CreateScoutingReportPage = (
   // TODO: Convert this to be multiple selected fields if possible
   const selectedField = fields[0];
   // Fetch existing scouting report if in edit mode
-
-  let defaultFormValues = undefined;
-  if (draftedReportKey) {
-    const draftedReport = draftedReports[draftedReportKey];
-    if (draftedReport) {
-      // @ts-ignore not worth fixing
-      defaultFormValues = {
-        ...draftedReport,
-        scoutedDate: new Date(draftedReport.scoutedDate),
-      };
-    }
-  }
-  console.log(draftedReportKey);
-
-  if (!draftedReportKey) {
-    defaultFormValues =
-      mode === "edit" && existingScoutingReport
-        ? {
-            ID: existingScoutingReport.ID,
-            scoutingAreas: convertObservationAreasToScoutingAreas(
-              existingScoutingReport.ObservationAreas
-            ),
-            // @ts-ignore TODO: Fix this
-            scoutedBy: existingScoutingReport.ScoutedBy,
-            scoutedById: existingScoutingReport.ScoutedById,
-            scoutedDate: new Date(existingScoutingReport.ScoutedDate),
-            summaryText: existingScoutingReport.Summary,
-            fieldIds: existingScoutingReport.FieldIds.map((obj) => obj.ID),
-            images: existingScoutingReport?.Images || [],
-            recommendations: existingScoutingReport.Recommendation,
-            growthStage: existingScoutingReport.GrowthStage,
-            field: selectedField,
-            growerName,
-            growerEmail,
-            farmName,
-            crop: existingScoutingReport.Crop,
-            status: existingScoutingReport.Status,
-          }
-        : {
-            ID: 0,
-            scoutingAreas: [
-              {
-                ID: 0,
-                UId: "Main",
-                ScoutReportId: 0,
-                Geometry: {
-                  type: "FeatureCollection",
-                  features: [],
-                },
-                WeedObservations: [],
-                InsectObservations: [],
-                DiseaseObservations: [],
-                GeneralObservations: [],
-                Type: "Main",
-              },
-            ],
-            scoutedDate: new Date(),
-            scoutedBy: undefined,
-            media: [],
-            summaryText: "",
-            recommendations: "",
-            growthStage: "",
-            fieldIds: fields?.map((field) => field?.ID),
-            images: [],
-            field: selectedField,
-            growerName,
-            growerEmail,
-            farmName,
-            crop: getMostRecentCrop(selectedField?.FieldCrops || [])?.Crop,
-            status: "draft" as ScoutingReportStatus,
-            uniqueDraftID:
-              fields.map((field) => field?.ID).join(",") + "-" + Date.now(),
-          };
-  }
+  const defaultFormValues = getDefaultFormValues(
+    existingScoutingReport,
+    selectedField,
+    draftedReportKey,
+    draftedReports,
+    mode,
+    growerName as string,
+    growerEmail,
+    farmName as string,
+    fields
+  );
 
   const {
     control,
@@ -301,6 +238,99 @@ export const CreateScoutingReportPage = (
   );
 };
 
+const getDefaultFormValues = (
+  existingScoutingReport: APIScoutingReport | undefined,
+  selectedField: Field,
+  draftedReportKey: string | undefined,
+  draftedReports: { [key: string]: ScoutingReportForm },
+  mode: "create" | "edit",
+  growerName: string,
+  growerEmail: string | undefined,
+  farmName: string,
+  fields: Field[]
+) => {
+  let defaultFormValues = undefined;
+  if (draftedReportKey) {
+    const draftedReport = draftedReports[draftedReportKey];
+    if (draftedReport) {
+      // @ts-ignore not worth fixing
+      defaultFormValues = {
+        ...draftedReport,
+        scoutedDate: new Date(draftedReport.scoutedDate),
+      };
+    }
+  }
+
+  if (!draftedReportKey) {
+    defaultFormValues =
+      mode === "edit" && existingScoutingReport
+        ? {
+            ID: existingScoutingReport.ID,
+            scoutingAreas: convertObservationAreasToScoutingAreas(
+              existingScoutingReport.ObservationAreas
+            ),
+            // @ts-ignore TODO: Fix this
+            scoutedBy: existingScoutingReport.ScoutedBy,
+            scoutedById: existingScoutingReport.ScoutedById,
+            fieldArea: existingScoutingReport.FieldArea,
+            fieldAreaUnit: existingScoutingReport.FieldAreaUnit,
+            scoutedDate: new Date(existingScoutingReport.ScoutedDate),
+            summaryText: existingScoutingReport.Summary,
+            fieldIds: existingScoutingReport.FieldIds.map((obj) => obj.ID),
+            images: existingScoutingReport?.Images || [],
+            recommendations: existingScoutingReport.Recommendation,
+            growthStage: existingScoutingReport.GrowthStage,
+            field: selectedField,
+            growerName,
+            growerEmail,
+            farmName,
+            crop: existingScoutingReport.Crop,
+            status: existingScoutingReport.Status,
+          }
+        : {
+            ID: 0,
+            scoutingAreas: [
+              {
+                ID: 0,
+                UId: "Main",
+                ScoutReportId: 0,
+                Geometry: {
+                  type: "FeatureCollection",
+                  features: [],
+                },
+                WeedObservations: [],
+                InsectObservations: [],
+                DiseaseObservations: [],
+                GeneralObservations: [],
+                Type: "Main",
+              },
+            ],
+            scoutedDate: new Date(),
+            scoutedBy: undefined,
+            fieldArea: FeatureCollectionArea(
+              selectedField?.ActiveBoundary?.Json,
+              "acres",
+              0
+            ),
+            fieldAreaUnit: "acres",
+            media: [],
+            summaryText: "",
+            recommendations: "",
+            growthStage: "",
+            fieldIds: fields?.map((field) => field?.ID),
+            images: [],
+            field: selectedField,
+            growerName,
+            growerEmail,
+            farmName,
+            crop: getMostRecentCrop(selectedField?.FieldCrops || [])?.Crop,
+            status: "draft" as ScoutingReportStatus,
+            uniqueDraftID:
+              fields?.map((field) => field?.ID).join(",") + "-" + Date.now(),
+          };
+  }
+  return defaultFormValues as ScoutingReportForm;
+};
 interface ScoutingReportFormProps {
   field: Field;
   handleSubmit: UseFormHandleSubmit<ScoutingReportForm>;
