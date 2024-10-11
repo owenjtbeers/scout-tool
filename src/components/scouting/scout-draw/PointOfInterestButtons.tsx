@@ -176,7 +176,7 @@ export const PointOfInterestButtons = (props: PointOfInterestButtonsProps) => {
           ))}
         </ScrollView>
       </Dialog>
-      <Dialog
+      {/* <Dialog
         isVisible={settingsDialogVisible}
         onDismiss={() => setSettingsDialogVisible(false)}
         onBackdropPress={() => setSettingsDialogVisible(false)}
@@ -194,7 +194,7 @@ export const PointOfInterestButtons = (props: PointOfInterestButtonsProps) => {
             <ListItem.CheckBox checked={dropAtCurrentLocation} />
           </ListItem>
         </ScrollView>
-      </Dialog>
+      </Dialog> */}
     </>
   );
 };
