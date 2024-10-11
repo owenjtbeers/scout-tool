@@ -184,10 +184,13 @@ export function CreateFieldForm(props: FieldFormProps) {
                       {Platform.OS === "ios" && (
                         <InputAccessoryView nativeID={"fieldname"}>
                           <Input
+                            label="Field Name"
+                            placeholder="Field Name"
                             value={value}
-                            focusable={false}
                             style={styles.input}
-                            // disabled={true}
+                            onChangeText={onChange}
+                            onBlur={onBlur}
+                            errorMessage={error?.message}
                           />
                         </InputAccessoryView>
                       )}
@@ -214,10 +217,12 @@ export function CreateFieldForm(props: FieldFormProps) {
                       {Platform.OS === "ios" && (
                         <InputAccessoryView nativeID={"legaldescription"}>
                           <Input
-                            value={value?.toString()}
-                            focusable={false}
+                            placeholder="Legal Description"
+                            onBlur={onBlur}
+                            onChangeText={onChange}
+                            value={value}
+                            label={"Legal Description"}
                             style={styles.input}
-                            // disabled={true}
                           />
                         </InputAccessoryView>
                       )}

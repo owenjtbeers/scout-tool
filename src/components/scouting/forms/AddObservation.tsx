@@ -25,7 +25,12 @@ import {
 import { ScoutingReportForm } from "../types";
 import { Alias, ObservationTypePrefix } from "../../../redux/scouting/types";
 import { getObservationSetForAlias } from "../utils/scoutReportUtils";
-import { WeedIcon, GeneralIcon, InsectIcon, DiseaseIcon } from "../icons/Icons";
+import {
+  WeedIcon,
+  GeneralIcon,
+  InsectIcon,
+  DiseaseIcon,
+} from "../../icons/Icons";
 import { Question } from "./Question";
 
 // TODO
@@ -173,9 +178,15 @@ const AddObservationSearchStep = (props: AddObservationSearchProps) => {
         value={searchValue}
         inputAccessoryViewID="search"
       />
-      <InputAccessoryView nativeID={"search"}>
-        <Input value={searchValue} focusable={false} />
-      </InputAccessoryView>
+      {Platform.OS === "ios" && (
+        <InputAccessoryView nativeID={"search"}>
+          <Input
+            value={searchValue}
+            onChangeText={setSearchValue}
+            placeholder="Search, or specify new name of pest"
+          />
+        </InputAccessoryView>
+      )}
       {searchValue.length > 1 && (
         <Button
           onPress={() => {
@@ -237,8 +248,8 @@ const AddObservationSpecifyNameStep = (
         <InputAccessoryView nativeID={"pestName"}>
           <Input
             value={props.newPestName}
-            focusable={false}
-            // disabled={true}
+            onChangeText={props.setNewPestName}
+            label="New Pest Name"
           />
         </InputAccessoryView>
       )}

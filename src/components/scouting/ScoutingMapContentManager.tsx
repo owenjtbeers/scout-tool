@@ -1,23 +1,24 @@
 import React, { RefObject } from "react";
-import { View, Text } from "react-native";
 import { FontAwesome5 } from "@expo/vector-icons";
-import { Field } from "../../redux/fields/types";
-import centroid from "@turf/centroid";
-import MapView, { Marker, Geojson, Polyline } from "react-native-maps";
 import { useTheme } from "@rneui/themed";
-import { colors } from "../../constants/styles";
-import {
-  FeatureCollection,
-  Polygon as TurfPolygon,
-  Position,
-} from "@turf/helpers";
-import { mapCoordinatesToLatLng } from "../../utils/latLngConversions";
-import { ScoutingArea } from "../../redux/scouting/types";
-import { RootState } from "../../redux/store";
-import { useSelector } from "react-redux";
-import { MAP_DRAWING_REDUCER_KEY } from "../../redux/map/drawingSlice";
+import centroid from "@turf/centroid";
 import type { Feature, LineString } from "@turf/helpers";
+import { FeatureCollection, Position } from "@turf/helpers";
+
+import { Text, View } from "react-native";
+import MapView, { Geojson, Marker, Polyline } from "react-native-maps";
+import { useSelector } from "react-redux";
 import { DEFAULT_POLYLINE_STROKE_WIDTH } from "../../constants/constants";
+import { colors } from "../../constants/styles";
+import { Field } from "../../redux/fields/types";
+import { MAP_DRAWING_REDUCER_KEY } from "../../redux/map/drawingSlice";
+import {
+  ObservationTypePrefix,
+  ScoutingArea,
+} from "../../redux/scouting/types";
+import { RootState } from "../../redux/store";
+import { mapCoordinatesToLatLng } from "../../utils/latLngConversions";
+import { PestPointComponent } from "../map-draw/pest-points/PestPointComponent";
 
 type MapContentManagerProps = {
   mapRef: RefObject<MapView>;
@@ -76,15 +77,15 @@ export const ScoutingMapContentManager = (props: MapContentManagerProps) => {
           );
         })}
       {scoutingAreas.map((scoutArea, index) => {
-        const area: FeatureCollection = scoutArea.Geometry;
+        const area: FeatureCollection = scoutArea?.Geometry;
         // @ts-ignore TODO: Figure out how to resolve having the JSON in two different places potentially ;
         if (!area?.features?.length) {
           return null;
         }
-        if (isDrawing && drawMode === "polyline" && scoutArea.UId === "Main") {
-          // Don't draw the main area while we are editing
+        if (drawMode === "polyline" && scoutArea.Type === "Main") {
+          // Don't draw the main area while we are editing. This is handled by the drawing manager
           return null;
-        } else if (!isDrawing && scoutArea.UId === "Main") {
+        } else if (drawMode !== "polyline" && scoutArea.Type === "Main") {
           // Loop through the features and draw them instead so we can control strokeColor
           return (
             <React.Fragment key={`${scoutArea.UId}-${index}`}>
@@ -110,6 +111,10 @@ export const ScoutingMapContentManager = (props: MapContentManagerProps) => {
           );
         }
 
+        if (drawMode === "pest-point" && scoutArea.Type !== "Main") {
+          // Don't draw the pest points while we are editing. This is handled by the drawing manager
+          return null;
+        }
         return (
           <React.Fragment key={`${scoutArea.UId}-${index}`}>
             {area && (
@@ -120,10 +125,16 @@ export const ScoutingMapContentManager = (props: MapContentManagerProps) => {
                   area.features[0].properties?.strokeColor ||
                   theme.colors.primary
                 }
+                strokeWidth={DEFAULT_POLYLINE_STROKE_WIDTH}
                 // fillColor={colors.tertiary}
                 title={scoutArea.UId}
                 tracksViewChanges={false}
-                markerComponent={<CustomMarkerComponent text={scoutArea.UId} />}
+                markerComponent={
+                  <CustomMarkerComponent
+                    text={scoutArea.UId}
+                    scoutArea={scoutArea}
+                  />
+                }
               />
             )}
           </React.Fragment>
@@ -133,7 +144,23 @@ export const ScoutingMapContentManager = (props: MapContentManagerProps) => {
   );
 };
 
-const CustomMarkerComponent = ({ text }: { text: string }) => {
+const CustomMarkerComponent = ({
+  text,
+  scoutArea,
+}: {
+  text: string;
+  scoutArea: ScoutingArea;
+}) => {
+  const pestPoint = {
+    // TODO: Come back to this when I get colors set up for Alias's
+    color: "red",
+    type: scoutArea?.Alias?.Type as ObservationTypePrefix,
+    Alias: scoutArea?.Alias,
+    coordinates: { latitude: 0, longitude: 0 }, // Just a placeholder to match interfaces
+  };
+  if (pestPoint.Alias) {
+    return <PestPointComponent pestPoint={pestPoint} />;
+  }
   return (
     <View style={{ alignItems: "center" }}>
       <FontAwesome5 name="map-marker" size={40} color={"red"}></FontAwesome5>

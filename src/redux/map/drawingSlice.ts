@@ -3,6 +3,7 @@ import { FeatureCollection } from "@turf/helpers";
 import React from "react";
 import { set } from "react-hook-form";
 import { LatLng } from "react-native-maps";
+import { Alias, ObservationTypePrefix } from "../scouting/types";
 
 export type DrawingOperation =
   | "add-field"
@@ -14,10 +15,20 @@ interface ColoredShape {
   coordinates: LatLng[];
   strokeColor?: React.CSSProperties["color"];
 }
-export type DrawMode = "polygon" | "polyline" | "point" | null;
+export interface PestPoint {
+  type: ObservationTypePrefix;
+  color: React.CSSProperties["color"];
+  coordinates: LatLng;
+  Alias?: Alias;
+  addIndex?: number;
+  observationAreaId?: number;
+}
+
+export type DrawMode = "polygon" | "polyline" | "point" | "pest-point" | null;
 interface DrawingState {
   polygons: LatLng[][];
   points: LatLng[];
+  pestPoints: PestPoint[];
   polylines: ColoredShape[];
   tempGeoJSON: FeatureCollection | null;
   isDrawing: boolean;
@@ -29,6 +40,7 @@ interface DrawingState {
 const initialState: DrawingState = {
   polygons: [],
   points: [],
+  pestPoints: [],
   polylines: [],
   drawColor: "red",
   tempGeoJSON: null,
@@ -93,6 +105,40 @@ export const drawingSlice = createSlice({
         points: newPoints,
       };
     },
+    addPestPoint: (state, action: PayloadAction<PestPoint>) => ({
+      ...state,
+      pestPoints: [
+        ...state.pestPoints,
+        { ...action.payload, addIndex: state.pestPoints.length },
+      ],
+    }),
+    setPestPoint: (
+      state,
+      action: PayloadAction<{ index: number; point: PestPoint }>
+    ) => {
+      const newPestPoints = [...state.pestPoints];
+      newPestPoints[action.payload.index] = action.payload.point;
+      return {
+        ...state,
+        pestPoints: newPestPoints,
+      };
+    },
+    setPestPoints: (state, action: PayloadAction<PestPoint[]>) => ({
+      ...state,
+      pestPoints: action.payload,
+    }),
+    undoPestPoint: (state) => {
+      const newPestPoints = [...state.pestPoints];
+      newPestPoints.pop();
+      return {
+        ...state,
+        pestPoints: newPestPoints,
+      };
+    },
+    clearPestPoints: (state) => ({
+      ...state,
+      pestPoints: [],
+    }),
     addPolyline: (state, action: PayloadAction<ColoredShape>) => ({
       ...state,
       polylines: [...state.polylines, action.payload],
@@ -153,6 +199,7 @@ export const drawingSlice = createSlice({
       polygons: [],
       points: [],
       polylines: [],
+      pestPoints: [],
     }),
     clearState: () => initialState,
   },

@@ -1,7 +1,7 @@
 import React from "react";
 import { Alert, ActivityIndicator, StyleSheet } from "react-native";
 import { Button, useTheme, Text } from "@rneui/themed";
-import { mapFormDataToPostScoutReport } from "../utils/scoutReportUtils";
+import { mapFormDataToPostScoutReport } from "../utils/convert";
 import { useGetCurrentUserQuery } from "../../../redux/user/userApi";
 import {
   useCreateScoutingReportMutation,
@@ -114,6 +114,7 @@ export const FinishWithScoutingReport = (
 
             if (scoutingReportResponse?.error) {
               console.error(scoutingReportResponse.error);
+              Alert.alert("Error saving scouting report", "Contact Support");
             } else {
               if (data?.images?.length > 0) {
                 Alert.alert(

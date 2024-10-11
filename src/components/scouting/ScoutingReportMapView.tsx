@@ -31,6 +31,12 @@ import FreehandDrawing from "../map-draw/FreeHandDraw";
 import { MapUtilButtons } from "../map/components/MapUtilButtons";
 import { fitToBoundsForMapView } from "../map/utils";
 import type { ScoutingReportForm } from "./types";
+import {
+  convertPestPointsToScoutingArea,
+  convertScoutingAreasToPestPoints,
+} from "./utils/pestPoints";
+import { get } from "react-native/Libraries/TurboModule/TurboModuleRegistry";
+import { ScoutingArea } from "../../redux/scouting/types";
 
 interface ScoutingReportMapViewProps {
   fields: Field[];
@@ -63,7 +69,9 @@ export const ScoutingReportMapView = (props: ScoutingReportMapViewProps) => {
   const drawMode = useSelector(
     (state: RootState) => state["map-drawing"].drawMode
   );
-
+  const selectedPestHotButton = useSelector(
+    (state: RootState) => state["scoutingSlice"].selectedPestHotButton
+  );
   const onPress = (event: any) => {
     if (!!isDrawing) {
       switch (drawMode) {
@@ -78,14 +86,30 @@ export const ScoutingReportMapView = (props: ScoutingReportMapViewProps) => {
         case "point":
           dispatch(drawingSlice.actions.addPoint(event.nativeEvent.coordinate));
           break;
+        case "pest-point":
+          if (selectedPestHotButton) {
+            dispatch(
+              drawingSlice.actions.addPestPoint({
+                type: selectedPestHotButton.type,
+                color: selectedPestHotButton.color,
+                Alias: selectedPestHotButton.Alias,
+                coordinates: event.nativeEvent.coordinate,
+              })
+            );
+          }
+          break;
         // case "polyline":
         // This is handled elsewhere
       }
     }
   };
 
-  const onDrawPress = (isDrawing: boolean, drawMode: DrawMode) => {
-    if (isDrawing && drawMode === "polyline") {
+  const onDrawModeEnterExit = (
+    newIsDrawing: boolean,
+    newDrawMode: DrawMode
+  ) => {
+    // Exiting Fully
+    if (newIsDrawing === false) {
       // Save the drawn polylines to form state
       // Grab the polylines from the drawing state
       const drawingState = drawingSlice.selectSlice(store.getState());
@@ -101,11 +125,12 @@ export const ScoutingReportMapView = (props: ScoutingReportMapViewProps) => {
           },
         } as Feature<LineString, Properties>;
       });
+      console.log("convertedPolylines", convertedPolylines);
       setFormValue("scoutingAreas.0.Geometry.features", convertedPolylines, {
         shouldDirty: true,
       });
-      dispatch(drawingSlice.actions.clearAllShapes());
-    } else if (!isDrawing) {
+      dispatch(drawingSlice.actions.setPolylines([]));
+    } else if (newIsDrawing) {
       // Put existing polylines back into drawing state for editing
       const geoJsonFeatures = getFormValues(
         "scoutingAreas.0.Geometry.features"
@@ -122,6 +147,73 @@ export const ScoutingReportMapView = (props: ScoutingReportMapViewProps) => {
       }
     }
   };
+  const onPestPointModeEnterExit = (
+    newIsDrawing: boolean,
+    newDrawMode: DrawMode
+  ) => {
+    // Exiting Fully
+    if (newIsDrawing === false) {
+      const drawingState = drawingSlice.selectSlice(store.getState());
+
+      // Save the drawn points to form state
+      if (drawingState.pestPoints.length !== 0) {
+        const drawingScoutingAreas = convertPestPointsToScoutingArea(
+          drawingState.pestPoints
+        );
+        const existingScoutingAreas = getFormValues("scoutingAreas");
+
+        const pointOfInterestScoutingAreas = existingScoutingAreas.filter(
+          (scoutingArea) => scoutingArea.Type === "PointOfInterest"
+        );
+        const fieldLevelArea = existingScoutingAreas.find(
+          (scoutingArea) => scoutingArea.Type === "Main"
+        ) as ScoutingArea;
+
+        // Need to update the geometry of matching scouting areas. They match if the Alias name is the same
+        const updatedScoutingAreas = drawingScoutingAreas.map(
+          (drawingScoutingArea) => {
+            // TODO: Matching on the UID is weak, but it's the best we have for now
+            const matchingScoutingArea = pointOfInterestScoutingAreas.find(
+              (area) =>
+                (area.ID !== 0 && area.ID === drawingScoutingArea.ID) ||
+                area.UId === drawingScoutingArea.UId
+            );
+            if (matchingScoutingArea) {
+              return {
+                ...matchingScoutingArea,
+                Geometry: drawingScoutingArea.Geometry,
+                Alias:
+                  drawingScoutingArea?.Alias || matchingScoutingArea?.Alias,
+              };
+            } else {
+              // Create a new scouting area
+              return drawingScoutingArea;
+            }
+          }
+        );
+        setFormValue(
+          "scoutingAreas",
+          [fieldLevelArea, ...(updatedScoutingAreas as ScoutingArea[])],
+          {
+            shouldDirty: true,
+          }
+        );
+      }
+      dispatch(drawingSlice.actions.setPestPoints([]));
+      // dispatch(drawingSlice.actions.clearAllShapes());
+    } else if (newIsDrawing === true) {
+      // Entering
+      // Put existing points back into drawing state for editing
+      const scoutingAreas = getFormValues("scoutingAreas").filter(
+        (scoutingArea) => scoutingArea.Type === "PointOfInterest"
+      );
+      if (scoutingAreas?.length > 0) {
+        const convertedPestPoints =
+          convertScoutingAreasToPestPoints(scoutingAreas);
+        dispatch(drawingSlice.actions.setPestPoints(convertedPestPoints));
+      }
+    }
+  };
   useEffect(() => {
     // Center the map on the field boundary
     const fieldBoundary = getFormValues("field.ActiveBoundary.Json");
@@ -134,7 +226,12 @@ export const ScoutingReportMapView = (props: ScoutingReportMapViewProps) => {
 
   return (
     <View style={{ flex: 1 }}>
-      <ScoutingDrawingButtons mapRef={mapRef} onDrawPress={onDrawPress} />
+      <ScoutingDrawingButtons
+        onAddPestPointPress={onPestPointModeEnterExit}
+        mapRef={mapRef}
+        onDrawPress={onDrawModeEnterExit}
+        getFormValues={getFormValues}
+      />
       <MapView
         style={styles.map}
         ref={mapRef}

@@ -35,11 +35,14 @@ import { ScoutingCameraView } from "./camera/ScoutingCameraView";
 import { ScoutingReportObservationContent } from "./forms/ScoutingReportObservationContent";
 import { ScoutingReportSummaryContent } from "./forms/ScoutingReportSummaryContent";
 import { ScoutingReportForm } from "./types";
-import { convertObservationAreasToScoutingAreas } from "./utils/scoutReportUtils";
+import { convertObservationAreasToScoutingAreas } from "./utils/convert";
 import { FinishWithScoutingReport } from "./forms/FinishWithReport";
 import { RootState } from "../../redux/store";
 import { useSelector } from "react-redux";
-import { SCOUTING_SLICE_REDUCER_KEY } from "../../redux/scouting/scoutingSlice";
+import {
+  SCOUTING_SLICE_REDUCER_KEY,
+  scoutingSlice,
+} from "../../redux/scouting/scoutingSlice";
 import { FeatureCollectionArea } from "../../utils/area";
 
 interface CreateScoutingReportPageProps {
@@ -116,6 +119,15 @@ export const CreateScoutingReportPage = (
   // Effects
   useEffect(() => {
     listener = navigation.addListener("beforeRemove", handleBeforeRemove);
+
+    // Clear scouting state
+    dispatch(scoutingSlice.actions.clearPestHotButtons());
+
+    // Clear drawing state
+    dispatch(
+      drawingSlice.actions.setIsDrawing({ drawMode: null, isDrawing: false })
+    );
+    dispatch(drawingSlice.actions.clearAllShapes());
     return () => navigation.removeListener("beforeRemove", handleBeforeRemove);
   }, []);
 
@@ -203,7 +215,8 @@ export const CreateScoutingReportPage = (
           </TouchableOpacity>
         }
         centerComponent={{
-          text: "Create Scouting Report",
+          text:
+            mode === "edit" ? "Edit Scouting Report" : "Create Scouting Report",
           style: styles.heading,
         }}
       />

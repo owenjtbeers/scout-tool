@@ -118,7 +118,7 @@ export const ScoutingReportSummaryContent = (
       >
         <View key={"section-field-info"} style={scoutFormStyles.section}>
           {/* Section for Field information, selected field name, crop info, previous crops, current date */}
-          <Text>Field: {field.Name}</Text>
+          <Text>Field: {field?.Name}</Text>
           <Controller
             control={formControl}
             render={({ field: { onChange, onBlur, value } }) => {
@@ -212,7 +212,13 @@ export const ScoutingReportSummaryContent = (
                 />
                 {Platform.OS === "ios" && (
                   <InputAccessoryView nativeID={name}>
-                    <Input value={value} focusable={false} />
+                    <Input
+                      placeholder="Enter Growth Stage..."
+                      onBlur={onBlur}
+                      onChangeText={onChange}
+                      value={value}
+                      label={"Growth Stage"}
+                    />
                   </InputAccessoryView>
                 )}
               </>
@@ -339,7 +345,10 @@ export const ScoutingReportSummaryContent = (
                   <InputAccessoryView nativeID={name}>
                     <Input
                       value={value}
-                      focusable={false}
+                      placeholder="Summary here..."
+                      onBlur={onBlur}
+                      onChangeText={onChange}
+                      label={"Comments"}
                       multiline
                       style={scoutFormStyles.largeTextInput}
                     />
@@ -370,8 +379,11 @@ export const ScoutingReportSummaryContent = (
                 {Platform.OS === "ios" && (
                   <InputAccessoryView nativeID={name}>
                     <Input
+                      placeholder="Specify recommendation text here..."
+                      onBlur={onBlur}
+                      onChangeText={onChange}
                       value={value}
-                      focusable={false}
+                      label={"Recommendations"}
                       multiline
                       style={scoutFormStyles.largeTextInput}
                     />

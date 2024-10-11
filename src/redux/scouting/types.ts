@@ -13,7 +13,8 @@ export type Observation = {
     | "select"
     | "multiselect"
     | "numeric"
-    | "numeric-slider";
+    | "numeric-slider"
+    | "IGNORE";
   value: string;
   options?: string[];
   valueUnit1?: ScoutingToolUnits;
@@ -46,6 +47,7 @@ export type ScoutingArea = {
   DiseaseObservations: Observation[];
   GeneralObservations: Observation[];
   Type: ObservationAreaType;
+  Alias?: Alias;
 };
 
 /*
