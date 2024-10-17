@@ -33,13 +33,14 @@ export const scoutingSlice = createSlice({
           button.type === action.payload.type &&
           button.Alias.Name === action.payload.Alias.Name
       );
-      if (existingIndex !== -1) {
-        // Button is already in Queue remove it, so that it's added to the end
-        newQueue.splice(existingIndex, 1);
-      } else if (newQueue.length >= 3) {
+      if (existingIndex === -1) {
+        newQueue.push(action.payload);
+      }
+
+      if (newQueue.length > 3) {
         newQueue.shift();
       }
-      newQueue.push(action.payload);
+
       return {
         ...state,
         selectedPestHotButton: action.payload,

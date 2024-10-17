@@ -1,6 +1,6 @@
 import React, { useCallback } from "react";
-import { ScrollView, View } from "react-native";
-import { Button, useTheme, Dialog, ListItem } from "@rneui/themed";
+import { ColorValue, ScrollView, View } from "react-native";
+import { Button, useTheme, Dialog, ListItem, Text } from "@rneui/themed";
 import { scoutDrawStyles as styles } from "./styles";
 import { useDispatch, useSelector } from "react-redux";
 import { drawingSlice } from "../../../redux/map/drawingSlice";
@@ -19,6 +19,8 @@ import {
   Observation,
   Alias,
 } from "../../../redux/scouting/types";
+import * as Location from "expo-location";
+
 interface PointOfInterestButtonsProps {
   getFormValues: UseFormGetValues<ScoutingReportForm>;
 }
@@ -28,10 +30,12 @@ export const PointOfInterestButtons = (props: PointOfInterestButtonsProps) => {
   const dispatch = useDispatch();
   const [hotButtonDialogVisible, setHotButtonDialogVisible] =
     React.useState(false);
+  // TODO: Implement asking the user about this
   const [settingsDialogVisible, setSettingsDialogVisible] =
     React.useState(false);
+  // TODO: Implement asking the user about this
   const [dropAtCurrentLocation, setDropAtCurrentLocation] =
-    React.useState(false);
+    React.useState(true);
   const selectedPestHotButton = useSelector(
     (state: RootState) =>
       state[SCOUTING_SLICE_REDUCER_KEY].selectedPestHotButton
@@ -71,8 +75,9 @@ export const PointOfInterestButtons = (props: PointOfInterestButtonsProps) => {
           style={{
             flexDirection: "row",
             width: "100%",
-            maxHeight: 100,
+            // maxHeight: 100,
             flexWrap: "wrap",
+            paddingBottom: 10,
           }}
         >
           {/* <Button
@@ -88,65 +93,87 @@ export const PointOfInterestButtons = (props: PointOfInterestButtonsProps) => {
               color: selectedPestHotButton?.color || theme.colors.secondary,
             })}
           /> */}
-          {selectedPestHotButtonQueue?.length
-            ? selectedPestHotButtonQueue
-                .map((button, index) => (
-                  <Button
-                    key={index}
-                    radius={10}
-                    containerStyle={styles.pointOfInterestButtonContainer}
-                    raised={isSelectedPestHotButton(
-                      selectedPestHotButton,
-                      button
-                    )}
-                    buttonStyle={styles.button}
-                    title={button?.Alias?.Name}
-                    iconPosition="top"
-                    icon={PestIcon({
-                      type: button.type,
-                      size: 49,
-                      color: button.color || theme.colors.secondary,
-                    })}
-                    onPress={() => {
-                      if (
-                        !isSelectedPestHotButton(selectedPestHotButton, button)
-                      ) {
-                        dispatch(
-                          scoutingSlice.actions.setPestHotButton({
-                            Alias: button.Alias,
-                            color: button.color,
-                            type: button.type,
-                          })
-                        );
-                      }
-                    }}
-                  />
-                ))
-                ?.reverse()
-            : null}
-          <Button
-            icon={{ name: "add", size: 49, color: theme.colors.secondary }}
-            radius={100}
-            containerStyle={styles.pointOfInterestButtonContainer}
-            // buttonStyle={styles.button}
-            onPress={() => setHotButtonDialogVisible(true)}
-          />
-          <Button
-            title={"Undo"}
-            onPress={() => {
-              dispatch(drawingSlice.actions.undoPestPoint());
-            }}
-            radius={10}
-            containerStyle={{
-              ...styles.pointOfInterestButtonContainer,
-              alignSelf: "flex-end",
-            }}
-            buttonStyle={styles.button}
-            iconContainerStyle={{ paddingRight: 10 }}
-            // containerStyle={{ padding: 5 }}
-            // size={"lg"}
-            icon={{ name: "undo", size: 49, color: theme.colors.secondary }}
-          />
+          <View style={styles.hotButtonsContainer}>
+            {selectedPestHotButtonQueue?.length
+              ? selectedPestHotButtonQueue
+                  .map((button, index) => (
+                    <Button
+                      key={index}
+                      radius={10}
+                      containerStyle={styles.pestPointHotButton}
+                      raised={isSelectedPestHotButton(
+                        selectedPestHotButton,
+                        button
+                      )}
+                      buttonStyle={styles.button}
+                      title={buttonTitle(button.Alias, theme.colors.secondary)}
+                      iconPosition="top"
+                      icon={PestIcon({
+                        type: button.type,
+                        size: 50,
+                        color: button.color || theme.colors.secondary,
+                      })}
+                      onPress={async () => {
+                        if (
+                          !isSelectedPestHotButton(
+                            selectedPestHotButton,
+                            button
+                          )
+                        ) {
+                          dispatch(
+                            scoutingSlice.actions.setPestHotButton({
+                              Alias: button.Alias,
+                              color: button.color,
+                              type: button.type,
+                            })
+                          );
+                        }
+                        // Get current location from the map ref
+                        if (dropAtCurrentLocation) {
+                          const location =
+                            await Location.getLastKnownPositionAsync({});
+                          if (location && location.coords) {
+                            dispatch(
+                              drawingSlice.actions.addPestPoint({
+                                coordinates: {
+                                  latitude: location?.coords.latitude,
+                                  longitude: location.coords.longitude,
+                                },
+                                Alias: button.Alias,
+                                type: button.type,
+                                color: button.color,
+                              })
+                            );
+                          }
+                        }
+                      }}
+                    />
+                  ))
+                  ?.reverse()
+              : null}
+          </View>
+          <View style={styles.adminButtonsContainer}>
+            <Button
+              icon={{ name: "add", size: 69, color: theme.colors.secondary }}
+              radius={100}
+              containerStyle={styles.pointOfInterestButtonContainer}
+              onPress={() => setHotButtonDialogVisible(true)}
+            />
+            <Button
+              title={"Undo"}
+              onPress={() => {
+                dispatch(drawingSlice.actions.undoPestPoint());
+              }}
+              radius={10}
+              containerStyle={styles.pointOfInterestButtonContainer}
+              buttonStyle={styles.button}
+              iconContainerStyle={{ paddingRight: 0 }}
+              iconPosition="bottom"
+              // containerStyle={{ padding: 5 }}
+              // size={"lg"}
+              icon={{ name: "undo", size: 49, color: theme.colors.secondary }}
+            />
+          </View>
         </View>
       </View>
       <Dialog
@@ -155,6 +182,8 @@ export const PointOfInterestButtons = (props: PointOfInterestButtonsProps) => {
         onBackdropPress={() => setHotButtonDialogVisible(false)}
       >
         <ScrollView>
+          <Dialog.Title title="Select Pest" />
+          <Dialog.Title title="This list is populated from current pests on the report" />
           {getAliasList().map((alias, index) => (
             <ListItem
               key={index}
@@ -162,6 +191,7 @@ export const PointOfInterestButtons = (props: PointOfInterestButtonsProps) => {
                 dispatch(
                   scoutingSlice.actions.setPestHotButton({
                     Alias: alias,
+                    // @ts-ignore TODO: Address adding colors
                     color: alias?.color || "red",
                     type: alias.Type as ObservationTypePrefix,
                   })
@@ -222,5 +252,18 @@ const isSelectedPestHotButton = (
   return (
     selectedPestHotButton?.Alias?.Name === button?.Alias?.Name &&
     selectedPestHotButton?.type === button?.type
+  );
+};
+
+const buttonTitle = (alias: Alias, fontColor: ColorValue) => {
+  return (
+    <Text
+      adjustsFontSizeToFit
+      numberOfLines={1}
+      ellipsizeMode="tail"
+      style={{ ...styles.buttonTitleStyle, color: fontColor }}
+    >
+      {alias.Name}
+    </Text>
   );
 };

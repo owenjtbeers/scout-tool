@@ -198,6 +198,7 @@ export const CreateScoutingReportPage = (
   if (isDoneWithReport) {
     return (
       <FinishWithScoutingReport
+        formGetValues={getValues}
         handleSubmitScoutingReport={handleSubmit}
         onBackToForm={() => setIsDoneWithReport(false)}
         control={control}
