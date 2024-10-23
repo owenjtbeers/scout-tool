@@ -81,11 +81,14 @@ export const DrawingButtons = (props: DrawingButtonsProps) => {
 
 const styles = StyleSheet.create({
   drawingButtonsContainer: {
+    position: 'absolute',
+    top: 20,
+    left: 0,
+    right: 0,
     flexDirection: "row",
-    height: 70,
-    backgroundColor: "lightgray",
     justifyContent: "space-around",
     alignItems: "center",
+    zIndex: 1000,
   },
   button: {
     height: 50,
