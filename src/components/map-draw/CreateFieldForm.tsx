@@ -110,14 +110,14 @@ export function CreateFieldForm(props: FieldFormProps) {
   );
   return (
     <View>
+
       <BottomSheet
         isVisible={isVisible}
         onBackdropPress={onClose}
         modalProps={{
-          statusBarTranslucent: true,
-          // transparent: true,
           animationType: "slide",
-          presentationStyle: "fullScreen",
+          presentationStyle: "formSheet",
+          transparent: false,
         }}
       >
         <View style={styles.modalView}>
@@ -168,7 +168,7 @@ export function CreateFieldForm(props: FieldFormProps) {
                 <Controller
                   control={control}
                   render={({
-                    field: { onChange, onBlur, value },
+                    field: { onChange, onBlur, value, name },
                     fieldState: { error },
                   }) => (
                     <>
@@ -178,11 +178,11 @@ export function CreateFieldForm(props: FieldFormProps) {
                         onBlur={onBlur}
                         onChangeText={onChange}
                         value={value}
-                        inputAccessoryViewID="fieldname"
+                        inputAccessoryViewID={name}
                         errorMessage={error?.message}
                       />
                       {Platform.OS === "ios" && (
-                        <InputAccessoryView nativeID={"fieldname"}>
+                        <InputAccessoryView nativeID={name}>
                           <Input
                             label="Field Name"
                             placeholder="Field Name"
@@ -250,7 +250,7 @@ const styles = StyleSheet.create({
   modalView: {
     flex: 1,
     justifyContent: "flex-end",
-    backgroundColor: "transparent",
+    // backgroundColor: "transparent",
   },
   formBackground: {
     backgroundColor: "lightgray",
