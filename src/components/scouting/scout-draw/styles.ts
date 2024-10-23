@@ -12,6 +12,7 @@ export const scoutDrawStyles = StyleSheet.create({
     height: 70,
     backgroundColor: "transparent",
     justifyContent: "space-around",
+    flex: 1,
     alignItems: "center",
     position: "absolute",
     zIndex: 10,
@@ -76,6 +77,9 @@ export const scoutDrawStyles = StyleSheet.create({
   },
   adminButtonsContainer: {
     marginLeft: "auto",
+    right: 10,
+    position: "relative",
     flexDirection: "row",
+    // flex: 1,
   },
 });

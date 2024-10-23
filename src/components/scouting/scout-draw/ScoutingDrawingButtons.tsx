@@ -76,6 +76,7 @@ export const ScoutingDrawingButtons = (props: DrawingButtonsProps) => {
           }
           titleStyle={{ color: selectedColor("pest-point") }}
           type={drawMode === "pest-point" ? "outline" : "solid"}
+          containerStyle={{ marginHorizontal: 5 }}
         />
         <Button
           title={"Draw"}

@@ -27,6 +27,7 @@ import {
 } from "../../../redux/scouting/types";
 import GeneralQuestionPrompt from "./GeneralQuestionPrompt";
 import { AddObservation } from "./AddObservation";
+import { useGetUnsavedAliasesFromDraftedReport } from "../../../redux/scouting/scoutingHooks";
 
 interface ScoutingReportObservationContentProps {
   field: Field;
@@ -68,6 +69,7 @@ export const ScoutingReportObservationContent = (
   const handleSubmit = () => {
     setSideSheetContentType("summary");
   };
+  const draftedAliases = useGetUnsavedAliasesFromDraftedReport();
   const getAliasList = useCallback(() => {
     const weedAliases =
       orgWeeds?.data?.map((orgWeed) => ({
@@ -87,8 +89,16 @@ export const ScoutingReportObservationContent = (
         Name: orgInsect?.InsectAlias?.Name || "",
         Type: "Insect" as ObservationTypePrefix,
       })) || [];
-    return weedAliases.concat(diseaseAliases).concat(insectAliases);
+
+    const apiAliasList: Alias[] = weedAliases.concat(diseaseAliases).concat(insectAliases);
+    draftedAliases.forEach((alias) => {
+      if (alias.ID === 0 && !apiAliasList.find((apiAlias) => apiAlias.Name === alias.Name)) {
+        apiAliasList.push(alias);
+      }
+    });
+    return apiAliasList;
   }, [orgWeeds, orgDiseases, orgInsects]);
+
   // const recentWeeds = scoutingArea?.weedObservations?.filter()
   return (
     <View style={{ flex: 1 }}>

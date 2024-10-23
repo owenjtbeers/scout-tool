@@ -33,6 +33,7 @@ import { getAliasSummaryText } from "../utils/scoutReportFormatting";
 import {
   getAliasesMapForScoutingAreas,
   getNumberOfObservationsFromScoutingArea,
+  getNumberOfUniqueAliasesFromScoutingArea,
 } from "../utils/scoutReportUtils";
 import { scoutFormStyles } from "./styles";
 import { DialogPickerSelect } from "../../../forms/components/DialogPicker";
@@ -126,6 +127,7 @@ export const ScoutingReportSummaryContent = (
                 <>
                   {/* <Button onPress={onBlur} title={value.toDateString()} /> */}
                   <DatePickerInput
+                    // style={{ backgroundColor: theme.colors.grey0 }}
                     label="Scouted Date"
                     value={typeof value === "string" ? new Date(value) : value}
                     locale={"en"}
@@ -135,7 +137,13 @@ export const ScoutingReportSummaryContent = (
                     // date={value}
                     // mode="single"
                     onChange={onChange}
-                    style={{ backgroundColor: theme.colors.grey0 }}
+                    style={{
+                      borderColor: theme.colors.grey2,
+                      marginVertical: 10,
+                      borderWidth: 1,
+                      backgroundColor: theme.colors.white,
+                      borderRadius: 10,
+                    }}
                   />
                 </>
               );
@@ -153,9 +161,8 @@ export const ScoutingReportSummaryContent = (
               fieldState: { error },
             }) => (
               <Input
-                label={`Field Area (${
-                  formGetValues("fieldAreaUnit") || "acres"
-                })`}
+                label={`Field Area (${formGetValues("fieldAreaUnit") || "acres"
+                  })`}
                 placeholder={"Enter Area"}
                 keyboardType={"numeric"}
                 onChangeText={(value) => {
@@ -208,7 +215,7 @@ export const ScoutingReportSummaryContent = (
                   value={value}
                   label={"Growth Stage"}
                   inputAccessoryViewID={name}
-                  // style={scoutFormStyles.largeTextInput}
+                // style={scoutFormStyles.largeTextInput}
                 />
                 {Platform.OS === "ios" && (
                   <InputAccessoryView nativeID={name}>
@@ -234,14 +241,14 @@ export const ScoutingReportSummaryContent = (
         >
           <View style={scoutFormStyles.summaryRow}>
             <FontAwesome5 name="binoculars" size={24} />
-            <Text># of Scouted Areas</Text>
+            <Text># of Pests</Text>
             <FAB>
               <Text style={scoutFormStyles.buttonText}>
-                {formGetValues("scoutingAreas")?.length}
+                {getNumberOfUniqueAliasesFromScoutingArea(scoutingAreas[0])}
               </Text>
             </FAB>
 
-            <Dialog
+            {/* <Dialog
               isVisible={isScoutedAreaDialogOpen}
               onBackdropPress={() => setIsScoutedAreaDialogOpen(false)}
             >
@@ -263,16 +270,16 @@ export const ScoutingReportSummaryContent = (
                   </ListItem.Subtitle>
                 </ListItem>
               ))}
-            </Dialog>
+            </Dialog> */}
           </View>
-          {formGetValues("scoutingAreas")?.length ? (
+          {/* {formGetValues("scoutingAreas")?.length ? (
             <Button
               title={"View Scouted Areas"}
               buttonStyle={{ paddingTop: 10 }}
               onPress={() => setIsScoutedAreaDialogOpen(true)}
             />
-          ) : null}
-          <View style={scoutFormStyles.summaryRow}>
+          ) : null} */}
+          {/* <View style={scoutFormStyles.summaryRow}>
             <Entypo name="magnifying-glass" size={24} />
             <Text># of Observations</Text>
             <FAB>
@@ -284,7 +291,7 @@ export const ScoutingReportSummaryContent = (
                 }, 0)}
               </Text>
             </FAB>
-          </View>
+          </View> */}
           <View style={scoutFormStyles.summaryRow}>
             <FontAwesome5 name="camera" size={24} />
             <Text># of Images</Text>
@@ -310,9 +317,9 @@ export const ScoutingReportSummaryContent = (
           ) : null}
         </View>
         {Object.keys(aliasMap.Weeds).length ||
-        Object.keys(aliasMap.Diseases).length ||
-        Object.keys(aliasMap.Insects).length ||
-        Object.keys(aliasMap.General).length ? (
+          Object.keys(aliasMap.Diseases).length ||
+          Object.keys(aliasMap.Insects).length ||
+          Object.keys(aliasMap.General).length ? (
           <View
             key={"section-auto-generated-summary"}
             style={scoutFormStyles.section}

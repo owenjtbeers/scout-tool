@@ -74,9 +74,10 @@ export const PointOfInterestButtons = (props: PointOfInterestButtonsProps) => {
         <View
           style={{
             flexDirection: "row",
-            width: "100%",
+            // width: "100%",
             // maxHeight: 100,
             flexWrap: "wrap",
+            flex: 1,
             paddingBottom: 10,
           }}
         >
@@ -96,17 +97,29 @@ export const PointOfInterestButtons = (props: PointOfInterestButtonsProps) => {
           <View style={styles.hotButtonsContainer}>
             {selectedPestHotButtonQueue?.length
               ? selectedPestHotButtonQueue
-                  .map((button, index) => (
+                .map((button, index) => {
+                  const isSelected = isSelectedPestHotButton(
+                    selectedPestHotButton,
+                    button
+                  );
+                  const backgroundColor = isSelected
+                    ? theme.colors.secondary
+                    : theme.colors.primary;
+                  const fontColor = isSelected
+                    ? theme.colors.primary
+                    : theme.colors.secondary;
+                  return (
                     <Button
                       key={index}
                       radius={10}
-                      containerStyle={styles.pestPointHotButton}
-                      raised={isSelectedPestHotButton(
-                        selectedPestHotButton,
-                        button
-                      )}
+                      color={backgroundColor}
+                      containerStyle={{
+                        ...styles.pestPointHotButton,
+                        backgroundColor,
+                      }}
+                      raised={isSelected}
                       buttonStyle={styles.button}
-                      title={buttonTitle(button.Alias, theme.colors.secondary)}
+                      title={buttonTitle(button.Alias, fontColor)}
                       iconPosition="top"
                       icon={PestIcon({
                         type: button.type,
@@ -133,6 +146,7 @@ export const PointOfInterestButtons = (props: PointOfInterestButtonsProps) => {
                           const location =
                             await Location.getLastKnownPositionAsync({});
                           if (location && location.coords) {
+                            console.log(location.coords);
                             dispatch(
                               drawingSlice.actions.addPestPoint({
                                 coordinates: {
@@ -148,8 +162,9 @@ export const PointOfInterestButtons = (props: PointOfInterestButtonsProps) => {
                         }
                       }}
                     />
-                  ))
-                  ?.reverse()
+                  )
+                })
+                ?.reverse()
               : null}
           </View>
           <View style={styles.adminButtonsContainer}>
@@ -172,6 +187,15 @@ export const PointOfInterestButtons = (props: PointOfInterestButtonsProps) => {
               // containerStyle={{ padding: 5 }}
               // size={"lg"}
               icon={{ name: "undo", size: 49, color: theme.colors.secondary }}
+            />
+            <Button
+              title={"Settings"}
+              onPress={() => setSettingsDialogVisible(true)}
+              radius={10}
+              containerStyle={styles.pointOfInterestButtonContainer}
+              buttonStyle={styles.button}
+              iconPosition="bottom"
+              icon={{ name: "settings", size: 49, color: theme.colors.secondary }}
             />
           </View>
         </View>
@@ -206,7 +230,7 @@ export const PointOfInterestButtons = (props: PointOfInterestButtonsProps) => {
           ))}
         </ScrollView>
       </Dialog>
-      {/* <Dialog
+      <Dialog
         isVisible={settingsDialogVisible}
         onDismiss={() => setSettingsDialogVisible(false)}
         onBackdropPress={() => setSettingsDialogVisible(false)}
@@ -215,16 +239,16 @@ export const PointOfInterestButtons = (props: PointOfInterestButtonsProps) => {
           <ListItem
             onPress={() => {
               setDropAtCurrentLocation(!dropAtCurrentLocation);
-              setSettingsDialogVisible(false);
+              // setSettingsDialogVisible(false);
             }}
           >
             <ListItem.Content>
-              <ListItem.Title>Drop at Current Location</ListItem.Title>
+              <ListItem.Title> Tap on Hot Button - Drop at Current Location</ListItem.Title>
             </ListItem.Content>
-            <ListItem.CheckBox checked={dropAtCurrentLocation} />
+            <ListItem.CheckBox onPress={() => setDropAtCurrentLocation(!dropAtCurrentLocation)} checked={dropAtCurrentLocation} />
           </ListItem>
         </ScrollView>
-      </Dialog> */}
+      </Dialog>
     </>
   );
 };

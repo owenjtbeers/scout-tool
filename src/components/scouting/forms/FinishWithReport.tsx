@@ -113,7 +113,7 @@ export const FinishWithScoutingReport = (
               console.error(scoutingReportResponse.error);
               Alert.alert("Error saving scouting report", "Contact Support");
             } else {
-              if (data?.images?.length > 0) {
+              if (data.status !== "draft" && data?.images?.length > 0) {
                 Alert.alert(
                   "Uploading Scouting Images",
                   "Please wait while we upload your scouting images"
@@ -135,7 +135,7 @@ export const FinishWithScoutingReport = (
                 [
                   {
                     text: "Continue",
-                    onPress: () => {},
+                    onPress: () => { },
                   },
                 ]
               );
