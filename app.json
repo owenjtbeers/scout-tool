@@ -20,7 +20,7 @@
       "supportsTablet": true,
       "bundleIdentifier": "com.owenbeers.scouttool",
       "jsEngine": "jsc",
-      "buildNumber": "6",
+      "buildNumber": "7",
       "config": {
         "usesNonExemptEncryption": false
       }
