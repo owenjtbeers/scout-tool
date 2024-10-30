@@ -2,7 +2,7 @@
   "expo": {
     "name": "scout-tool",
     "slug": "scout-tool",
-    "version": "1.0.5",
+    "version": "1.0.6",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
@@ -13,14 +13,12 @@
     },
     "jsEngine": "hermes",
     "plugins": [],
-    "assetBundlePatterns": [
-      "**/*"
-    ],
+    "assetBundlePatterns": ["**/*"],
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.owenbeers.scouttool",
       "jsEngine": "jsc",
-      "buildNumber": "7",
+      "buildNumber": "1",
       "config": {
         "usesNonExemptEncryption": false
       }
