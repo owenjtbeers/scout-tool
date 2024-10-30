@@ -4,7 +4,7 @@ import type { AxiosRequestConfig, AxiosError } from "axios";
 import {
   PrepareHeadersType,
   prepareHeaders as prepareScoutToolHeaders,
-} from "../utils/prepareHeaders";
+} from "../utils/network/prepareHeaders";
 
 export type APIResponse<T> = {
   data: T;

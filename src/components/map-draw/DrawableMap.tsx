@@ -56,7 +56,7 @@ export const DrawableMapScreen = () => {
           // provider={PROVIDER_GOOGLE}
           region={initialRegion || defaultRegion}
           onPress={onPress}
-          onMapReady={() => {}}
+          onMapReady={() => { }}
           mapType={"hybrid"}
           showsUserLocation={true}
           showsMyLocationButton={false}
@@ -75,6 +75,7 @@ export const DrawableMapScreen = () => {
           mapRef={mapRef}
         />
       </View>
+
     </SafeAreaView>
   );
 };
@@ -82,8 +83,10 @@ export const DrawableMapScreen = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    height: "100%",
   },
   map: {
     flex: 1,
+    height: "100%",
   },
 });

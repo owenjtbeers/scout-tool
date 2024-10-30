@@ -1,19 +1,59 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import type { ScoutingReportForm } from "../../components/scouting/types";
+import type { Alias, ObservationTypePrefix } from "./types";
 
 interface ScoutingSliceState {
   draftedReports: { [key: string]: ScoutingReportForm };
+  selectedPestHotButton: PestHotButton | null;
+  pestHotButtonsQueue: PestHotButton[];
 }
 
 const initialState: ScoutingSliceState = {
   draftedReports: {},
+  selectedPestHotButton: null,
+  pestHotButtonsQueue: [],
 };
+
+export interface PestHotButton {
+  Alias: Alias;
+  type: ObservationTypePrefix;
+  color: React.CSSProperties["color"];
+}
 
 export const SCOUTING_SLICE_REDUCER_KEY = "scoutingSlice";
 export const scoutingSlice = createSlice({
   name: SCOUTING_SLICE_REDUCER_KEY,
   initialState,
   reducers: {
+    setPestHotButton: (state, action: PayloadAction<PestHotButton>) => {
+      const newQueue = [...state.pestHotButtonsQueue];
+      const existingIndex = state.pestHotButtonsQueue.findIndex(
+        (button) =>
+          button.Alias.ID === action.payload.Alias.ID &&
+          button.type === action.payload.type &&
+          button.Alias.Name === action.payload.Alias.Name
+      );
+      if (existingIndex === -1) {
+        newQueue.push(action.payload);
+      }
+
+      if (newQueue.length > 3) {
+        newQueue.shift();
+      }
+
+      return {
+        ...state,
+        selectedPestHotButton: action.payload,
+        pestHotButtonsQueue: newQueue,
+      };
+    },
+    clearPestHotButtons: (state) => {
+      return {
+        ...state,
+        selectedPestHotButton: null,
+        pestHotButtonsQueue: [],
+      };
+    },
     setDraftedReport: (
       state,
       action: PayloadAction<{ key: string; report: ScoutingReportForm }>

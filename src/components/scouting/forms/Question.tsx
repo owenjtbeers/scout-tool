@@ -53,7 +53,11 @@ export const Question = (props: QuestionProps) => {
               />
               {Platform.OS === "ios" && (
                 <InputAccessoryView nativeID={name}>
-                  <Input value={value} focusable={false} />
+                  <Input
+                    value={value}
+                    onChangeText={onChange}
+                    placeholder="Enter text here..."
+                  />
                 </InputAccessoryView>
               )}
             </>

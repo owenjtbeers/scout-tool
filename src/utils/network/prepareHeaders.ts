@@ -1,4 +1,4 @@
-import type { RootState } from "../redux/store";
+import type { RootState } from "../../redux/store";
 
 export type PrepareHeadersType = (
   headers: Headers,

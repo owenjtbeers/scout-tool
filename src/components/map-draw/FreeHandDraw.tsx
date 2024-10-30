@@ -23,7 +23,6 @@ const FreehandDrawing = (props: FreehandDrawingProps) => {
   const pathRef = useRef<{ x: number; y: number }[]>([]);
   const [pathLength, setPathLength] = useState(0);
   const dispatch = useDispatch();
-  let points = [] as [number, number][];
 
   const panResponder = PanResponder.create({
     onStartShouldSetPanResponder: () => true,

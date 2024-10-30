@@ -1,7 +1,7 @@
 import React from "react";
 import { Alert, ActivityIndicator, StyleSheet } from "react-native";
 import { Button, useTheme, Text } from "@rneui/themed";
-import { mapFormDataToPostScoutReport } from "../utils/scoutReportUtils";
+import { mapFormDataToPostScoutReport } from "../utils/convert";
 import { useGetCurrentUserQuery } from "../../../redux/user/userApi";
 import {
   useCreateScoutingReportMutation,
@@ -27,6 +27,7 @@ interface FinishWithScoutingReportProps {
   onSuccess: () => void;
   handleSubmitScoutingReport: UseFormHandleSubmit<ScoutingReportForm>;
   control: Control<ScoutingReportForm, any>;
+  formGetValues: () => ScoutingReportForm;
 }
 
 export const FinishWithScoutingReport = (
@@ -41,6 +42,8 @@ export const FinishWithScoutingReport = (
   const [createScoutingReport, createResult] =
     useCreateScoutingReportMutation();
   const { data: currentUserResponse } = useGetCurrentUserQuery("default");
+
+  const draftedReportKey = props.formGetValues().uniqueDraftID;
 
   if (updateResult.isLoading || createResult.isLoading) {
     return <ActivityIndicator />;
@@ -74,13 +77,7 @@ export const FinishWithScoutingReport = (
           <DialogPickerSelect
             label={"Move to Status"}
             dialogTitle="Status"
-            options={
-              [
-                { label: "Draft", value: "draft" },
-                { label: "In Review", value: "in_review" },
-                { label: "Reviewed", value: "passed_review" },
-              ] as { label: string; value: ScoutingReportStatus }[]
-            }
+            options={draftedReportKey ? optionsFromDraft : optionsFromNonDraft}
             onChangeText={onChange}
             value={value}
           />
@@ -114,8 +111,9 @@ export const FinishWithScoutingReport = (
 
             if (scoutingReportResponse?.error) {
               console.error(scoutingReportResponse.error);
+              Alert.alert("Error saving scouting report", "Contact Support");
             } else {
-              if (data?.images?.length > 0) {
+              if (data.status !== "draft" && data?.images?.length > 0) {
                 Alert.alert(
                   "Uploading Scouting Images",
                   "Please wait while we upload your scouting images"
@@ -137,7 +135,7 @@ export const FinishWithScoutingReport = (
                 [
                   {
                     text: "Continue",
-                    onPress: () => {},
+                    onPress: () => { },
                   },
                 ]
               );
@@ -153,6 +151,17 @@ export const FinishWithScoutingReport = (
     </SafeAreaView>
   );
 };
+
+const optionsFromDraft = [
+  { label: "Draft", value: "draft" },
+  { label: "Publish - In Review", value: "in_review" },
+  { label: "Publish - Reviewed", value: "passed_review" },
+] as { label: string; value: ScoutingReportStatus }[];
+
+const optionsFromNonDraft = [
+  { label: "In Review", value: "in_review" },
+  { label: "Reviewed", value: "passed_review" },
+] as { label: string; value: ScoutingReportStatus }[];
 
 const styles = StyleSheet.create({
   descriptionText: {

@@ -16,6 +16,7 @@ import {
 import { RootState } from "../../redux/store";
 import { colors } from "../../constants/styles";
 import { DEFAULT_POLYLINE_STROKE_WIDTH } from "../../constants/constants";
+import { DrawingPestPoints } from "./pest-points/DrawingPestPoints";
 
 /**
  * This component is responsible for rendering all the shapes drawn on the map
@@ -38,6 +39,7 @@ export const DrawingManager = (props: { mapRef: React.RefObject<MapView> }) => {
       <DrawingPolygons isDrawing={isDrawing} />
       <DrawingPoints isDrawing={isDrawing} />
       <DrawingPolylines isDrawing={isDrawing} />
+      <DrawingPestPoints isDrawing={isDrawing} />
       {tempGeoJSON !== null && (
         <Geojson
           key={"tempGeoJSON"}
@@ -184,6 +186,7 @@ export const DrawingPoints = (props: { isDrawing: boolean }) => {
     );
   });
 };
+
 const styles = StyleSheet.create({
   container: {
     flex: 1,

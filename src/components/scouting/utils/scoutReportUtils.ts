@@ -3,19 +3,10 @@ import type {
   Alias,
   Observation,
   ObservationTypePrefix,
-  APIObservationArea,
-  APIScoutingReport,
   ScoutingImage,
 } from "../../../redux/scouting/types";
-import { ScoutingAppUser } from "../../../redux/user/types";
-import type { ScoutingReportForm } from "../types";
 
-const valueIsDefined = (value: string | number | null | undefined): boolean => {
-  if (value === "") {
-    return false;
-  }
-  return value !== null && value !== undefined;
-};
+import { valueIsDefined } from "../../../utils/valueIsDefined";
 
 export const getNumberOfObservationsFromScoutingArea = (
   scoutingArea: ScoutingArea
@@ -147,7 +138,7 @@ export const getNewGeneralObservation = (questionName: string): Observation => {
     value: "",
     tags: null,
     ScoutingAreaId: 0,
-    Alias: { ID: 0, Name: questionName },
+    Alias: { ID: 0, Name: questionName, Type: "General" },
   };
 };
 
@@ -165,6 +156,17 @@ export const getObservationSetForAlias = (alias: Alias): Observation[] => {
     }
   }
   return observations;
+};
+
+export const getMinimumObservationSetForAlias = (alias: Alias): Observation[] => {
+  return [{
+    questionType: "IGNORE",
+    name: "Found",
+    value: "",
+    tags: null,
+    ScoutingAreaId: 0,
+    Alias: alias,
+  }];
 };
 /*
   This function is used to get a map of recent observations from a list of scouting areas.
@@ -225,199 +227,6 @@ export const getRecentAliasesFromObservations = (
   return recentMap;
 };
 
-export const mapFormDataToPostScoutReport = (
-  scoutReportForm: ScoutingReportForm,
-  currentUser?: ScoutingAppUser
-): APIScoutingReport => {
-  const {
-    summaryText,
-    scoutingAreas,
-    fieldIds,
-    scoutedById,
-    scoutedDate,
-    recommendations,
-    growthStage,
-    fieldArea,
-    fieldAreaUnit,
-  } = scoutReportForm;
-  return {
-    ID: scoutReportForm.ID || 0,
-    // TODO: Record the date properly through the UI
-    ScoutedDate: scoutedDate.toISOString(),
-    // TODO: Record the scouted by properly through the UI
-    ScoutedById: scoutedById || currentUser?.ID || 0,
-    FieldArea: fieldArea,
-    FieldAreaUnit: fieldAreaUnit,
-    Summary: summaryText,
-    Recommendation: recommendations,
-    GrowthStage: growthStage,
-    Fields: fieldIds,
-    // @ts-ignore TODO: Type this better. The input type to the api is not the same as the output type
-    ObservationAreas: scoutingAreas.map((scoutingArea) => {
-      return {
-        ID: scoutingArea.ID,
-        UId: scoutingArea.UId,
-        ScoutReportId: scoutingArea.ScoutReportId,
-        Geometry: scoutingArea.Geometry,
-        WeedObservations: mapScoutingAreaObservationsToAPITypeObservation(
-          scoutingArea.WeedObservations
-        ),
-        InsectObservations: mapScoutingAreaObservationsToAPITypeObservation(
-          scoutingArea.InsectObservations
-        ),
-        DiseaseObservations: mapScoutingAreaObservationsToAPITypeObservation(
-          scoutingArea.DiseaseObservations
-        ),
-        GeneralObservations: scoutingArea.GeneralObservations.map(
-          mapFormObservationToAPIQuestionVal
-        ),
-      };
-    }),
-    Images: scoutReportForm.images,
-    Crop: scoutReportForm.crop,
-    Status: scoutReportForm.status,
-  };
-};
-
-const mapScoutingAreaObservationsToAPITypeObservation = (
-  observations: Observation[]
-) => {
-  // Group the observations by alias
-  const aliasMap = observations.reduce((acc, observation) => {
-    const { Alias } = observation;
-    if (!Alias) {
-      return acc;
-    }
-    if (!acc[Alias.Name]) {
-      acc[Alias.Name] = { ID: Alias.ID, observations: [] as Observation[] };
-    }
-    acc[Alias.Name].observations.push(observation);
-    return acc;
-  }, {} as Record<string, { ID: number; observations: Observation[] }>);
-
-  // Map the grouped observations to the API format
-  return Object.keys(aliasMap).map((aliasName) => {
-    const alias = aliasMap[aliasName];
-    return {
-      AliasName: aliasName,
-      AliasId: alias.ID,
-      QuestionVals: alias.observations
-        .map(mapFormObservationToAPIQuestionVal)
-        .filter((questionVal) => valueIsDefined(questionVal.Value)),
-    };
-  });
-};
-
-export const convertObservationAreasToScoutingAreas = (
-  observationAreas: APIObservationArea[] | undefined
-): ScoutingArea[] => {
-  if (!observationAreas) {
-    return [];
-  }
-  const returnVal = observationAreas.map((observationArea) => {
-    return {
-      ID: observationArea.ID,
-      UId: observationArea.UId,
-      ScoutReportId: observationArea.ScoutReportId,
-      // @ts-ignore
-      Geometry: observationArea.Geometry.Json,
-      WeedObservations: observationArea.WeedObservations.map((weedObs) => {
-        return weedObs.WeedQuestionVals.map((weedQuestionVal) => {
-          const questionVal = weedQuestionVal.QuestionVal;
-          return {
-            ID: questionVal.ID,
-            Alias: {
-              ID: weedObs.WeedAliasId,
-              Name: weedObs.WeedAlias.Name,
-            },
-            questionType: questionVal.RenderType,
-            name: questionVal.Question,
-            options: questionVal.Options.split(","),
-            value: questionVal.Value,
-            tags: null,
-            ScoutingAreaId: observationArea.ID,
-          } as Observation;
-        });
-      }).flat(),
-      InsectObservations: observationArea.InsectObservations.map(
-        (insectObs) => {
-          return insectObs.InsectQuestionVals.map((insectQuestionVal) => {
-            const questionVal = insectQuestionVal.QuestionVal;
-            return {
-              ID: questionVal.ID,
-              Alias: {
-                ID: insectObs.InsectAliasId,
-                Name: insectObs.InsectAlias.Name,
-              },
-              questionType: questionVal.RenderType,
-              name: questionVal.Question,
-              options: questionVal.Options.split(","),
-              value: questionVal.Value,
-              tags: null,
-              ScoutingAreaId: observationArea.ID,
-            } as Observation;
-          });
-        }
-      ).flat(),
-      DiseaseObservations: observationArea.DiseaseObservations.map(
-        (diseaseObs) => {
-          return diseaseObs.DiseaseQuestionVals.map((diseaseQuestionVal) => {
-            const questionVal = diseaseQuestionVal.QuestionVal;
-            return {
-              ID: questionVal.ID,
-              Alias: {
-                ID: diseaseObs.DiseaseAliasId,
-                Name: diseaseObs.DiseaseAlias.Name,
-              },
-              questionType: questionVal.RenderType,
-              name: questionVal.Question,
-              options: questionVal.Options.split(","),
-              valueUnit1: questionVal.ValueUnit1,
-              valueUnit2: questionVal.ValueUnit2,
-              value: questionVal.Value,
-              tags: null,
-              ScoutingAreaId: observationArea.ID,
-            } as Observation;
-          });
-        }
-      ).flat(),
-      // InsectObservations: observationArea.InsectObservations,
-      // DiseaseObservations: observationArea.DiseaseObservations,
-      GeneralObservations: observationArea.GeneralObservations.map(
-        (generalQuestionVal) => {
-          return {
-            ID: generalQuestionVal.ID,
-            Alias: { ID: 0, Name: "" },
-            questionType: generalQuestionVal.RenderType,
-            name: generalQuestionVal.Question,
-            options: generalQuestionVal.Options.split(","),
-            value: generalQuestionVal.Value,
-            tags: null,
-            ScoutingAreaId: observationArea.ID,
-          };
-        }
-      ),
-    } as ScoutingArea;
-  });
-
-  const mainAreas = returnVal.filter(
-    (observationArea) => observationArea.Type === "Main"
-  );
-  return returnVal;
-};
-
-const mapFormObservationToAPIQuestionVal = (observation: Observation) => {
-  return {
-    ID: observation.ID || 0,
-    Question: observation.name,
-    Value: String(observation.value),
-    Options: observation.options?.join(","),
-    RenderType: observation.questionType,
-    ValueUnit1: observation.valueUnit1,
-    ValueUnit2: observation.valueUnit2,
-  };
-};
-
 export const createScoutingImageMetadata = (
   observationArea: ScoutingArea,
   typePrefix: ObservationTypePrefix,
@@ -468,13 +277,16 @@ export const getAliasesMapForScoutingAreas = (
   } as ReturnAliasMap;
 
   scoutingAreas.forEach((scoutingArea) => {
+    if (!scoutingArea) {
+      return;
+    }
     const {
       WeedObservations,
       DiseaseObservations,
       InsectObservations,
       GeneralObservations,
     } = scoutingArea;
-    WeedObservations.forEach((weedObs) => {
+    WeedObservations?.forEach((weedObs) => {
       const { Alias } = weedObs;
       if (aliasMap.Weeds[Alias.Name] === undefined) {
         aliasMap.Weeds[Alias.Name] = new Set([scoutingArea.UId]);
@@ -482,7 +294,7 @@ export const getAliasesMapForScoutingAreas = (
         aliasMap.Weeds[Alias.Name].add(scoutingArea.UId);
       }
     });
-    DiseaseObservations.forEach((diseaseObs) => {
+    DiseaseObservations?.forEach((diseaseObs) => {
       const { Alias } = diseaseObs;
       if (aliasMap.Diseases[Alias.Name] === undefined) {
         aliasMap.Diseases[Alias.Name] = new Set([scoutingArea.UId]);
@@ -490,7 +302,7 @@ export const getAliasesMapForScoutingAreas = (
         aliasMap.Diseases[Alias.Name].add(scoutingArea.UId);
       }
     });
-    InsectObservations.forEach((insectObs) => {
+    InsectObservations?.forEach((insectObs) => {
       const { Alias } = insectObs;
       if (aliasMap.Insects[Alias.Name] === undefined) {
         aliasMap.Insects[Alias.Name] = new Set([scoutingArea.UId]);
@@ -498,7 +310,7 @@ export const getAliasesMapForScoutingAreas = (
         aliasMap.Insects[Alias.Name].add(scoutingArea.UId);
       }
     });
-    GeneralObservations.forEach((generalObs) => {
+    GeneralObservations?.forEach((generalObs) => {
       if (aliasMap.General[generalObs.name] === undefined) {
         aliasMap.General[generalObs.name] = new Set([scoutingArea.UId]);
       } else {

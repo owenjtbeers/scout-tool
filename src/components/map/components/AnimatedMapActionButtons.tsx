@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 
 import { AntDesign, FontAwesome5 } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
-import { StyleSheet } from "react-native";
+import { StyleSheet, Alert } from "react-native";
 import { SpeedDial } from "@rneui/themed";
 import { useDispatch } from "react-redux";
 import { colors } from "../../../constants/styles";
@@ -62,7 +62,13 @@ const AnimatedMapActionButtons = () => {
       <SpeedDial.Action
         iconContainerStyle={styles.buttonPadding2}
         title="Add New Scouting Report"
-        onPress={() => {}}
+        // Note: This serves to direct the user to the correct flow to add a scouting report
+        onPress={() => {
+          Alert.alert(
+            "Tap a field to add a scouting report",
+            "If you have no fields, please add a field first."
+          );
+        }}
         icon={<AntDesign name="addfile" size={24} />}
       />
     </SpeedDial>
