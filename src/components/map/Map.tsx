@@ -99,6 +99,8 @@ export const MapScreen = () => {
     <View style={styles.container}>
       <MapView
         style={styles.map}
+        provider={"google"}
+        googleMapsApiKey={process.env.EXPO_PUBLIC_GOOGLE_MAPS_WEB_API_KEY}
         ref={mapRef}
         showsUserLocation={true}
         showsCompass={true}
@@ -106,8 +108,7 @@ export const MapScreen = () => {
         showsPointsOfInterest={false}
         onMapReady={onMapReady}
         toolbarEnabled={false}
-        // provider={PROVIDER_GOOGLE}
-        mapType="hybrid"
+        mapType={"hybrid"}
         userLocationUpdateInterval={5000}
         initialRegion={
           initialRegion || {

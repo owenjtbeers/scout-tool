@@ -39,6 +39,9 @@
       "favicon": "./assets/favicon.png",
       "bundler": "metro"
     },
+    "experiments": {
+      "baseUrl": "/scout-tool"
+    },
     "extra": {
       "eas": {
         "projectId": "290dc20f-d344-457c-97f3-941b0c713aeb"

@@ -1,5 +1,8 @@
+import { Platform } from "react-native";
+
 // Storage
 import ExpoFileSystemStorage from "redux-persist-expo-filesystem";
+import localStorage from "redux-persist/lib/storage";
 
 // Redux
 import { persistStore, persistReducer } from "redux-persist";
@@ -16,7 +19,7 @@ import { fieldManagementApi } from "./field-management/fieldManagementApi";
 // Redux Persist Config
 const persistConfig = {
   key: "root",
-  storage: ExpoFileSystemStorage,
+  storage: Platform.OS === "web" ? localStorage : ExpoFileSystemStorage,
   blacklist: [MAP_DRAWING_REDUCER_KEY],
   reconcile: autoMergeLevel2,
 };

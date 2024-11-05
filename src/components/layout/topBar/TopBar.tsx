@@ -28,8 +28,6 @@ export const TopBar = () => {
   );
 };
 
-
-
 const GrowerSelector = () => {
   const dispatch = useDispatch();
   const [isGrowerDialogOpen, setIsGrowerDialogOpen] = useState(false);
@@ -52,27 +50,27 @@ const GrowerSelector = () => {
         <Text style={styles.selectionButtonText}>
           {selectedGrower?.Name || "Select a Grower"}
         </Text>
-        <Dialog
-          isVisible={isGrowerDialogOpen}
-          onBackdropPress={() => setIsGrowerDialogOpen(false)}
-        >
-          <ScrollView>
-            <Dialog.Title title={"Select a Grower"} />
-            {growers?.map((grower) => (
-              <ListItem
-                onPress={() => {
-                  dispatch(globalSelectionsSlice.actions.setGrower(grower));
-                  setIsGrowerDialogOpen(false);
-                }}
-                key={grower.ID}
-              >
-                <ListItem.Title>{grower.Name}</ListItem.Title>
-                {grower.ID === selectedGrower?.ID && <AntDesign name="check" />}
-              </ListItem>
-            ))}
-          </ScrollView>
-        </Dialog>
       </Button>
+      <Dialog
+        isVisible={isGrowerDialogOpen}
+        onBackdropPress={() => setIsGrowerDialogOpen(false)}
+      >
+        <ScrollView>
+          <Dialog.Title title={"Select a Grower"} />
+          {growers?.map((grower) => (
+            <ListItem
+              onPress={() => {
+                dispatch(globalSelectionsSlice.actions.setGrower(grower));
+                setIsGrowerDialogOpen(false);
+              }}
+              key={grower.ID}
+            >
+              <ListItem.Title>{grower.Name}</ListItem.Title>
+              {grower.ID === selectedGrower?.ID && <AntDesign name="check" />}
+            </ListItem>
+          ))}
+        </ScrollView>
+      </Dialog>
     </React.Fragment>
   );
 };
@@ -107,50 +105,50 @@ const FarmSelector = () => {
         iconPosition="right"
       >
         <Text style={styles.selectionButtonText}>{farmSelectorTitle}</Text>
-        <Dialog
-          isVisible={isFarmDialogOpen}
-          onBackdropPress={() => setIsFarmDialogOpen(false)}
-        >
-          <ScrollView>
-            <Dialog.Title title={"Select a Farm"} />
-            <ListItem
-              onPress={() => {
-                dispatch(
-                  globalSelectionsSlice.actions.setFarm({
-                    farm: null,
-                    grower: selectedGrower as Grower,
-                  })
-                );
-                setIsFarmDialogOpen(false);
-              }}
-            >
-              <ListItem.Title>All Farms</ListItem.Title>
-              {selectedFarm === null && <AntDesign name="check" />}
-            </ListItem>
-            {farms
-              ?.filter((farm) => farm.GrowerId === selectedGrower?.ID)
-              .map((farm) => (
-                <ListItem
-                  onPress={() => {
-                    dispatch(
-                      globalSelectionsSlice.actions.setFarm({
-                        farm,
-                        grower: growers?.find(
-                          (g) => g.ID === farm.GrowerId
-                        ) as Grower,
-                      })
-                    );
-                    setIsFarmDialogOpen(false);
-                  }}
-                  key={farm.ID}
-                >
-                  <ListItem.Title>{farm.Name}</ListItem.Title>
-                  {farm.ID === selectedFarm?.ID && <AntDesign name="check" />}
-                </ListItem>
-              ))}
-          </ScrollView>
-        </Dialog>
       </Button>
+      <Dialog
+        isVisible={isFarmDialogOpen}
+        onBackdropPress={() => setIsFarmDialogOpen(false)}
+      >
+        <ScrollView>
+          <Dialog.Title title={"Select a Farm"} />
+          <ListItem
+            onPress={() => {
+              dispatch(
+                globalSelectionsSlice.actions.setFarm({
+                  farm: null,
+                  grower: selectedGrower as Grower,
+                })
+              );
+              setIsFarmDialogOpen(false);
+            }}
+          >
+            <ListItem.Title>All Farms</ListItem.Title>
+            {selectedFarm === null && <AntDesign name="check" />}
+          </ListItem>
+          {farms
+            ?.filter((farm) => farm.GrowerId === selectedGrower?.ID)
+            .map((farm) => (
+              <ListItem
+                onPress={() => {
+                  dispatch(
+                    globalSelectionsSlice.actions.setFarm({
+                      farm,
+                      grower: growers?.find(
+                        (g) => g.ID === farm.GrowerId
+                      ) as Grower,
+                    })
+                  );
+                  setIsFarmDialogOpen(false);
+                }}
+                key={farm.ID}
+              >
+                <ListItem.Title>{farm.Name}</ListItem.Title>
+                {farm.ID === selectedFarm?.ID && <AntDesign name="check" />}
+              </ListItem>
+            ))}
+        </ScrollView>
+      </Dialog>
     </React.Fragment>
   );
 };
@@ -173,26 +171,26 @@ const SeasonSelector = () => {
         <Text style={styles.selectionButtonText}>
           {selectedSeason || "Select a Season"}
         </Text>
-        <Dialog
-          isVisible={isSeasonDialogOpen}
-          onBackdropPress={() => setIsSeasonDialogOpen(false)}
-        >
-          <ScrollView>
-            <Dialog.Title title={"Select a Season"} />
-            {["2024", "2023"].map((season) => (
-              <ListItem
-                onPress={() => {
-                  dispatch(globalSelectionsSlice.actions.setSeason(season));
-                  setIsSeasonDialogOpen(false);
-                }}
-                key={season}
-              >
-                <ListItem.Title>{season}</ListItem.Title>
-              </ListItem>
-            ))}
-          </ScrollView>
-        </Dialog>
       </Button>
+      <Dialog
+        isVisible={isSeasonDialogOpen}
+        onBackdropPress={() => setIsSeasonDialogOpen(false)}
+      >
+        <ScrollView>
+          <Dialog.Title title={"Select a Season"} />
+          {["2024", "2023"].map((season) => (
+            <ListItem
+              onPress={() => {
+                dispatch(globalSelectionsSlice.actions.setSeason(season));
+                setIsSeasonDialogOpen(false);
+              }}
+              key={season}
+            >
+              <ListItem.Title>{season}</ListItem.Title>
+            </ListItem>
+          ))}
+        </ScrollView>
+      </Dialog>
     </React.Fragment>
   );
 };

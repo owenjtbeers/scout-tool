@@ -1,10 +1,12 @@
-import type { BaseQueryFn } from "@reduxjs/toolkit/query";
+import type { BaseQueryFn, fakeBaseQuery } from "@reduxjs/toolkit/query";
 import axios from "axios";
 import type { AxiosRequestConfig, AxiosError } from "axios";
 import {
+  prepareHeaders,
   PrepareHeadersType,
   prepareHeaders as prepareScoutToolHeaders,
 } from "../utils/network/prepareHeaders";
+import { store as scoutingToolStore } from "./store";
 
 export type APIResponse<T> = {
   data: T;
@@ -17,15 +19,12 @@ export type APIErrorResponse = {
 };
 
 export const axiosBaseQuery =
-  (
-    {
-      baseUrl,
-      prepareHeaders,
-    }: { baseUrl: string; prepareHeaders: PrepareHeadersType } = {
-      baseUrl: "",
-      prepareHeaders: prepareScoutToolHeaders,
-    }
-  ): BaseQueryFn<
+  ({
+    baseUrl,
+  }: {
+    baseUrl: string;
+    // prepareHeaders?: PrepareHeadersType;
+  }): BaseQueryFn<
     {
       url: string;
       method?: AxiosRequestConfig["method"];
@@ -36,14 +35,16 @@ export const axiosBaseQuery =
     unknown,
     unknown
   > =>
-  async ({ url, method, data, params, headers }) => {
+  async ({ url, method, data, params, headers }, api) => {
+    // @ts-expect-error - the type of headers is not correct
+    const newHeaders = prepareScoutToolHeaders(headers, api);
     try {
       const result = await axios({
         url: baseUrl + url,
         method,
         data,
         params,
-        headers,
+        headers: newHeaders,
       });
       return { data: result.data };
     } catch (axiosError) {

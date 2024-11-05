@@ -53,10 +53,10 @@ export const DrawableMapScreen = () => {
         <MapView
           style={styles.map}
           ref={mapRef}
-          // provider={PROVIDER_GOOGLE}
+          provider={"google"}
+          googleMapsApiKey={process.env.EXPO_PUBLIC_GOOGLE_MAPS_WEB_API_KEY}
           region={initialRegion || defaultRegion}
           onPress={onPress}
-          onMapReady={() => { }}
           mapType={"hybrid"}
           showsUserLocation={true}
           showsMyLocationButton={false}
@@ -75,7 +75,6 @@ export const DrawableMapScreen = () => {
           mapRef={mapRef}
         />
       </View>
-
     </SafeAreaView>
   );
 };

@@ -1,5 +1,5 @@
 import React from "react";
-import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
+import { View, Text, Pressable, StyleSheet } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { Slot, useRouter } from "expo-router";
 import { useSelector } from "react-redux";
@@ -28,9 +28,9 @@ const Layout = () => {
     <View style={{ flex: 1 }}>
       <View style={styles.topBar}>
         <Text style={styles.text}>{translation}</Text>
-        <TouchableOpacity style={styles.button} onPress={onPressBack}>
+        <Pressable style={styles.button} onPress={onPressBack}>
           <Ionicons name="close-sharp" size={24} color="white" />
-        </TouchableOpacity>
+        </Pressable>
       </View>
       <Slot />
     </View>

@@ -1,11 +1,6 @@
 import React, { useState } from "react";
 import { Input, Dialog, InputProps, Text } from "@rneui/themed";
-import {
-  ScrollView,
-  StyleSheet,
-  TouchableOpacity,
-  Pressable,
-} from "react-native";
+import { ScrollView, StyleSheet, Pressable } from "react-native";
 import { Entypo } from "@expo/vector-icons";
 
 type Option = {
@@ -51,9 +46,9 @@ export const CustomInput = React.forwardRef(
             props.options?.find((opt) => opt.value === props.value)?.label || ""
           }
           rightIcon={
-            <TouchableOpacity onPress={onPressIn}>
+            <Pressable onPress={onPressIn}>
               <Entypo name="chevron-down" size={24} color="black" />
-            </TouchableOpacity>
+            </Pressable>
           }
           onPressIn={onPressIn}
           ref={ref}

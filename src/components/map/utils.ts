@@ -5,7 +5,7 @@ export const fitToBoundsForMapView = (
   mapRef: RefObject<MapView>,
   bounds: LatLng[]
 ) => {
-  if (mapRef.current) {
+  if (mapRef.current !== null) {
     mapRef.current.fitToCoordinates(bounds, {
       edgePadding: {
         top: 70,

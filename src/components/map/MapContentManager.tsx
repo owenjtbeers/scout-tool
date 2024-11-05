@@ -1,8 +1,8 @@
-import React, { RefObject } from "react";
+import React, { RefObject, useCallback } from "react";
 import { Text } from "react-native";
 import { Field } from "../../redux/fields/types";
 import centroid from "@turf/centroid";
-import MapView, { Marker, Geojson } from "react-native-maps";
+import MapView, { Geojson, Marker} from "react-native-maps";
 import { useTheme } from "@rneui/themed";
 import { colors } from "../../constants/styles";
 import {
@@ -30,6 +30,31 @@ export const MapContentManager = (props: MapContentManagerProps) => {
   );
   const { theme } = useTheme();
   const dispatch = useDispatch();
+  const onPressFieldBoundary = useCallback(
+    (field: Field) => (geoJsonProps: any) => {
+      if (selectedField?.ID !== field.ID) {
+        // Set the selected field in the global selections
+        dispatch(globalSelectionsSlice.actions.setField(field));
+        const { coordinates } = geoJsonProps;
+        if (coordinates && mapRef.current) {
+          // TODO: Figure out how to deal with this error
+          // @ts-ignore
+          props.mapRef.current?.fitToCoordinates(coordinates, {
+            edgePadding: {
+              top: 20,
+              right: 20,
+              bottom: 20,
+              left: 20,
+            },
+            animated: true,
+          });
+        }
+      } else {
+        dispatch(globalSelectionsSlice.actions.setField(null));
+      }
+    },
+    []
+  );
   return (
     <>
       {fields &&
@@ -70,29 +95,12 @@ export const MapContentManager = (props: MapContentManagerProps) => {
                       ? colors.selectedFieldBoundaryFill
                       : colors.tertiary
                   }
-                  tappable
-                  onPress={(geoJsonProps) => {
-                    if (selectedField?.ID !== field.ID) {
-                      // Set the selected field in the global selections
-                      dispatch(globalSelectionsSlice.actions.setField(field));
-                      const { coordinates } = geoJsonProps;
-                      if (coordinates && mapRef.current) {
-                        // TODO: Figure out how to deal with this error
-                        // @ts-ignore
-                        props.mapRef.current?.fitToCoordinates(coordinates, {
-                          edgePadding: {
-                            top: 20,
-                            right: 20,
-                            bottom: 20,
-                            left: 20,
-                          },
-                          animated: true,
-                        });
-                      }
-                    } else {
-                      dispatch(globalSelectionsSlice.actions.setField(null));
-                    }
-                  }}
+                  tappable={true}
+                  // tracksViewChanges={true}
+                  // onClick={onPressFieldBoundary(field)}
+                  onPress={onPressFieldBoundary(field)}
+                  // zIndex={100000000}
+                  key={`polygon-${field.ID}`}
                 />
               )}
             </React.Fragment>
