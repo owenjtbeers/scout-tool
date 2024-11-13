@@ -13,7 +13,9 @@
     },
     "jsEngine": "hermes",
     "plugins": [],
-    "assetBundlePatterns": ["**/*"],
+    "assetBundlePatterns": [
+      "**/*"
+    ],
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.owenbeers.scouttool",
@@ -40,7 +42,7 @@
       "bundler": "metro"
     },
     "experiments": {
-      "baseUrl": "/scout-tool"
+      "baseUrl": "/"
     },
     "extra": {
       "eas": {

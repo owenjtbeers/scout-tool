@@ -11,7 +11,7 @@
     "ios:local": "expo run:ios",
     "web": "expo start --web",
     "web:predeploy": "NODE_ENV=production expo export -p web",
-    "web:deploy": "NODE_ENV=production gh-pages -t -d dist",
+    "web:deploy": "gh-pages --cname groundedag.com -d dist",
     "android:development:build": "eas build --profile development --platform android",
     "android:apk:build": "eas build --profile preview --platform android",
     "ios:store:build": "eas build --profile preview --platform ios",

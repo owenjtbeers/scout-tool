@@ -104,9 +104,9 @@ export const Login = () => {
 
         <Button title="Login" onPress={handleSubmit(onSubmit)} />
       </View>
-      <Link style={styles.link} href="/signup">
+      {Platform.OS !== "web" && <Link style={styles.link} href="/signup">
         Don't have an account? Sign up here
-      </Link>
+      </Link>}
       <Dialog
         onBackdropPress={() => setError(null)}
         isVisible={!!error}

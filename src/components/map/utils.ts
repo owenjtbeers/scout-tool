@@ -1,11 +1,12 @@
 import { RefObject } from "react";
+import { Platform } from "react-native";
 import MapView, { LatLng } from "react-native-maps";
 
 export const fitToBoundsForMapView = (
   mapRef: RefObject<MapView>,
   bounds: LatLng[]
 ) => {
-  if (mapRef.current !== null) {
+  if (mapRef.current !== null && Platform.OS !== "web") {
     mapRef.current.fitToCoordinates(bounds, {
       edgePadding: {
         top: 70,

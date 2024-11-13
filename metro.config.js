@@ -22,4 +22,7 @@ config.resolver.resolveRequest = (context, moduleName, platform) => {
   return context.resolveRequest(context, moduleName, platform);
 };
 
-module.exports = config;
+config.resetCache = true;
+config.cacheVersion = process.env.APP_ENV;
+
+module.exports = config
