@@ -1,12 +1,21 @@
 import React from "react";
-import { View, StyleSheet, Image, KeyboardAvoidingView, Platform } from "react-native";
+import {
+  View,
+  StyleSheet,
+  Image,
+  KeyboardAvoidingView,
+  Platform,
+} from "react-native";
 import { Button, Input, Text } from "@rneui/themed";
 import { useForm, Controller } from "react-hook-form";
 import { useDispatch } from "react-redux";
 import { Link, useRouter } from "expo-router";
 import { Entypo, MaterialIcons } from "@expo/vector-icons";
 import { useLoginMutation } from "../../../src/redux/auth/authApi";
-import { HOME_MAP_SCREEN } from "../../../src/navigation/screens";
+import {
+  HOME_MAP_SCREEN,
+  SIGNUP_SCREEN,
+} from "../../../src/navigation/screens";
 import { userSlice } from "../../../src/redux/user/userSlice";
 import { Dialog, useTheme } from "@rneui/themed";
 import { getErrorMessage } from "../../utils/errors";
@@ -38,7 +47,10 @@ export const Login = () => {
   };
 
   return (
-    <KeyboardAvoidingView behavior={keyboardBehavior()} style={styles.container}>
+    <KeyboardAvoidingView
+      behavior={keyboardBehavior()}
+      style={styles.container}
+    >
       <View style={styles.logoContainer}>
         <Image
           source={require("../../../assets/icon.png")}
@@ -104,9 +116,11 @@ export const Login = () => {
 
         <Button title="Login" onPress={handleSubmit(onSubmit)} />
       </View>
-      {Platform.OS !== "web" && <Link style={styles.link} href="/signup">
-        Don't have an account? Sign up here
-      </Link>}
+      {Platform.OS !== "web" && (
+        <Link style={styles.link} href={SIGNUP_SCREEN}>
+          Don't have an account? Sign up here
+        </Link>
+      )}
       <Dialog
         onBackdropPress={() => setError(null)}
         isVisible={!!error}

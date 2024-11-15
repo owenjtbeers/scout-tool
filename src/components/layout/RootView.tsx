@@ -1,5 +1,5 @@
 import React from "react";
-import { SafeAreaView } from "react-native";
+import { SafeAreaProvider } from "react-native-safe-area-context";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { en, registerTranslation } from "react-native-paper-dates";
 // Navigation
@@ -21,9 +21,9 @@ const App = () => {
       <Provider store={store}>
         <PersistGate loading={null} persistor={persistor}>
           <ThemeProvider theme={theme}>
-            <SafeAreaView style={{ flex: 1 }}>
+            <SafeAreaProvider style={{ flex: 1 }}>
               <Slot />
-            </SafeAreaView>
+            </SafeAreaProvider>
           </ThemeProvider>
         </PersistGate>
       </Provider>
