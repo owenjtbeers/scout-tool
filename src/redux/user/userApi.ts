@@ -46,9 +46,24 @@ export const userApi = baseApi.injectEndpoints({
       }),
       providesTags: ["User"],
     }),
+    updateTutorialProgress: builder.mutation<
+      APIResponse<ScoutingAppUser>,
+      {
+        hasSetupGrower?: boolean;
+        hasSetupCrops?: boolean;
+        hasSetupPests?: boolean;
+      }
+    >({
+      query: (data) => ({
+        url: "/organization/tutorial-progress",
+        method: "PATCH",
+        data,
+      }),
+      invalidatesTags: ["User"],
+    }),
   }),
   // TODO: Disable in production
   // overrideExisting: true,
 });
 
-export const { useGetCurrentUserQuery, useSignupUserMutation } = userApi;
+export const { useGetCurrentUserQuery, useSignupUserMutation, useUpdateTutorialProgressMutation } = userApi;

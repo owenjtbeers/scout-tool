@@ -1,6 +1,6 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 
-import { ScoutingAppUser } from "./types";
+import { ScoutingAppUser, Organization } from "./types";
 import { baseApi } from "../baseApi";
 
 interface UserState {
@@ -24,6 +24,18 @@ export const userSlice = createSlice({
     setToken: (state, action: PayloadAction<string>) => {
       state.token = action.payload;
       return state;
+    },
+    updateUserOrganization: (state, action: PayloadAction<Organization>) => {
+      if (state.currentUser && state.currentUser.Organization) {
+        return {
+          ...state,
+          currentUser: {
+            ...state.currentUser,
+            Organization: action.payload
+          }
+        }
+      }
+      return state
     },
     logout: (state) => {
       state.currentUser = null;

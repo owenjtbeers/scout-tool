@@ -13,3 +13,7 @@ export const INFO_PRODUCTS_SCREEN = "/info/products";
 export const INFO_ABOUT_SCREEN = "/info/about";
 export const INFO_CONTACT_SCREEN = "/info/contact";
 export const INFO_PRICING_SCREEN = "/info/pricing";
+export const MANAGE_GROWERS_SCREEN = '/manage-growers'
+export const MANAGE_ORGANIZATION_SCREEN = '/manage-organization'
+export const MANAGE_CROPS_SCREEN = '/manage-crops'
+export const MANAGE_PESTS_SCREEN= '/manage-pests'

@@ -239,7 +239,9 @@ export const ScoutingReportMapView = (props: ScoutingReportMapViewProps) => {
         mapType={"hybrid"}
         showsUserLocation={true}
         showsMyLocationButton={false}
-        // provider={"google"}
+        provider={"google"}
+        // @ts-ignore
+        googleMapsApiKey={process.env.EXPO_PUBLIC_GOOGLE_MAPS_WEB_API_KEY}
         toolbarEnabled={false}
         onPress={onPress}
         scrollEnabled={!isDrawing}

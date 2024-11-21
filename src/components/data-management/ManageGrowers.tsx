@@ -13,10 +13,16 @@ import { useRouter } from "expo-router";
 import { ScrollView, RefreshControl, Alert } from "react-native";
 import { Grower, Farm } from "../../redux/field-management/types";
 import { useForm, Controller, set } from "react-hook-form";
+import { useSelector } from "react-redux";
+import { RootState } from "../../redux/store";
+import { HOME_SETTINGS_SCREEN } from "../../navigation/screens";
+import { useUpdateTutorialProgressMutation } from "../../redux/user/userApi";
+
 
 export const ManageGrowers: React.FC = () => {
   const router = useRouter();
   const { theme } = useTheme();
+  const currentUser = useSelector((state: RootState) => state.user.currentUser)
   const {
     data: growerData,
     error: growerError,
@@ -32,12 +38,17 @@ export const ManageGrowers: React.FC = () => {
     refetch: refetchFarms,
     isFetching: isFetchingFarms,
   } = useGetFarmsQuery("default");
-
+  
   const [selectedGrower, setSelectedGrower] = React.useState<Grower>();
-  const [isAddingGrower, setIsAddingGrower] = React.useState(false);
+  const [isAddingGrower, setIsAddingGrower] = React.useState(false || !currentUser?.Organization?.hasSetupGrower);
 
   const handleBack = () => {
-    router.back();
+    if (router.canGoBack()) {
+      router.back();
+    } else {
+      router.push(HOME_SETTINGS_SCREEN)
+    }
+
   };
 
   return (
@@ -143,7 +154,7 @@ const ManageSingleGrowerDialog = (props: ManageSingleGrowerDialogProps) => {
             value={value}
             label={"Grower Email"}
             errorMessage={error?.message}
-            // style={scoutFormStyles.largeTextInput}
+          // style={scoutFormStyles.largeTextInput}
           />
         )}
         name={`Email`}
@@ -182,7 +193,7 @@ const ManageSingleGrowerDialog = (props: ManageSingleGrowerDialogProps) => {
                     value={value}
                     label={"Farm Name"}
                     errorMessage={error?.message}
-                    // style={scoutFormStyles.largeTextInput}
+                  // style={scoutFormStyles.largeTextInput}
                   />
                 )}
                 name={`newFarms.${index}.Name`}
@@ -248,7 +259,7 @@ const ManageSingleGrowerDialog = (props: ManageSingleGrowerDialogProps) => {
             // Close Dialog
             onClose();
           },
-          () => {}
+          () => { }
         )}
       />
     </Dialog>
@@ -267,6 +278,8 @@ interface GrowerForm {
   Farm: { Name: string; ID: number; GrowerId: number };
 }
 const AddSingleGrowerDialog = (props: AddSingleGrowerDialogProps) => {
+  const currentUser = useSelector((state: RootState) => state.user.currentUser)
+  const [updateTutorialProgress] = useUpdateTutorialProgressMutation()
   const { onClose, refetchFarms } = props;
   const { theme } = useTheme();
   const defaultFormValues = {
@@ -283,6 +296,10 @@ const AddSingleGrowerDialog = (props: AddSingleGrowerDialogProps) => {
     const response = await createGrower(data);
     if (response.error) {
       Alert.alert("Error saving grower");
+    } else {
+      // Update Organization hasSetupGrower
+      // TODO: Specify this functionality
+      const setupResponse = await updateTutorialProgress({ hasSetupGrower: true })
     }
     refetchFarms();
     onClose();
@@ -303,7 +320,7 @@ const AddSingleGrowerDialog = (props: AddSingleGrowerDialogProps) => {
             value={value}
             label={"* Grower Name"}
             errorMessage={error?.message}
-            // style={scoutFormStyles.largeTextInput}
+          // style={scoutFormStyles.largeTextInput}
           />
         )}
         name={`Name`}
@@ -333,7 +350,7 @@ const AddSingleGrowerDialog = (props: AddSingleGrowerDialogProps) => {
             value={value}
             label={"* Farm Name"}
             errorMessage={error?.message}
-            // style={scoutFormStyles.largeTextInput}
+          // style={scoutFormStyles.largeTextInput}
           />
         )}
         name={`Farm.Name`}
@@ -363,7 +380,7 @@ const AddSingleGrowerDialog = (props: AddSingleGrowerDialogProps) => {
             value={value}
             label={"Grower Email"}
             errorMessage={error?.message}
-            // style={scoutFormStyles.largeTextInput}
+          // style={scoutFormStyles.largeTextInput}
           />
         )}
         name={`Email`}
@@ -377,7 +394,7 @@ const AddSingleGrowerDialog = (props: AddSingleGrowerDialogProps) => {
         defaultValue=""
       />
       <Dialog.Actions>
-        <Button title="Save" onPress={handleSubmit(onValidSubmit, () => {})} />
+        <Button title="Save" onPress={handleSubmit(onValidSubmit, () => { })} />
       </Dialog.Actions>
     </Dialog>
   );

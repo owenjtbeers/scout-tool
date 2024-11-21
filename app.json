@@ -13,12 +13,15 @@
     },
     "jsEngine": "hermes",
     "plugins": [],
-    "assetBundlePatterns": ["**/*"],
+    "assetBundlePatterns": [
+      "**/*"
+    ],
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.owenbeers.scouttool",
       "jsEngine": "jsc",
       "buildNumber": "1",
+      "scheme": "scout-tool",
       "config": {
         "usesNonExemptEncryption": false
       }
@@ -37,9 +40,9 @@
     },
     "web": {
       "favicon": "./assets/favicon.png",
-      "bundler": "metro",
+      "bundler": "metro"
       // NOTE: This is needed to run the predeploy command
-      "output": "static"
+      // "output": "static"
     },
     "experiments": {
       "baseUrl": "/"
@@ -54,6 +57,5 @@
       "type": "string",
       "pattern": "^[a-z][a-z0-9+.-]*$"
     }
-    // "scheme": "scout-tool"
   }
 }

@@ -8,6 +8,7 @@ import { userSlice } from "../../redux/user/userSlice";
 // Get Current user data
 import { useGetCurrentUserQuery } from "../../redux/user/userApi";
 import { ActivityIndicator } from "react-native";
+import { HOME_SETTINGS_SCREEN } from "../../navigation/screens";
 export const ManageOrganization: React.FC = () => {
   const { theme } = useTheme();
   const router = useRouter();
@@ -15,7 +16,12 @@ export const ManageOrganization: React.FC = () => {
     useGetCurrentUserQuery("default", { refetchOnReconnect: true });
 
   const handleBack = () => {
-    router.back();
+    if (router.canGoBack()) {
+      router.back();
+    } else {
+      router.push(HOME_SETTINGS_SCREEN)
+    }
+
   };
 
   return (

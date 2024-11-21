@@ -19,7 +19,7 @@ export default () => {
     // Clear api state, so that all data is refetched when user logs back in
     dispatch(baseApi.util.resetApiState());
     // Take user to login screen
-    router.replace("/login");
+  router.replace("/login");
   };
 
   const onManageGrowers = () => {

@@ -99,7 +99,9 @@ export const MapScreen = () => {
     <View style={styles.container}>
       <MapView
         style={styles.map}
-        // provider={PROVIDER_GOOGLE}
+        provider={"google"}
+        // @ts-expect-error because of the Interface mismatch from teovilla to react-native-maps
+        googleMapsApiKey={process.env.EXPO_PUBLIC_GOOGLE_MAPS_WEB_API_KEY}
         ref={mapRef}
         showsUserLocation={true}
         showsCompass={true}
