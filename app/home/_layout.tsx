@@ -8,11 +8,13 @@ import { TopBar } from "../../src/components/layout/topBar/TopBar";
 import { BottomBar } from "../../src/components/layout/bottomBar/HomeBottomBar";
 import { Welcome } from "../../src/components/tutorial/Welcome"
 import { useSelector } from "react-redux";
+import { hasOrganizationFinishedTutorial } from "../../src/utils/tutorial";
+import { Organization } from "../../src/redux/user/types";
 
 export default function HomeLayout() {
   const currentUser = useSelector((state: RootState) => state.user.currentUser)
   console.log(currentUser)
-  if (!currentUser?.Organization?.hasSetupGrower && currentUser?.AccountType === "org_admin") {
+  if (hasOrganizationFinishedTutorial(currentUser?.Organization as Organization) && currentUser?.AccountType === "org_admin") {
     return <Welcome />
   }
   return (

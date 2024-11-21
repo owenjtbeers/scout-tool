@@ -2,10 +2,14 @@ import React, { useEffect, useRef } from 'react';
 import { Animated, StyleSheet, View } from 'react-native';
 import { Button, Text } from '@rneui/themed';
 import { useRouter } from 'expo-router';
-import { MANAGE_GROWERS_SCREEN } from '../../navigation/screens';
-
+import { navigateToNextPhaseOfTutorial } from './navigation';
+import { useSelector } from 'react-redux';
+import { RootState } from '../../redux/store';
+import { ScoutingAppUser } from '../../redux/user/types';
 
 export const Welcome = () => {
+  // @ts-expect-error Note: Not sure how to best deal with this error right now but I don't wanna be slowed down
+  const currentUser: ScoutingAppUser = useSelector((state: RootState) => state.user.currentUser);
   const welcomeFadeAnim = useRef(new Animated.Value(0)).current;
   const welcomeSlideAnim = useRef(new Animated.Value(50)).current;
   const setupFadeAnim = useRef(new Animated.Value(0)).current;
@@ -98,7 +102,7 @@ export const Welcome = () => {
           that is relevant to you
         </Text>
         <Button containerStyle={{ margin: 10 }} title={"Continue"} onPress={() => {
-          router.push(MANAGE_GROWERS_SCREEN)
+          navigateToNextPhaseOfTutorial(router, currentUser.Organization)
         }} />
       </Animated.View>
     </View>

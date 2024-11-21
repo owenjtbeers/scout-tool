@@ -1,6 +1,6 @@
 import { baseApi } from "../baseApi";
 import type { APIResponse } from "../query";
-import type { FieldCrop, OrgCrop } from "./types";
+import type { FieldCrop, OrgCrop, Crop } from "./types";
 
 export const cropsApi = baseApi.injectEndpoints({
   endpoints: (build) => ({
@@ -44,6 +44,12 @@ export const cropsApi = baseApi.injectEndpoints({
       }),
       invalidatesTags: ["Crops"],
     }),
+    getGenericCropList: build.query<APIResponse<Crop[]>, void>({
+      query: () => ({
+        url: "/crops/generic",
+        method: "GET"
+      }),
+    })
   }),
   // TODO: Disable this in production
   // overrideExisting: true,
@@ -52,5 +58,6 @@ export const cropsApi = baseApi.injectEndpoints({
 export const {
   useGetOrgCropsQuery,
   useUpdateFieldCropsMutation,
+  useGetGenericCropListQuery,
   useGetFieldCropsForFieldQuery,
 } = cropsApi;

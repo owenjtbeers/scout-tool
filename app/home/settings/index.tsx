@@ -19,7 +19,7 @@ export default () => {
     // Clear api state, so that all data is refetched when user logs back in
     dispatch(baseApi.util.resetApiState());
     // Take user to login screen
-  router.replace("/login");
+    router.replace("/login");
   };
 
   const onManageGrowers = () => {
@@ -30,12 +30,17 @@ export default () => {
     router.push("/manage-organization");
   };
 
+  const onManageCrops = () => {
+    router.navigate("/manage-crops");
+  };
+
   return (
     <>
       <View style={styles.container}>
         <Button onPress={onLogout}>Logout</Button>
         <Button onPress={onManageGrowers}>Manage Growers</Button>
         <Button onPress={onManageOrganization}>Manage Organization</Button>
+        <Button onPress={onManageCrops}>Manage Crops</Button>
       </View>
     </>
   );
