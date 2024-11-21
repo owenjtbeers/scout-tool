@@ -75,7 +75,7 @@ export const getNewWeedObservationSet = (alias: Alias): Observation[] => {
       questionType: "numeric-slider",
       name: "Diameter",
       value: "",
-      options: ["0", "3"],
+      options: ["0", "12"],
       valueUnit1: "inches",
       // valueUnit2: "m2",
       tags: null,
@@ -158,15 +158,19 @@ export const getObservationSetForAlias = (alias: Alias): Observation[] => {
   return observations;
 };
 
-export const getMinimumObservationSetForAlias = (alias: Alias): Observation[] => {
-  return [{
-    questionType: "IGNORE",
-    name: "Found",
-    value: "",
-    tags: null,
-    ScoutingAreaId: 0,
-    Alias: alias,
-  }];
+export const getMinimumObservationSetForAlias = (
+  alias: Alias
+): Observation[] => {
+  return [
+    {
+      questionType: "IGNORE",
+      name: "Found",
+      value: "",
+      tags: null,
+      ScoutingAreaId: 0,
+      Alias: alias,
+    },
+  ];
 };
 /*
   This function is used to get a map of recent observations from a list of scouting areas.
