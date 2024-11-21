@@ -67,7 +67,7 @@ const AboutUsPage: React.FC = () => {
               Stephen
             </Text>
             <Text style={styles.paragraph}>
-              Pretty good guy, likes to do Agronomy
+              Pretty good guy, likes to do Agronomy. He's got his P.Ag
             </Text>
           </View>
         </View>
@@ -85,7 +85,7 @@ const AboutUsPage: React.FC = () => {
               Laine
             </Text>
             <Text style={styles.paragraph}>
-              Pretty good guy, also likes to do Agronomy
+              Pretty good guy, also likes to do Agronomy. He's got his P.Ag
             </Text>
           </View>
           <Image
