@@ -9,7 +9,33 @@ export const cropsApi = baseApi.injectEndpoints({
         url: "/crops",
         method: "GET",
       }),
-      providesTags: ["Crops"],
+      providesTags: ["OrgCrops"],
+    }),
+    createOrgCrop: build.mutation<APIResponse<OrgCrop>, { Name: string }>({
+      query: (data) => ({
+        url: "/crops/org-crop",
+        method: "POST",
+        data,
+      }),
+      invalidatesTags: ["OrgCrops"],
+    }),
+    editOrgCrop: build.mutation<
+      APIResponse<OrgCrop>,
+      { ID: number; Name: string }
+    >({
+      query: (data) => ({
+        url: `/crops/org-crop/${data.ID}`,
+        method: "PUT",
+        data,
+      }),
+      invalidatesTags: ["OrgCrops"],
+    }),
+    deleteOrgCrop: build.mutation<APIResponse<void>, number>({
+      query: (cropId) => ({
+        url: `/crops/org-crop/${cropId}`,
+        method: "DELETE",
+      }),
+      invalidatesTags: ["OrgCrops"],
     }),
     updateFieldCrops: build.mutation({
       query: (args: { fieldId: number; data: FieldCrop[] }) => {
@@ -20,7 +46,7 @@ export const cropsApi = baseApi.injectEndpoints({
           data: { FieldCrops: args.data },
         };
       },
-      invalidatesTags: ["Crops"],
+      invalidatesTags: ["OrgCrops"],
       // transformErrorResponse: (response: APIErrorResponse) => {
       //   return response.data;
       // },
@@ -42,14 +68,14 @@ export const cropsApi = baseApi.injectEndpoints({
         url: `/crops/field-crop/${data.ID}`,
         method: "DELETE",
       }),
-      invalidatesTags: ["Crops"],
+      invalidatesTags: ["OrgCrops"],
     }),
     getGenericCropList: build.query<APIResponse<Crop[]>, void>({
       query: () => ({
         url: "/crops/generic",
-        method: "GET"
+        method: "GET",
       }),
-    })
+    }),
   }),
   // TODO: Disable this in production
   // overrideExisting: true,
@@ -57,6 +83,10 @@ export const cropsApi = baseApi.injectEndpoints({
 
 export const {
   useGetOrgCropsQuery,
+  useCreateOrgCropMutation,
+  useDeleteOrgCropMutation,
+  useEditOrgCropMutation,
+  useDeleteFieldCropMutation,
   useUpdateFieldCropsMutation,
   useGetGenericCropListQuery,
   useGetFieldCropsForFieldQuery,

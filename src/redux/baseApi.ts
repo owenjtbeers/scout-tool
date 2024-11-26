@@ -19,6 +19,7 @@ export const baseApi = createApi({
     "OrgWeeds",
     "OrgDiseases",
     "OrgInsects",
+    "OrgCrops",
     "Crops",
   ],
   endpoints: () => ({}),
