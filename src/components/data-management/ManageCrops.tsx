@@ -19,6 +19,8 @@ import {
 } from "../../redux/crops/cropsApi";
 import { OrgCrop } from "../../redux/crops/types";
 import { ScoutingAppUser } from "../../redux/user/types";
+import { navigateToNextPhaseOfTutorial } from "../tutorial/navigation";
+import { useUpdateTutorialProgressMutation } from "../../redux/user/userApi";
 
 interface CropForm {
   ID: number;
@@ -179,12 +181,14 @@ const AddCropsDialog: React.FC<AddCropsDialogProps> = ({
   refetchCrops,
 }) => {
   const { theme } = useTheme();
+  const router = useRouter();
   const dispatch = useDispatch();
   // @ts-ignore Note: User will be logged in and an actual user
   const currentUser: ScoutingAppUser = useSelector(
     (state: RootState) => state.user.currentUser
   );
   const [createOrgCrop] = useCreateOrgCropMutation();
+  const [updateTutorialProgress] = useUpdateTutorialProgressMutation()
   const { data: genericCrops } = useGetGenericCropListQuery();
   const { control, handleSubmit, watch, setValue } = useForm<AddCropForm>({
     defaultValues: {
@@ -213,13 +217,11 @@ const AddCropsDialog: React.FC<AddCropsDialogProps> = ({
         }
       }
       if (data.crops.length > 0) {
-        dispatch(
-          userSlice.actions.updateUserOrganization({
-            ...currentUser?.Organization,
-            hasSetupCrops: true,
-          })
-        );
+        const updatedUserOrg = { ...currentUser?.Organization, hasSetupCrops: true }
+        dispatch(userSlice.actions.updateUserOrganization(updatedUserOrg));
+        await updateTutorialProgress({ hasSetupCrops: true })
         alert(`Created ${results.length} of ${data.crops.length}`, "");
+        navigateToNextPhaseOfTutorial(router, updatedUserOrg)
       }
       refetchCrops();
       onClose();
@@ -437,8 +439,8 @@ export const ManageCrops: React.FC = () => {
         refreshControl={
           <RefreshControl refreshing={isFetching} onRefresh={refetchOrgCrops} />
         }
-        // contentContainerStyle={{ flex: 1 }}
-        // style={{ flex: 1 }}
+      // contentContainerStyle={{ flex: 1 }}
+      // style={{ flex: 1 }}
       >
         {isLoading ? (
           <Text>Loading crops...</Text>
@@ -488,7 +490,7 @@ export const ManageCrops: React.FC = () => {
                   color={"secondary"}
                   titleStyle={{ color: "primary" }}
                   onPress={() => setSelectedCrop(crop)}
-                  // titleStyle={{ color: theme.colors.primary }}
+                // titleStyle={{ color: theme.colors.primary }}
                 />
                 <Button
                   type="clear"

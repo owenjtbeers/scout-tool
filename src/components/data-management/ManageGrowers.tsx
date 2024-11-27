@@ -307,21 +307,24 @@ const AddSingleGrowerDialog = (props: AddSingleGrowerDialogProps) => {
   const { handleSubmit, control } = useForm<GrowerForm>({
     defaultValues: defaultFormValues,
   });
+  const onCompleteGrowerTutorialStep = async () => {
+    // Update Organization hasSetupGrower with the server
+    const hasSetupGrowerBefore = currentUser.Organization?.hasSetupGrower
+    const setupResponse = await updateTutorialProgress({ hasSetupGrower: true })
+    // Save this in local state regardless of the response
+    const newOrgData = { ...currentUser.Organization, hasSetupGrower: true }
+    dispatch(userSlice.actions.updateUserOrganization(newOrgData))
+    if (!hasSetupGrowerBefore) {
+      // We are in tutorial state, navigate the user to the next phase
+      navigateToNextPhaseOfTutorial(router, newOrgData)
+    }
+  }
   const onValidSubmit = async (data: GrowerForm) => {
     const response = await createGrower(data);
     if (response.error) {
       alert("Error saving grower", "");
     } else {
-      // Update Organization hasSetupGrower with the server
-      const hasSetupGrowerBefore = currentUser.Organization?.hasSetupGrower
-      const setupResponse = await updateTutorialProgress({ hasSetupGrower: true })
-      // Save this in local state regardless of the response
-      const newOrgData = { ...currentUser.Organization, hasSetupGrower: true }
-      dispatch(userSlice.actions.updateUserOrganization(newOrgData))
-      if (!hasSetupGrowerBefore) {
-        // We are in tutorial state, navigate the user to the next phase
-        navigateToNextPhaseOfTutorial(router, newOrgData)
-      }
+      await onCompleteGrowerTutorialStep()
     }
     refetchFarms();
     onClose();
@@ -423,7 +426,12 @@ const AddSingleGrowerDialog = (props: AddSingleGrowerDialogProps) => {
           <Button title="Skip" onPress={() => alert(
             "Are you sure you want to skip creating a grower and farm right now? This is not recommended",
             "",
-            [{ text: "I want to skip", onPress: () => router.push(MANAGE_CROPS_SCREEN) }],
+            [{
+              text: "I want to skip", onPress: async () => {
+                await onCompleteGrowerTutorialStep()
+              }
+            }
+            ],
             undefined
           )} />
           : null

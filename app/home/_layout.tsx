@@ -13,7 +13,6 @@ import { Organization } from "../../src/redux/user/types";
 
 export default function HomeLayout() {
   const currentUser = useSelector((state: RootState) => state.user.currentUser);
-  console.log(currentUser);
   if (
     !hasOrganizationFinishedTutorial(
       currentUser?.Organization as Organization
