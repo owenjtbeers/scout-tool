@@ -125,7 +125,6 @@ export const ScoutingReportMapView = (props: ScoutingReportMapViewProps) => {
           },
         } as Feature<LineString, Properties>;
       });
-      console.log("convertedPolylines", convertedPolylines);
       setFormValue("scoutingAreas.0.Geometry.features", convertedPolylines, {
         shouldDirty: true,
       });

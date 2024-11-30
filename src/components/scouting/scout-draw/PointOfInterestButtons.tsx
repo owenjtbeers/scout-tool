@@ -97,74 +97,73 @@ export const PointOfInterestButtons = (props: PointOfInterestButtonsProps) => {
           <View style={styles.hotButtonsContainer}>
             {selectedPestHotButtonQueue?.length
               ? selectedPestHotButtonQueue
-                .map((button, index) => {
-                  const isSelected = isSelectedPestHotButton(
-                    selectedPestHotButton,
-                    button
-                  );
-                  const backgroundColor = isSelected
-                    ? theme.colors.secondary
-                    : theme.colors.primary;
-                  const fontColor = isSelected
-                    ? theme.colors.primary
-                    : theme.colors.secondary;
-                  return (
-                    <Button
-                      key={index}
-                      radius={10}
-                      color={backgroundColor}
-                      containerStyle={{
-                        ...styles.pestPointHotButton,
-                        backgroundColor,
-                      }}
-                      raised={isSelected}
-                      buttonStyle={styles.button}
-                      title={buttonTitle(button.Alias, fontColor)}
-                      iconPosition="top"
-                      icon={PestIcon({
-                        type: button.type,
-                        size: 50,
-                        color: button.color || theme.colors.secondary,
-                      })}
-                      onPress={async () => {
-                        if (
-                          !isSelectedPestHotButton(
-                            selectedPestHotButton,
-                            button
-                          )
-                        ) {
-                          dispatch(
-                            scoutingSlice.actions.setPestHotButton({
-                              Alias: button.Alias,
-                              color: button.color,
-                              type: button.type,
-                            })
-                          );
-                        }
-                        // Get current location from the map ref
-                        if (dropAtCurrentLocation) {
-                          const location =
-                            await Location.getLastKnownPositionAsync({});
-                          if (location && location.coords) {
-                            console.log(location.coords);
+                  .map((button, index) => {
+                    const isSelected = isSelectedPestHotButton(
+                      selectedPestHotButton,
+                      button
+                    );
+                    const backgroundColor = isSelected
+                      ? theme.colors.secondary
+                      : theme.colors.primary;
+                    const fontColor = isSelected
+                      ? theme.colors.primary
+                      : theme.colors.secondary;
+                    return (
+                      <Button
+                        key={index}
+                        radius={10}
+                        color={backgroundColor}
+                        containerStyle={{
+                          ...styles.pestPointHotButton,
+                          backgroundColor,
+                        }}
+                        raised={isSelected}
+                        buttonStyle={styles.button}
+                        title={buttonTitle(button.Alias, fontColor)}
+                        iconPosition="top"
+                        icon={PestIcon({
+                          type: button.type,
+                          size: 50,
+                          color: button.color || theme.colors.secondary,
+                        })}
+                        onPress={async () => {
+                          if (
+                            !isSelectedPestHotButton(
+                              selectedPestHotButton,
+                              button
+                            )
+                          ) {
                             dispatch(
-                              drawingSlice.actions.addPestPoint({
-                                coordinates: {
-                                  latitude: location?.coords.latitude,
-                                  longitude: location.coords.longitude,
-                                },
+                              scoutingSlice.actions.setPestHotButton({
                                 Alias: button.Alias,
-                                type: button.type,
                                 color: button.color,
+                                type: button.type,
                               })
                             );
                           }
-                        }
-                      }}
-                    />
-                  )
-                })
-                ?.reverse()
+                          // Get current location from the map ref
+                          if (dropAtCurrentLocation) {
+                            const location =
+                              await Location.getLastKnownPositionAsync({});
+                            if (location && location.coords) {
+                              dispatch(
+                                drawingSlice.actions.addPestPoint({
+                                  coordinates: {
+                                    latitude: location?.coords.latitude,
+                                    longitude: location.coords.longitude,
+                                  },
+                                  Alias: button.Alias,
+                                  type: button.type,
+                                  color: button.color,
+                                })
+                              );
+                            }
+                          }
+                        }}
+                      />
+                    );
+                  })
+                  ?.reverse()
               : null}
           </View>
           <View style={styles.adminButtonsContainer}>
@@ -195,7 +194,11 @@ export const PointOfInterestButtons = (props: PointOfInterestButtonsProps) => {
               containerStyle={styles.pointOfInterestButtonContainer}
               buttonStyle={styles.button}
               iconPosition="bottom"
-              icon={{ name: "settings", size: 49, color: theme.colors.secondary }}
+              icon={{
+                name: "settings",
+                size: 49,
+                color: theme.colors.secondary,
+              }}
             />
           </View>
         </View>
@@ -243,9 +246,15 @@ export const PointOfInterestButtons = (props: PointOfInterestButtonsProps) => {
             }}
           >
             <ListItem.Content>
-              <ListItem.Title> Tap on Hot Button - Drop at Current Location</ListItem.Title>
+              <ListItem.Title>
+                {" "}
+                Tap on Hot Button - Drop at Current Location
+              </ListItem.Title>
             </ListItem.Content>
-            <ListItem.CheckBox onPress={() => setDropAtCurrentLocation(!dropAtCurrentLocation)} checked={dropAtCurrentLocation} />
+            <ListItem.CheckBox
+              onPress={() => setDropAtCurrentLocation(!dropAtCurrentLocation)}
+              checked={dropAtCurrentLocation}
+            />
           </ListItem>
         </ScrollView>
       </Dialog>

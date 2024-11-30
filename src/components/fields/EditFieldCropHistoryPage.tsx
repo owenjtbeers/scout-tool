@@ -25,6 +25,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { formatDate } from "../../utils/formatting/dates";
 import { getErrorMessage } from "../../utils/errors";
 import { DialogPickerSelect } from "../../forms/components/DialogPicker";
+import { DARK_GREEN_PRIMARY } from "../../constants/styles";
 
 interface EditFieldCropHistoryPageProps {
   onClose: () => void;
@@ -150,7 +151,7 @@ const FieldCropHistoryForm = (props: FieldCropHistoryFormProps) => {
                 ID: 0,
                 FieldId: selectedField?.ID || 0,
                 CropId: 0,
-                Crop: { ID: 0, Name: "" },
+                Crop: { ID: 0, Name: "", Color: DARK_GREEN_PRIMARY },
                 PlantedDate: new Date(),
                 EndDate: undefined,
               });
@@ -247,7 +248,7 @@ const EditingFieldCropForm = (props: EditingFieldCropFormProps) => {
   const getCropOptions = () => {
     const fieldCrop = getValues("Crop");
     const orgCropNames = orgCrops.map((orgCrop) => orgCrop.Name);
-    const fieldCropNames = [fieldCrop.Name];
+    const fieldCropNames = [fieldCrop?.Name];
     const uniqueOptions = new Set([...orgCropNames, ...fieldCropNames]);
     return Array.from(uniqueOptions).map((option) => ({
       label: option,

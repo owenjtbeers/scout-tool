@@ -225,7 +225,6 @@ const generateImagesHtml = async (report: ScoutingReportForm) => {
       stringifiedImage = await readAsStringAsync(image.Url, {
         encoding: "base64",
       });
-      console.log("stringifiedImage local", stringifiedImage.slice(0, 500));
     }
     stringifiedImage = `data:image/jpg;base64,${stringifiedImage}`;
     return `

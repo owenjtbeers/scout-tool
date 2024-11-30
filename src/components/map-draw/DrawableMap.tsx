@@ -47,13 +47,14 @@ export const DrawableMapScreen = () => {
     withCrops: true,
   });
   return (
-    <SafeAreaView style={styles.container}>
+    <View style={styles.container}>
       <View style={styles.container}>
         <DrawingButtons setModalVisible={setModalVisible} />
         <MapView
           style={styles.map}
           ref={mapRef}
           provider={"google"}
+          // @ts-expect-error
           googleMapsApiKey={process.env.EXPO_PUBLIC_GOOGLE_MAPS_WEB_API_KEY}
           region={initialRegion || defaultRegion}
           onPress={onPress}
@@ -75,17 +76,17 @@ export const DrawableMapScreen = () => {
           mapRef={mapRef}
         />
       </View>
-    </SafeAreaView>
+    </View>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    height: "100%",
+    // height: "100%",
   },
   map: {
     flex: 1,
-    height: "100%",
+    // height: "100%",
   },
 });

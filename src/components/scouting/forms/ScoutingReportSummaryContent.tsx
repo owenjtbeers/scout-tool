@@ -79,7 +79,7 @@ export const ScoutingReportSummaryContent = (
   const getCropOptions = () => {
     const selectedField = formGetValues("field");
     const fieldCropNames = selectedField?.FieldCrops?.map((fieldCrop) => {
-      return fieldCrop.Crop.Name;
+      return fieldCrop.Crop?.Name;
     });
     const currentCropName = formGetValues("crop.Name");
     if (currentCropName && currentCropName !== "") {
@@ -161,8 +161,9 @@ export const ScoutingReportSummaryContent = (
               fieldState: { error },
             }) => (
               <Input
-                label={`Field Area (${formGetValues("fieldAreaUnit") || "acres"
-                  })`}
+                label={`Field Area (${
+                  formGetValues("fieldAreaUnit") || "acres"
+                })`}
                 placeholder={"Enter Area"}
                 keyboardType={"numeric"}
                 onChangeText={(value) => {
@@ -215,7 +216,7 @@ export const ScoutingReportSummaryContent = (
                   value={value}
                   label={"Growth Stage"}
                   inputAccessoryViewID={name}
-                // style={scoutFormStyles.largeTextInput}
+                  // style={scoutFormStyles.largeTextInput}
                 />
                 {Platform.OS === "ios" && (
                   <InputAccessoryView nativeID={name}>
@@ -317,9 +318,9 @@ export const ScoutingReportSummaryContent = (
           ) : null}
         </View>
         {Object.keys(aliasMap.Weeds).length ||
-          Object.keys(aliasMap.Diseases).length ||
-          Object.keys(aliasMap.Insects).length ||
-          Object.keys(aliasMap.General).length ? (
+        Object.keys(aliasMap.Diseases).length ||
+        Object.keys(aliasMap.Insects).length ||
+        Object.keys(aliasMap.General).length ? (
           <View
             key={"section-auto-generated-summary"}
             style={scoutFormStyles.section}

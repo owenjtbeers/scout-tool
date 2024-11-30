@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 
 import { View, StyleSheet } from "react-native";
 import { RootState } from "../../src/redux/store";
@@ -9,24 +9,26 @@ import { BottomBar } from "../../src/components/layout/bottomBar/HomeBottomBar";
 import { Welcome } from "../../src/components/tutorial/Welcome";
 import { useSelector } from "react-redux";
 import { hasOrganizationFinishedTutorial } from "../../src/utils/tutorial";
-import { Organization } from "../../src/redux/user/types";
 
 export default function HomeLayout() {
   const currentUser = useSelector((state: RootState) => state.user.currentUser);
-  if (
-    !hasOrganizationFinishedTutorial(
-      currentUser?.Organization as Organization
-    ) &&
-    currentUser?.AccountType === "org_admin"
-  ) {
-    return <Welcome />;
-  }
+  const hasDismissedWelcomeScreen = useSelector(
+    (state: RootState) => state.user.hasDismissedWelcomeScreen
+  );
+  const hasOrganizationFinishedTutorialBool = hasOrganizationFinishedTutorial(
+    currentUser?.Organization
+  );
+  const shouldRenderWelcomeScreen =
+    !hasOrganizationFinishedTutorialBool && !hasDismissedWelcomeScreen;
   return (
-    <View style={styles.container}>
-      <TopBar />
-      <Slot />
-      <BottomBar />
-    </View>
+    <>
+      {shouldRenderWelcomeScreen ? <Welcome /> : null}
+      <View style={styles.container}>
+        <TopBar />
+        <Slot />
+        <BottomBar />
+      </View>
+    </>
   );
 }
 

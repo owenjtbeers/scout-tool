@@ -1,22 +1,33 @@
-import React, { RefObject, useCallback } from "react";
-import { Text } from "react-native";
-import { Field } from "../../redux/fields/types";
-import centroid from "@turf/centroid";
-import MapView, { Geojson, Marker} from "react-native-maps";
 import { useTheme } from "@rneui/themed";
-import { colors } from "../../constants/styles";
+import bbox from "@turf/bbox";
+import centroid from "@turf/centroid";
 import {
+  Feature,
   FeatureCollection,
-  Polygon as TurfPolygon,
   Position,
+  featureCollection,
 } from "@turf/helpers";
-import { mapCoordinatesToLatLng } from "../../utils/latLngConversions";
+import React, { RefObject, useCallback, useEffect } from "react";
+import { Platform, Text } from "react-native";
+import MapView, { Geojson, Marker } from "react-native-maps";
+import { useDispatch, useSelector } from "react-redux";
+import { colors } from "../../constants/styles";
+import { useGetOrgCropsQuery } from "../../redux/crops/cropsApi";
+import {
+  getColorForFieldCropSeason,
+  setOpacityOnHexColor,
+} from "../../redux/crops/utils";
+import { Field } from "../../redux/fields/types";
 import {
   GLOBAL_SELECTIONS_REDUCER_KEY,
   globalSelectionsSlice,
 } from "../../redux/globalSelections/globalSelectionsSlice";
-import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "../../redux/store";
+import {
+  convertTurfBBoxToLatLng,
+  mapCoordinatesToLatLng,
+} from "../../utils/latLngConversions";
+import { fitToBoundsForMapView } from "./utils";
 
 type MapContentManagerProps = {
   mapRef: RefObject<MapView>;
@@ -28,8 +39,14 @@ export const MapContentManager = (props: MapContentManagerProps) => {
   const selectedField = useSelector(
     (state: RootState) => state[GLOBAL_SELECTIONS_REDUCER_KEY].field
   );
+  const selectedSeason = useSelector(
+    (state: RootState) => state[GLOBAL_SELECTIONS_REDUCER_KEY].season
+  );
   const { theme } = useTheme();
   const dispatch = useDispatch();
+  const { data: orgCropsData } = useGetOrgCropsQuery("default", {
+    refetchOnReconnect: true,
+  });
   const onPressFieldBoundary = useCallback(
     (field: Field) => (geoJsonProps: any) => {
       if (selectedField?.ID !== field.ID) {
@@ -53,8 +70,30 @@ export const MapContentManager = (props: MapContentManagerProps) => {
         dispatch(globalSelectionsSlice.actions.setField(null));
       }
     },
-    []
+    [selectedField]
   );
+  const shouldZoomToBbox = useSelector((state: RootState) => {
+    return state[GLOBAL_SELECTIONS_REDUCER_KEY].shouldZoomToBbox;
+  });
+  useEffect(() => {
+    if (shouldZoomToBbox && fields?.length) {
+      const features = fields.reduce((acc, field) => {
+        const activeBoundary = field?.ActiveBoundary?.Json;
+        if (activeBoundary && activeBoundary.features?.length > 0) {
+          activeBoundary.features.forEach((feature) => {
+            acc.push(feature);
+          });
+        }
+        return acc;
+      }, [] as Feature[]);
+      const fc = featureCollection(features);
+      const bboxOfFields = bbox(fc);
+      if (bboxOfFields) {
+        fitToBoundsForMapView(mapRef, convertTurfBBoxToLatLng(bboxOfFields));
+        dispatch(globalSelectionsSlice.actions.setShouldZoomToBbox(false));
+      }
+    }
+  }, [shouldZoomToBbox]);
   return (
     <>
       {fields &&
@@ -74,6 +113,11 @@ export const MapContentManager = (props: MapContentManagerProps) => {
           const centroidLatLng = mapCoordinatesToLatLng([
             centroidOfPolygon?.geometry.coordinates as Position,
           ]);
+          const fieldColor = getColorForFieldCropSeason(
+            orgCropsData?.data,
+            field.FieldCrops,
+            selectedSeason
+          );
           return (
             <React.Fragment key={`fragment-${field.ID}`}>
               {centroidLatLng[0]?.latitude !== undefined && (
@@ -89,12 +133,8 @@ export const MapContentManager = (props: MapContentManagerProps) => {
                 <Geojson
                   // @ts-ignore TODO: Figure out how to resolve this between the two libraries
                   geojson={field.ActiveBoundary?.Json}
-                  strokeColor={theme.colors.primary}
-                  fillColor={
-                    selectedField?.ID === field.ID
-                      ? colors.selectedFieldBoundaryFill
-                      : colors.tertiary
-                  }
+                  strokeColor={fieldColor}
+                  fillColor={setOpacityOnHexColor(fieldColor)}
                   tappable={true}
                   // tracksViewChanges={true}
                   // onClick={onPressFieldBoundary(field)}

@@ -1,20 +1,21 @@
-import React, { useEffect, useRef } from 'react';
-import { Animated, StyleSheet, View } from 'react-native';
-import { Button, Text } from '@rneui/themed';
-import { useRouter } from 'expo-router';
-import { navigateToNextPhaseOfTutorial } from './navigation';
-import { useSelector } from 'react-redux';
-import { RootState } from '../../redux/store';
-import { ScoutingAppUser } from '../../redux/user/types';
+import React, { useEffect, useRef } from "react";
+import { Animated, StyleSheet, View } from "react-native";
+import { Button, Text } from "@rneui/themed";
+import { useRouter } from "expo-router";
+import { navigateToNextPhaseOfTutorial } from "./navigation";
+import { useDispatch, useSelector } from "react-redux";
+import { RootState } from "../../redux/store";
+import { set } from "react-hook-form";
+import { setHasDismissedWelcomeScreen } from "../../redux/user/userSlice";
 
 export const Welcome = () => {
-  // @ts-expect-error Note: Not sure how to best deal with this error right now but I don't wanna be slowed down
-  const currentUser: ScoutingAppUser = useSelector((state: RootState) => state.user.currentUser);
+  const dispatch = useDispatch();
+  const currentUser = useSelector((state: RootState) => state.user.currentUser);
   const welcomeFadeAnim = useRef(new Animated.Value(0)).current;
   const welcomeSlideAnim = useRef(new Animated.Value(50)).current;
   const setupFadeAnim = useRef(new Animated.Value(0)).current;
   const setupSlideAnim = useRef(new Animated.Value(50)).current;
-  const router = useRouter()
+  const router = useRouter();
   useEffect(() => {
     // Welcome message animation sequence
     const welcomeAnimation = Animated.parallel([
@@ -64,7 +65,6 @@ export const Welcome = () => {
       //   useNativeDriver: true,
       // }),
     ]).start();
-
   }, []);
 
   return (
@@ -101,9 +101,14 @@ export const Welcome = () => {
         <Text h2 style={styles.setupText}>
           that is relevant to you
         </Text>
-        <Button containerStyle={{ margin: 10 }} title={"Continue"} onPress={() => {
-          navigateToNextPhaseOfTutorial(router, currentUser.Organization)
-        }} />
+        <Button
+          containerStyle={{ margin: 10 }}
+          title={"Continue"}
+          onPress={() => {
+            dispatch(setHasDismissedWelcomeScreen(true));
+            navigateToNextPhaseOfTutorial(router, currentUser.Organization);
+          }}
+        />
       </Animated.View>
     </View>
   );
@@ -111,31 +116,31 @@ export const Welcome = () => {
 
 const styles = StyleSheet.create({
   container: {
-    position: 'absolute',
+    position: "absolute",
     top: 0,
     left: 0,
     right: 0,
     bottom: 0,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: 'rgba(255, 255, 255, 0.9)',
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "rgba(255, 255, 255, 0.9)",
     zIndex: 1000,
   },
   content: {
-    alignItems: 'center',
-    position: 'absolute',
+    alignItems: "center",
+    position: "absolute",
   },
   title: {
-    color: '#333',
+    color: "#333",
     marginBottom: 10,
   },
   brandName: {
-    color: '#2E7D32',
-    fontWeight: 'bold',
+    color: "#2E7D32",
+    fontWeight: "bold",
   },
   setupText: {
-    color: '#333',
-    textAlign: 'center',
+    color: "#333",
+    textAlign: "center",
     marginHorizontal: 20,
   },
 });

@@ -21,14 +21,23 @@ import { OrgCrop } from "../../redux/crops/types";
 import { ScoutingAppUser } from "../../redux/user/types";
 import { navigateToNextPhaseOfTutorial } from "../tutorial/navigation";
 import { useUpdateTutorialProgressMutation } from "../../redux/user/userApi";
+import ColorPicker, {
+  Panel1,
+  Preview,
+  Swatches,
+} from "reanimated-color-picker";
+import { styles } from "./styles";
+import { DARK_GREEN_PRIMARY } from "../../constants/styles";
 
-interface CropForm {
-  ID: number;
+interface FormCrop {
   Name: string;
+  ID: number;
+  Color?: string;
+  generic?: boolean;
 }
 
 interface EditCropDialogProps {
-  crop?: { ID: number; Name: string };
+  crop?: OrgCrop;
   onClose: () => void;
   onBackdropPress: () => void;
   refetchCrops: () => void;
@@ -41,14 +50,15 @@ const EditCropDialog: React.FC<EditCropDialogProps> = ({
   refetchCrops,
 }) => {
   const [editCrop] = useEditOrgCropMutation();
-  const { handleSubmit, control } = useForm<CropForm>({
+  const { handleSubmit, control } = useForm<FormCrop>({
     defaultValues: {
       ID: crop?.ID || 0,
       Name: crop?.Name || "",
+      Color: crop?.Color || DARK_GREEN_PRIMARY,
     },
   });
 
-  const onValidSubmit = async (data: CropForm) => {
+  const onValidSubmit = async (data: FormCrop) => {
     const response = await editCrop(data);
     if ("error" in response) {
       // @ts-expect-error
@@ -83,6 +93,26 @@ const EditCropDialog: React.FC<EditCropDialogProps> = ({
             value: 2,
             message: "Must be at least two characters long",
           },
+        }}
+      />
+      <Controller
+        control={control}
+        render={({ field: { onChange, value }, fieldState: { error } }) => (
+          <>
+            <Text>Field Border Color</Text>
+            <ColorPicker
+              onComplete={({ hex: value }) => onChange(value)}
+              value={value}
+            >
+              <Panel1 />
+              <Swatches />
+              <Preview />
+            </ColorPicker>
+          </>
+        )}
+        name="Color"
+        rules={{
+          required: "Crop Color is required",
         }}
       />
       <Dialog.Actions>
@@ -165,20 +195,18 @@ interface AddCropsDialogProps {
   onClose: () => void;
   onBackdropPress: () => void;
   refetchCrops: () => void;
+  onCompleteCropsTutorialStep: () => void;
 }
 
 interface AddCropForm {
-  crops: {
-    Name: string;
-    ID?: number;
-    generic: boolean;
-  }[];
+  crops: FormCrop[];
 }
 
 const AddCropsDialog: React.FC<AddCropsDialogProps> = ({
   onClose,
   onBackdropPress,
   refetchCrops,
+  onCompleteCropsTutorialStep,
 }) => {
   const { theme } = useTheme();
   const router = useRouter();
@@ -188,8 +216,10 @@ const AddCropsDialog: React.FC<AddCropsDialogProps> = ({
     (state: RootState) => state.user.currentUser
   );
   const [createOrgCrop] = useCreateOrgCropMutation();
-  const [updateTutorialProgress] = useUpdateTutorialProgressMutation()
-  const { data: genericCrops } = useGetGenericCropListQuery();
+  const [updateTutorialProgress] = useUpdateTutorialProgressMutation();
+  const { data: genericCrops } = useGetGenericCropListQuery("default", {
+    refetchOnReconnect: true,
+  });
   const { control, handleSubmit, watch, setValue } = useForm<AddCropForm>({
     defaultValues: {
       crops: [],
@@ -207,7 +237,10 @@ const AddCropsDialog: React.FC<AddCropsDialogProps> = ({
       for (const crop of data.crops) {
         const trimmedCropName = crop.Name?.trim();
         if (trimmedCropName) {
-          const result = await createOrgCrop({ Name: trimmedCropName });
+          const result = await createOrgCrop({
+            ...crop,
+            Name: trimmedCropName,
+          });
           if (!result.error) {
             results.push({
               cropName: trimmedCropName,
@@ -217,11 +250,8 @@ const AddCropsDialog: React.FC<AddCropsDialogProps> = ({
         }
       }
       if (data.crops.length > 0) {
-        const updatedUserOrg = { ...currentUser?.Organization, hasSetupCrops: true }
-        dispatch(userSlice.actions.updateUserOrganization(updatedUserOrg));
-        await updateTutorialProgress({ hasSetupCrops: true })
+        await onCompleteCropsTutorialStep();
         alert(`Created ${results.length} of ${data.crops.length}`, "");
-        navigateToNextPhaseOfTutorial(router, updatedUserOrg)
       }
       refetchCrops();
       onClose();
@@ -277,7 +307,12 @@ const AddCropsDialog: React.FC<AddCropsDialogProps> = ({
                     }
                   } else {
                     // Add the crop, flag it as generic
-                    append({ Name: crop.Name, generic: true });
+                    append({
+                      ID: 0,
+                      Name: crop.Name,
+                      Color: crop.DefaultColor,
+                      generic: true,
+                    });
                   }
                 }}
                 color={isSelected ? "secondary" : "primary"}
@@ -359,12 +394,21 @@ const AddCropsDialog: React.FC<AddCropsDialogProps> = ({
       </ScrollView>
       <Button
         title="Not in the list? Add Another Crop"
-        onPress={() => append({ Name: "", generic: false })}
+        onPress={() => append({ Name: "", generic: false, ID: 0 })}
         containerStyle={{ marginVertical: 10 }}
       />
 
       <Dialog.Actions>
         <View style={{ flexDirection: "row", gap: 5 }}>
+          {!currentUser?.Organization.hasSetupCrops && (
+            <Button
+              title="Skip"
+              onPress={async () => {
+                await onCompleteCropsTutorialStep();
+                onClose();
+              }}
+            />
+          )}
           <Button title="Cancel" onPress={onClose} type="solid" />
           <Button title="Save" onPress={handleSubmit(onValidSubmit)} />
         </View>
@@ -375,14 +419,21 @@ const AddCropsDialog: React.FC<AddCropsDialogProps> = ({
 
 export const ManageCrops: React.FC = () => {
   const router = useRouter();
+  const dispatch = useDispatch();
   const navigation = useNavigation();
   const { theme } = useTheme();
+  const currentUser: ScoutingAppUser = useSelector(
+    (state: RootState) => state.user.currentUser
+  );
   const [selectedCrop, setSelectedCrop] = React.useState<OrgCrop>();
-  const [isAddingCrops, setIsAddingCrops] = React.useState(false);
+  const [isAddingCrops, setIsAddingCrops] = React.useState(
+    !currentUser.Organization?.hasSetupCrops
+  );
   const [cropToDelete, setCropToDelete] = React.useState<OrgCrop | undefined>(
     undefined
   );
 
+  const [updateTutorialProgress] = useUpdateTutorialProgressMutation();
   const {
     data: orgCropData,
     isLoading,
@@ -392,7 +443,6 @@ export const ManageCrops: React.FC = () => {
 
   const handleBack = () => {
     if (router.canGoBack()) {
-      console.log(navigation.getParent());
       router.back();
       return;
     } else {
@@ -403,6 +453,19 @@ export const ManageCrops: React.FC = () => {
 
   const handleCloseDeleteDialog = () => {
     setCropToDelete(undefined);
+  };
+
+  const completeCropTutorialStep = async () => {
+    const currentUserHasSetupCrops = currentUser?.Organization.hasSetupCrops;
+    if (!currentUserHasSetupCrops) {
+      const updatedUserOrg = {
+        ...currentUser?.Organization,
+        hasSetupCrops: true,
+      };
+      dispatch(userSlice.actions.updateUserOrganization(updatedUserOrg));
+      await updateTutorialProgress({ hasSetupCrops: true });
+      navigateToNextPhaseOfTutorial(router, updatedUserOrg);
+    }
   };
   return (
     <SafeAreaView style={{ flex: 1 }}>
@@ -439,8 +502,8 @@ export const ManageCrops: React.FC = () => {
         refreshControl={
           <RefreshControl refreshing={isFetching} onRefresh={refetchOrgCrops} />
         }
-      // contentContainerStyle={{ flex: 1 }}
-      // style={{ flex: 1 }}
+        // contentContainerStyle={{ flex: 1 }}
+        // style={{ flex: 1 }}
       >
         {isLoading ? (
           <Text>Loading crops...</Text>
@@ -460,17 +523,7 @@ export const ManageCrops: React.FC = () => {
               <ListItem
                 key={crop.ID}
                 onPress={() => setSelectedCrop(crop)}
-                containerStyle={{
-                  backgroundColor: theme.colors.background,
-                  marginHorizontal: 16,
-                  marginVertical: 8,
-                  borderRadius: 12,
-                  elevation: 2,
-                  shadowColor: "#000",
-                  shadowOffset: { width: 0, height: 2 },
-                  shadowOpacity: 0.1,
-                  shadowRadius: 4,
-                }}
+                containerStyle={styles.managementItem}
               >
                 <ListItem.Content>
                   <ListItem.Title
@@ -481,16 +534,25 @@ export const ManageCrops: React.FC = () => {
                   >
                     {crop.Name}
                   </ListItem.Title>
+
+                  <View
+                    style={{
+                      width: 20,
+                      height: 20,
+                      backgroundColor: crop.Color,
+                      borderRadius: 4,
+                    }}
+                  ></View>
                 </ListItem.Content>
                 <Button
                   // type="clear"
                   title="Edit"
-                  icon={<ListItem.Chevron color={"primary"} />}
+                  icon={<ListItem.Chevron color={theme.colors.primary} />}
                   iconRight
                   color={"secondary"}
-                  titleStyle={{ color: "primary" }}
+                  titleStyle={{ color: theme.colors.primary }}
                   onPress={() => setSelectedCrop(crop)}
-                // titleStyle={{ color: theme.colors.primary }}
+                  // titleStyle={{ color: theme.colors.primary }}
                 />
                 <Button
                   type="clear"
@@ -513,8 +575,13 @@ export const ManageCrops: React.FC = () => {
           onClose={() => {
             setIsAddingCrops(false);
           }}
-          onBackdropPress={() => setIsAddingCrops(false)}
+          onBackdropPress={() => {
+            if (currentUser.Organization.hasSetupCrops) {
+              setIsAddingCrops(false);
+            }
+          }}
           refetchCrops={refetchOrgCrops}
+          onCompleteCropsTutorialStep={completeCropTutorialStep}
         />
       )}
       {selectedCrop && (

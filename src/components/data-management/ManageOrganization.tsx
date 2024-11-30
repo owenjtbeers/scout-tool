@@ -7,37 +7,55 @@ import { userSlice } from "../../redux/user/userSlice";
 
 // Get Current user data
 import { useGetCurrentUserQuery } from "../../redux/user/userApi";
-import { ActivityIndicator } from "react-native";
+import { ActivityIndicator, View } from "react-native";
 import { HOME_SETTINGS_SCREEN } from "../../navigation/screens";
 export const ManageOrganization: React.FC = () => {
   const { theme } = useTheme();
   const router = useRouter();
-  const { data: currentUser, isLoading: isLoadingUser, refetch } =
-    useGetCurrentUserQuery("default", { refetchOnReconnect: true });
+  const {
+    data: currentUser,
+    isLoading: isLoadingUser,
+    refetch,
+  } = useGetCurrentUserQuery("default", { refetchOnReconnect: true });
 
   const handleBack = () => {
     if (router.canGoBack()) {
       router.back();
     } else {
-      router.push(HOME_SETTINGS_SCREEN)
+      router.push(HOME_SETTINGS_SCREEN);
     }
-
   };
 
   return (
-    <SafeAreaView>
-      <Button title={"Back"} onPress={handleBack} />
+    <SafeAreaView style={{ flex: 1 }}>
+      <View style={{ justifyContent: "flex-start", padding: 16 }}>
+        <Button
+          containerStyle={{ maxWidth: 200 }}
+          radius={5}
+          title={"Back"}
+          onPress={handleBack}
+        />
+      </View>
       <ActivityIndicator
         animating={isLoadingUser}
         size="large"
         color="#0000ff"
       />
-      <Text h4>Organization Name: </Text>
-      <Text>{currentUser?.data?.Organization?.Name}</Text>
-      <Text h4>Current User: </Text>
-      <Text>
-        {currentUser?.data?.FirstName + " " + currentUser?.data?.LastName}
-      </Text>
+      <View style={{ rowGap: 10 }}>
+        <Text h4 style={{ marginBottom: 8, marginLeft: 16 }}>
+          Organization Name
+        </Text>
+        <Text style={{ fontSize: 18, marginLeft: 16, color: "#666666" }}>
+          {currentUser?.data?.Organization?.Name}
+        </Text>
+
+        <Text h4 style={{ marginBottom: 8, marginLeft: 16 }}>
+          Current User
+        </Text>
+        <Text style={{ fontSize: 18, marginLeft: 16, color: "#666666" }}>
+          {currentUser?.data?.FirstName + " " + currentUser?.data?.LastName}
+        </Text>
+      </View>
     </SafeAreaView>
   );
 };

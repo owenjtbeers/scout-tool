@@ -25,7 +25,9 @@ export const SubmitButton: React.FC<SubmitButtonProps> = ({
   const isDrawing = useSelector(
     (state: RootState) => state["map-drawing"].isDrawing
   );
-  const polygons = useSelector((state: RootState) => state["map-drawing"].polygons);
+  const polygons = useSelector(
+    (state: RootState) => state["map-drawing"].polygons
+  );
   const handlePress = () => {
     if (polygons?.[0] === undefined || polygons?.[0]?.length < 3) {
       Alert.alert("Please draw a field before proceeding");
@@ -57,10 +59,7 @@ export const SubmitButton: React.FC<SubmitButtonProps> = ({
 };
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 0,
-    height: 65,
-  },
+  container: { minHeight: 50 },
   buttonContainer: {
     flex: 1,
     minHeight: 50,

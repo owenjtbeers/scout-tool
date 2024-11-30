@@ -13,7 +13,8 @@ export const INFO_PRODUCTS_SCREEN = "/info/products";
 export const INFO_ABOUT_SCREEN = "/info/about";
 export const INFO_CONTACT_SCREEN = "/info/contact";
 export const INFO_PRICING_SCREEN = "/info/pricing";
-export const MANAGE_GROWERS_SCREEN = '/manage-growers'
-export const MANAGE_ORGANIZATION_SCREEN = '/manage-organization'
-export const MANAGE_CROPS_SCREEN = '/manage-crops'
-export const MANAGE_PESTS_SCREEN= '/manage-pests'
+export const SETTINGS_MANAGE_GROWERS_SCREEN = "/home/settings/manage-growers";
+export const SETTINGS_MANAGE_ORGANIZATION_SCREEN =
+  "/home/settings/manage-organization";
+export const SETTINGS_MANAGE_CROPS_SCREEN = "/home/settings/manage-crops";
+export const SETTINGS_MANAGE_PESTS_SCREEN = "/home/settings/manage-pests";

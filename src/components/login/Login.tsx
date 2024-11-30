@@ -56,6 +56,17 @@ export const Login = () => {
           source={require("../../../assets/icon.png")}
           style={styles.logo}
         />
+        <Text
+          style={{
+            position: "absolute",
+            fontSize: 70,
+            fontWeight: "bold",
+            color: "red",
+            transform: "rotate(30deg)",
+          }}
+        >
+          BETA
+        </Text>
       </View>
       <View style={styles.inputsContainer}>
         <Controller

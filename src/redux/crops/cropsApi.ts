@@ -39,7 +39,6 @@ export const cropsApi = baseApi.injectEndpoints({
     }),
     updateFieldCrops: build.mutation({
       query: (args: { fieldId: number; data: FieldCrop[] }) => {
-        console.log("data", args);
         return {
           url: `/crops/${args.fieldId}/field-crop`,
           method: "POST",
@@ -56,7 +55,6 @@ export const cropsApi = baseApi.injectEndpoints({
       { fieldId: number }
     >({
       query: (params) => {
-        console.log(params);
         return {
           url: `/crops/${params.fieldId}/field-crop`,
           method: "GET",
@@ -70,7 +68,7 @@ export const cropsApi = baseApi.injectEndpoints({
       }),
       invalidatesTags: ["OrgCrops"],
     }),
-    getGenericCropList: build.query<APIResponse<Crop[]>, void>({
+    getGenericCropList: build.query<APIResponse<Crop[]>, string>({
       query: () => ({
         url: "/crops/generic",
         method: "GET",

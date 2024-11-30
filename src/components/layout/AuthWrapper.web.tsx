@@ -14,7 +14,12 @@ import { RootState } from "../../redux/store";
 import { useValidateMutation } from "../../redux/auth/authApi";
 
 // Top level Component that will navigate to the correct screen
-export default function App() {
+
+interface AuthWrapperProps {
+  children: React.ReactNode;
+}
+
+export default function App({ children }: AuthWrapperProps) {
   const router = useRouter();
   const rootNavigation = useRootNavigationState();
 
@@ -45,9 +50,14 @@ export default function App() {
     }
   }, [token, rootNavigation?.key]);
 
-  return (
-    <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
-      <ActivityIndicator size="large" color={colors.primary} />
-    </View>
-  );
+  if (!isLoggedIn) {
+    return (
+      <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
+        <ActivityIndicator size="large" color={colors.primary} />
+      </View>
+    );
+  }
+
+  return <>children</>;
+  
 }

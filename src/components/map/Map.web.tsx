@@ -73,28 +73,7 @@ export const MapScreen = () => {
     withBoundaries: true,
     withCrops: true,
   });
-  const shouldZoomToBbox = useSelector((state: RootState) => {
-    return state[GLOBAL_SELECTIONS_REDUCER_KEY].shouldZoomToBbox;
-  });
-  useEffect(() => {
-    if (shouldZoomToBbox && fieldResponse?.data?.length) {
-      const features = fieldResponse.data.reduce((acc, field) => {
-        const activeBoundary = field?.ActiveBoundary?.Json;
-        if (activeBoundary && activeBoundary.features?.length > 0) {
-          activeBoundary.features.forEach((feature) => {
-            acc.push(feature);
-          });
-        }
-        return acc;
-      }, [] as Feature[]);
-      const fc = featureCollection(features);
-      const bboxOfFields = bbox(fc);
-      if (bboxOfFields) {
-        fitToBoundsForMapView(mapRef, convertTurfBBoxToLatLng(bboxOfFields));
-        dispatch(globalSelectionsSlice.actions.setShouldZoomToBbox(false));
-      }
-    }
-  }, [shouldZoomToBbox]);
+  
   return (
     <View style={styles.container}>
       <MapView
