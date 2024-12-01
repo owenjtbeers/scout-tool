@@ -13,9 +13,7 @@
     },
     "jsEngine": "hermes",
     "plugins": [],
-    "assetBundlePatterns": [
-      "**/*"
-    ],
+    "assetBundlePatterns": ["**/*"],
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.owenbeers.scouttool",
@@ -53,9 +51,10 @@
       }
     },
     "owner": "owenbeers",
-    "scheme": {
-      "type": "string",
-      "pattern": "^[a-z][a-z0-9+.-]*$"
-    }
+    "scheme": "scout-tool"
+    // "scheme": {
+    //   "type": "string",
+    //   "pattern": "^[a-z][a-z0-9+.-]*$"
+    // }
   }
 }

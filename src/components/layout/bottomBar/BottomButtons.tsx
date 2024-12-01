@@ -1,5 +1,9 @@
 import React from "react";
-import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
+import {
+  Ionicons,
+  MaterialCommunityIcons,
+  MaterialIcons,
+} from "@expo/vector-icons";
 
 type IconProps = {
   focused: boolean;
@@ -18,4 +22,8 @@ export const FieldTabIcon = (props: IconProps) => {
 
 export const SettingsTabIcon = (props: IconProps) => {
   return <Ionicons name="settings" size={24} color={props.color} />;
+};
+
+export const FeedbackTabIcon = (props: IconProps) => {
+  return <MaterialIcons name="feedback" size={24} color={props.color} />;
 };

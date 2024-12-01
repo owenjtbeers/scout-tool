@@ -61,9 +61,23 @@ export const userApi = baseApi.injectEndpoints({
       }),
       invalidatesTags: ["User"],
     }),
+    postUserFeedback: builder.mutation<
+      APIResponse<any>,
+      {
+        email: string;
+        rating: number | null;
+        comments: string;
+      }
+    >({
+      query: (data) => ({
+        url: "/users/feedback",
+        method: "POST",
+        data,
+      }),
+    }),
   }),
   // TODO: Disable in production
   // overrideExisting: true,
 });
 
-export const { useGetCurrentUserQuery, useSignupUserMutation, useUpdateTutorialProgressMutation } = userApi;
+export const { useGetCurrentUserQuery, useSignupUserMutation, useUpdateTutorialProgressMutation, usePostUserFeedbackMutation } = userApi;
