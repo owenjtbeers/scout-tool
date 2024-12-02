@@ -35,7 +35,6 @@ import {
   convertPestPointsToScoutingArea,
   convertScoutingAreasToPestPoints,
 } from "./utils/pestPoints";
-import { get } from "react-native/Libraries/TurboModule/TurboModuleRegistry";
 import { ScoutingArea } from "../../redux/scouting/types";
 
 interface ScoutingReportMapViewProps {

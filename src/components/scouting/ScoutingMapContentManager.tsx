@@ -9,7 +9,6 @@ import { Text, View } from "react-native";
 import MapView, { Geojson, Marker, Polyline } from "react-native-maps";
 import { useSelector } from "react-redux";
 import { DEFAULT_POLYLINE_STROKE_WIDTH } from "../../constants/constants";
-import { colors } from "../../constants/styles";
 import { Field } from "../../redux/fields/types";
 import { MAP_DRAWING_REDUCER_KEY } from "../../redux/map/drawingSlice";
 import {
@@ -17,7 +16,7 @@ import {
   ScoutingArea,
 } from "../../redux/scouting/types";
 import { RootState } from "../../redux/store";
-import { mapCoordinatesToLatLng } from "../../utils/latLngConversions";
+import { featureCollectionToLatLngCoordinates, mapCoordinatesToLatLng } from "../../utils/latLngConversions";
 import { PestPointComponent } from "../map-draw/pest-points/PestPointComponent";
 
 type MapContentManagerProps = {
@@ -54,6 +53,11 @@ export const ScoutingMapContentManager = (props: MapContentManagerProps) => {
           const centroidLatLng = mapCoordinatesToLatLng([
             centroidOfPolygon?.geometry.coordinates as Position,
           ]);
+
+          const convertedFeatureCollectionToLatLngCoordinates = featureCollectionToLatLngCoordinates(
+            // @ts-expect-error
+            field.ActiveBoundary?.Json
+          );
           return (
             <React.Fragment key={`fragment-${field.ID}`}>
               {centroidLatLng[0]?.latitude !== undefined && (
@@ -66,13 +70,19 @@ export const ScoutingMapContentManager = (props: MapContentManagerProps) => {
                 </Marker>
               )}
               {field.ActiveBoundary?.Json && (
-                <Geojson
-                  // @ts-ignore TODO: Figure out how to resolve this between the two libraries
-                  geojson={field.ActiveBoundary?.Json}
-                  strokeColor={theme.colors.primary}
-                  fillColor={colors.tertiary}
-                />
-              )}
+                convertedFeatureCollectionToLatLngCoordinates.map((feature, index) => (
+                  // Note: We use Polyline here because the field boundary does not render
+                  // correctly with Polygon or GeoJSON when rendering out to a screenshot on
+                  // iOS. Not sure why this is the case, but it's a workaround for now.
+                  <Polyline
+                    key={`fieldboundary-polygon-${index}`}
+                    coordinates={feature}
+                    // @ts-ignore TODO: Figure out how to resolve this between the two libraries
+                    // geojson={field.ActiveBoundary?.Json}
+                    strokeColor={"red"}
+                    strokeWidth={DEFAULT_POLYLINE_STROKE_WIDTH}
+                  />
+                )))}
             </React.Fragment>
           );
         })}

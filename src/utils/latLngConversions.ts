@@ -1,6 +1,28 @@
 import type { LatLng } from "react-native-maps";
-import type { FeatureCollection, Feature, Polygon } from "@turf/helpers";
+import type { FeatureCollection, Feature, Polygon, MultiPolygon } from "@turf/helpers";
 import { BBox } from "@turf/helpers";
+
+
+/*
+  This function takes a Turf FeatureCollection and returns an array of coordinate arrays.
+  Each coordinate array represents a point in the FeatureCollection.
+*/
+export const featureCollectionToLatLngCoordinates = (featureCollection: FeatureCollection<Polygon>): LatLng[][] => {
+  const polygons: number[][][] = [];
+  const convertedPolygons: LatLng[][] = [];
+
+  featureCollection.features.forEach((feature: Feature<Polygon>, index: number) => {
+    feature.geometry.coordinates.forEach((polygon) => {
+      polygons[index] = [];
+      polygon.forEach((coordinate) => {
+        polygons[index].push(coordinate);
+      });
+      convertedPolygons[index] = mapCoordinatesToLatLng(polygons[index]);
+    });
+  });
+
+  return convertedPolygons
+};
 
 /*
   This function takes an array of coordinate arrays and returns an array of LatLng objects.
