@@ -52,8 +52,9 @@ export const DrawableMapScreen = () => {
       <MapView
         style={styles.map}
         ref={mapRef}
-        // provider={"google"}
-        // googleMapsApiKey={process.env.EXPO_PUBLIC_GOOGLE_MAPS_WEB_API_KEY}
+        provider={"google"}
+        // @ts-expect-error
+        googleMapsApiKey={process.env.EXPO_PUBLIC_GOOGLE_MAPS_WEB_API_KEY}
         region={initialRegion || defaultRegion}
         onPress={onPress}
         mapType={"hybrid"}
