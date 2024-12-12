@@ -6,6 +6,7 @@ import { scoutFormStyles } from "./styles";
 import { ScoutingReportForm } from "../types";
 import { Observation } from "../../../redux/scouting/types";
 import { getDisplayUnit } from "../../../utils/formatting/units";
+import { InputWithAccessoryView } from "../../lib/InputWithAccessoryView";
 
 export interface IQuestion {
   observation: Observation;
@@ -44,23 +45,12 @@ export const Question = (props: QuestionProps) => {
         <Controller
           control={formControl}
           render={({ field: { onChange, value, name } }) => (
-            <>
-              <Input
-                value={value}
-                onChangeText={onChange}
-                placeholder="Enter text here..."
-                inputAccessoryViewID={name}
-              />
-              {Platform.OS === "ios" && (
-                <InputAccessoryView nativeID={name}>
-                  <Input
-                    value={value}
-                    onChangeText={onChange}
-                    placeholder="Enter text here..."
-                  />
-                </InputAccessoryView>
-              )}
-            </>
+            <InputWithAccessoryView
+              value={value}
+              onChangeText={onChange}
+              placeholder="Enter text here..."
+              inputAccessoryViewID={name}
+            />
           )}
           name={formValueName}
         />

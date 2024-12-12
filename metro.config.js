@@ -7,6 +7,18 @@ const ALIASES = {
   "react-native-maps": "@teovilla/react-native-web-maps",
 };
 
+// Add polyfills
+config.resolver.extraNodeModules = {
+  ...config.resolver.extraNodeModules,
+  'buffer': require.resolve('buffer/'),
+};
+config.transformer.getTransformOptions = () => ({
+  transform: {
+    experimentalImportSupport: false,
+    inlineRequires: true,
+  },
+});
+
 config.resolver.resolveRequest = (context, moduleName, platform) => {
   if (platform === "web" && ALIASES[moduleName]) {
     // The alias will only be used when bundling for the web.

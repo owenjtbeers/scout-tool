@@ -32,6 +32,7 @@ import {
   DiseaseIcon,
 } from "../../icons/Icons";
 import { Question } from "./Question";
+import { InputWithAccessoryView, SearchWithAccessoryView } from "../../lib/InputWithAccessoryView";
 
 // TODO
 // [] Validation
@@ -172,21 +173,12 @@ const AddObservationSearchStep = (props: AddObservationSearchProps) => {
   const [searchValue, setSearchValue] = useState("");
   return (
     <ScrollView style={{ maxHeight: "90%" }}>
-      <SearchBar
+      <SearchWithAccessoryView
         placeholder="Search, or specify new name of pest"
         onChangeText={setSearchValue}
         value={searchValue}
         inputAccessoryViewID="search"
       />
-      {Platform.OS === "ios" && (
-        <InputAccessoryView nativeID={"search"}>
-          <Input
-            value={searchValue}
-            onChangeText={setSearchValue}
-            placeholder="Search, or specify new name of pest"
-          />
-        </InputAccessoryView>
-      )}
       {searchValue.length > 1 && (
         <Button
           onPress={() => {
@@ -238,21 +230,12 @@ const AddObservationSpecifyNameStep = (
   const { setWizardStep, setNewPestName, newPestName } = props;
   return (
     <View>
-      <Input
+      <InputWithAccessoryView
         label="New Pest Name"
         value={props.newPestName}
         onChangeText={props.setNewPestName}
         inputAccessoryViewID="pestName"
       />
-      {Platform.OS === "ios" && (
-        <InputAccessoryView nativeID={"pestName"}>
-          <Input
-            value={props.newPestName}
-            onChangeText={props.setNewPestName}
-            label="New Pest Name"
-          />
-        </InputAccessoryView>
-      )}
       <Button title="Back" onPress={() => setWizardStep("search")} />
       <Button title="Next" onPress={() => setWizardStep("select-type")} />
     </View>

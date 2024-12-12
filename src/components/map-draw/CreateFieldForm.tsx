@@ -9,8 +9,6 @@ import {
   StyleSheet,
   TouchableOpacity,
   View,
-  InputAccessoryView,
-  Platform,
 } from "react-native";
 import { useSelector } from "react-redux";
 import { DialogPickerSelect } from "../../forms/components/DialogPicker";
@@ -24,6 +22,7 @@ import { RootState } from "../../redux/store";
 import { FeatureCollectionArea, RNMapsPolygonArea } from "../../utils/area";
 import { convertRNMapsPolygonToTurfFeatureCollection } from "../../utils/latLngConversions";
 import { useSelectedGrowerAndFarm } from "../layout/topBar/selectionHooks";
+import { InputWithAccessoryView } from "../lib/InputWithAccessoryView";
 
 type FieldFormProps = {
   isVisible: boolean;
@@ -171,30 +170,15 @@ export function CreateFieldForm(props: FieldFormProps) {
                     field: { onChange, onBlur, value, name },
                     fieldState: { error },
                   }) => (
-                    <>
-                      <Input
-                        label="Field Name"
-                        placeholder="Field Name"
-                        onBlur={onBlur}
-                        onChangeText={onChange}
-                        value={value}
-                        inputAccessoryViewID={name}
-                        errorMessage={error?.message}
-                      />
-                      {Platform.OS === "ios" && (
-                        <InputAccessoryView nativeID={name}>
-                          <Input
-                            label="Field Name"
-                            placeholder="Field Name"
-                            value={value}
-                            style={styles.input}
-                            onChangeText={onChange}
-                            onBlur={onBlur}
-                            errorMessage={error?.message}
-                          />
-                        </InputAccessoryView>
-                      )}
-                    </>
+                    <InputWithAccessoryView
+                      label="Field Name"
+                      placeholder="Field Name"
+                      onBlur={onBlur}
+                      onChangeText={onChange}
+                      value={value}
+                      inputAccessoryViewID={name}
+                      errorMessage={error?.message}
+                    />
                   )}
                   name="name"
                   rules={validationRules.requiredAndMinMaxLength(1, 100)}
@@ -205,28 +189,14 @@ export function CreateFieldForm(props: FieldFormProps) {
                 <Controller
                   control={control}
                   render={({ field: { onChange, onBlur, value } }) => (
-                    <>
-                      <Input
-                        placeholder="Legal Description"
-                        onBlur={onBlur}
-                        onChangeText={onChange}
-                        value={value}
-                        label={"Legal Description"}
-                        inputAccessoryViewID="legaldescription"
-                      />
-                      {Platform.OS === "ios" && (
-                        <InputAccessoryView nativeID={"legaldescription"}>
-                          <Input
-                            placeholder="Legal Description"
-                            onBlur={onBlur}
-                            onChangeText={onChange}
-                            value={value}
-                            label={"Legal Description"}
-                            style={styles.input}
-                          />
-                        </InputAccessoryView>
-                      )}
-                    </>
+                    <InputWithAccessoryView
+                      placeholder="Legal Description"
+                      onBlur={onBlur}
+                      onChangeText={onChange}
+                      value={value}
+                      label={"Legal Description"}
+                      inputAccessoryViewID="legaldescription"
+                    />
                   )}
                   name="legalDescription"
                 />

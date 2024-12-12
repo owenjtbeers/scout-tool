@@ -8,6 +8,7 @@ import { usePostUserFeedbackMutation } from "../../redux/user/userApi";
 import alert from "../polyfill/Alert";
 import { useRouter } from "expo-router";
 import { HOME_MAP_SCREEN } from "../../navigation/screens";
+import { InputWithAccessoryView } from "../lib/InputWithAccessoryView";
 
 interface FeedbackForm {
   email: string;
@@ -38,31 +39,16 @@ export const FeedbackCenter = () => {
           field: { onChange, onBlur, value, name },
           fieldState: { error },
         }) => (
-          <>
-            <Input
-              placeholder="Email"
-              onBlur={onBlur}
-              onChangeText={onChange}
-              value={value}
-              label="* Email"
-              labelStyle={{ color: "gray" }}
-              errorMessage={error?.message}
-              inputAccessoryViewID={name}
-            />
-            {Platform.OS === "ios" && (
-              <InputAccessoryView nativeID={name}>
-                <Input
-                  label="* Email"
-                  labelStyle={{ color: "gray" }}
-                  placeholder="Enter Email"
-                  value={value}
-                  onChangeText={onChange}
-                  onBlur={onBlur}
-                  errorMessage={error?.message}
-                />
-              </InputAccessoryView>
-            )}
-          </>
+          <InputWithAccessoryView
+            placeholder="Email"
+            onBlur={onBlur}
+            onChangeText={onChange}
+            value={value}
+            label="* Email"
+            labelStyle={{ color: "gray" }}
+            errorMessage={error?.message}
+            inputAccessoryViewID={name}
+          />
         )}
         name="email"
         rules={{
@@ -119,34 +105,18 @@ export const FeedbackCenter = () => {
           field: { onChange, onBlur, value, name },
           fieldState: { error },
         }) => (
-          <>
-            <Input
-              placeholder="Enter Comments"
-              onBlur={onBlur}
-              containerStyle={{ paddingVertical: 10 }}
-              onChangeText={onChange}
-              value={value}
-              label="* Enter your Feedback here"
-              multiline
-              labelStyle={{ color: "gray" }}
-              errorMessage={error?.message}
-              inputAccessoryViewID={name}
-            />
-            {Platform.OS === "ios" && (
-              <InputAccessoryView nativeID={name}>
-                <Input
-                  label="Enter your Feedback here"
-                  labelStyle={{ color: "gray" }}
-                  placeholder="Enter Comments"
-                  value={value}
-                  multiline
-                  onChangeText={onChange}
-                  onBlur={onBlur}
-                  errorMessage={error?.message}
-                />
-              </InputAccessoryView>
-            )}
-          </>
+          <InputWithAccessoryView
+            placeholder="Enter Comments"
+            onBlur={onBlur}
+            containerStyle={{ paddingVertical: 10 }}
+            onChangeText={onChange}
+            value={value}
+            label="* Enter your Feedback here"
+            multiline
+            labelStyle={{ color: "gray" }}
+            errorMessage={error?.message}
+            inputAccessoryViewID={name}
+          />
         )}
         name="comments"
         rules={{

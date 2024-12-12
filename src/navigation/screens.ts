@@ -4,6 +4,7 @@ export const HOME_MAP_SCREEN = "home/map";
 export const HOME_SCOUT_REPORT_SCREEN = "home/scout-report";
 export const HOME_SETTINGS_SCREEN = "/home/settings";
 export const HOME_FEEDBACK_SCREEN = "/home/feedback";
+export const HOME_FIELD_UPLOAD_SCREEN = "/home/field-upload";
 export const SCOUT_CREATE_REPORT_SCREEN = "/scout-report/create";
 export const SCOUT_REPORT_EDIT_SCREEN = "/scout-report/[slug]";
 export const MAP_DRAW_SCREEN = "map-draw";

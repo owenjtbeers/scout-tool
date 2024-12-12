@@ -1,3 +1,4 @@
+import 'buffer';
 import React from "react";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
@@ -13,6 +14,7 @@ import { store, persistor } from "../../../src/redux/store";
 // Styles
 import { ThemeProvider } from "@rneui/themed";
 import { theme } from "../../../src/constants/styles";
+
 
 registerTranslation("en", en);
 const App = () => {

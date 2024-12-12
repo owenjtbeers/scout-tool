@@ -1,6 +1,6 @@
-import React, { useCallback, useEffect } from "react";
+import React, { useCallback } from "react";
 import { View, StyleSheet, PermissionsAndroid, Platform } from "react-native";
-import MapView, { LatLng, PROVIDER_GOOGLE, Region } from "react-native-maps";
+import MapView, { LatLng, Region } from "react-native-maps";
 // TODO Revisit this on another day
 // import MapBoxGL from "@rnmapbox/maps"
 import { useSelector } from "react-redux";
@@ -21,16 +21,8 @@ import AnimatedMapActionButtons, {
 import { defaultRegion } from "../../constants/constants";
 import { useGetFieldsQuery } from "../../redux/fields/fieldsApi";
 import { useSelectedGrowerAndFarm } from "../layout/topBar/selectionHooks";
-import { Feature, FeatureCollection, featureCollection } from "@turf/helpers";
-import bbox from "@turf/bbox";
-import { convertTurfBBoxToLatLng } from "../../utils/latLngConversions";
 import { MapUtilButtons } from "./components/MapUtilButtons";
-import {
-  GLOBAL_SELECTIONS_REDUCER_KEY,
-  globalSelectionsSlice,
-} from "../../redux/globalSelections/globalSelectionsSlice";
 import { EditFieldCropHistoryPage } from "../fields/EditFieldCropHistoryPage";
-import { fitToBoundsForMapView } from "./utils";
 
 export const MapScreen = () => {
   const mapRef = React.useRef<MapView>(null);
@@ -73,7 +65,7 @@ export const MapScreen = () => {
     withBoundaries: true,
     withCrops: true,
   });
-  
+
   return (
     <View style={styles.container}>
       <MapView

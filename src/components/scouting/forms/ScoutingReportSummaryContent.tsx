@@ -37,6 +37,7 @@ import {
 } from "../utils/scoutReportUtils";
 import { scoutFormStyles } from "./styles";
 import { DialogPickerSelect } from "../../../forms/components/DialogPicker";
+import { InputWithAccessoryView } from "../../lib/InputWithAccessoryView";
 
 interface ScoutingReportSummaryContentProps {
   field: Field;
@@ -161,9 +162,8 @@ export const ScoutingReportSummaryContent = (
               fieldState: { error },
             }) => (
               <Input
-                label={`Field Area (${
-                  formGetValues("fieldAreaUnit") || "acres"
-                })`}
+                label={`Field Area (${formGetValues("fieldAreaUnit") || "acres"
+                  })`}
                 placeholder={"Enter Area"}
                 keyboardType={"numeric"}
                 onChangeText={(value) => {
@@ -208,28 +208,15 @@ export const ScoutingReportSummaryContent = (
           <Controller
             control={formControl}
             render={({ field: { onChange, onBlur, value, name } }) => (
-              <>
-                <Input
-                  placeholder="Enter Growth Stage..."
-                  onBlur={onBlur}
-                  onChangeText={onChange}
-                  value={value}
-                  label={"Growth Stage"}
-                  inputAccessoryViewID={name}
-                  // style={scoutFormStyles.largeTextInput}
-                />
-                {Platform.OS === "ios" && (
-                  <InputAccessoryView nativeID={name}>
-                    <Input
-                      placeholder="Enter Growth Stage..."
-                      onBlur={onBlur}
-                      onChangeText={onChange}
-                      value={value}
-                      label={"Growth Stage"}
-                    />
-                  </InputAccessoryView>
-                )}
-              </>
+              <InputWithAccessoryView
+                placeholder="Enter Growth Stage..."
+                onBlur={onBlur}
+                onChangeText={onChange}
+                value={value}
+                label={"Growth Stage"}
+                inputAccessoryViewID={name}
+              // style={scoutFormStyles.largeTextInput}
+              />
             )}
             name="growthStage"
             rules={{ required: false }}
@@ -318,9 +305,9 @@ export const ScoutingReportSummaryContent = (
           ) : null}
         </View>
         {Object.keys(aliasMap.Weeds).length ||
-        Object.keys(aliasMap.Diseases).length ||
-        Object.keys(aliasMap.Insects).length ||
-        Object.keys(aliasMap.General).length ? (
+          Object.keys(aliasMap.Diseases).length ||
+          Object.keys(aliasMap.Insects).length ||
+          Object.keys(aliasMap.General).length ? (
           <View
             key={"section-auto-generated-summary"}
             style={scoutFormStyles.section}
@@ -338,31 +325,16 @@ export const ScoutingReportSummaryContent = (
           <Controller
             control={formControl}
             render={({ field: { onChange, onBlur, value, name } }) => (
-              <>
-                <Input
-                  placeholder="Summary here..."
-                  onBlur={onBlur}
-                  onChangeText={onChange}
-                  value={value}
-                  label={"Comments"}
-                  multiline
-                  inputAccessoryViewID={name}
-                  style={scoutFormStyles.largeTextInput}
-                />
-                {Platform.OS === "ios" && (
-                  <InputAccessoryView nativeID={name}>
-                    <Input
-                      value={value}
-                      placeholder="Summary here..."
-                      onBlur={onBlur}
-                      onChangeText={onChange}
-                      label={"Comments"}
-                      multiline
-                      style={scoutFormStyles.largeTextInput}
-                    />
-                  </InputAccessoryView>
-                )}
-              </>
+              <InputWithAccessoryView
+                placeholder="Summary here..."
+                onBlur={onBlur}
+                onChangeText={onChange}
+                value={value}
+                label={"Comments"}
+                multiline
+                inputAccessoryViewID={name}
+                style={scoutFormStyles.largeTextInput}
+              />
             )}
             name="summaryText"
             rules={{ required: false }}
@@ -373,31 +345,16 @@ export const ScoutingReportSummaryContent = (
           <Controller
             control={formControl}
             render={({ field: { onChange, onBlur, value, name } }) => (
-              <>
-                <Input
-                  placeholder="Specify recommendation text here..."
-                  onBlur={onBlur}
-                  onChangeText={onChange}
-                  value={value}
-                  label={"Recommendations"}
-                  multiline
-                  inputAccessoryViewID={name}
-                  style={scoutFormStyles.largeTextInput}
-                />
-                {Platform.OS === "ios" && (
-                  <InputAccessoryView nativeID={name}>
-                    <Input
-                      placeholder="Specify recommendation text here..."
-                      onBlur={onBlur}
-                      onChangeText={onChange}
-                      value={value}
-                      label={"Recommendations"}
-                      multiline
-                      style={scoutFormStyles.largeTextInput}
-                    />
-                  </InputAccessoryView>
-                )}
-              </>
+              <InputWithAccessoryView
+                placeholder="Specify recommendation text here..."
+                onBlur={onBlur}
+                onChangeText={onChange}
+                value={value}
+                label={"Recommendations"}
+                multiline
+                inputAccessoryViewID={name}
+                style={scoutFormStyles.largeTextInput}
+              />
             )}
             name="recommendations"
             rules={{ required: false }}
