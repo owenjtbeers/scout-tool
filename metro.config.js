@@ -7,11 +7,6 @@ const ALIASES = {
   "react-native-maps": "@teovilla/react-native-web-maps",
 };
 
-// Add polyfills
-config.resolver.extraNodeModules = {
-  ...config.resolver.extraNodeModules,
-  'buffer': require.resolve('buffer/'),
-};
 config.transformer.getTransformOptions = () => ({
   transform: {
     experimentalImportSupport: false,

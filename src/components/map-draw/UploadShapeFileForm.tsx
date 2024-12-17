@@ -12,8 +12,6 @@ import turfCentroid from "@turf/centroid";
 import MapView from "react-native-maps";
 import { convertUriToBuffer } from "../../utils/files/base64";
 
-
-
 type UploadShapeFileFormProps = {
   mapRef: React.RefObject<MapView>;
   setModalVisible: (val: boolean) => void;
