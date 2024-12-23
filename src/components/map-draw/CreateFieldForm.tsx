@@ -4,12 +4,7 @@ import { FeatureCollection, Units } from "@turf/helpers";
 import { useRouter } from "expo-router";
 import React, { useCallback } from "react";
 import { Controller, useForm } from "react-hook-form";
-import {
-  Pressable,
-  StyleSheet,
-  TouchableOpacity,
-  View,
-} from "react-native";
+import { Pressable, StyleSheet, TouchableOpacity, View } from "react-native";
 import { useSelector } from "react-redux";
 import { DialogPickerSelect } from "../../forms/components/DialogPicker";
 import { validation } from "../../forms/validationFunctions";
@@ -109,14 +104,13 @@ export function CreateFieldForm(props: FieldFormProps) {
   );
   return (
     <View>
-
       <BottomSheet
         isVisible={isVisible}
         onBackdropPress={onClose}
         modalProps={{
           animationType: "slide",
-          presentationStyle: "formSheet",
-          transparent: false,
+          presentationStyle: "pageSheet",
+          transparent: true,
         }}
       >
         <View style={styles.modalView}>

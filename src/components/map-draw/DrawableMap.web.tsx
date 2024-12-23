@@ -1,16 +1,14 @@
 import React, { useRef, useState } from "react";
-import MapView, { MapPressEvent, PROVIDER_GOOGLE } from "react-native-maps";
+import MapView, { MapRef } from "react-map-gl";
 import { useSelector, useDispatch } from "react-redux";
 import { StyleSheet, View } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
 import { defaultRegion } from "../../constants/constants";
 import { RootState } from "../../redux/store";
-import { DrawingManager } from "./DrawingManager";
-import { drawingSlice } from "../../redux/map/drawingSlice";
-import { DrawingButtons } from "./DrawingButtons";
+import { DrawingManager } from "./DrawingManager.web";
+import { DrawingButtons } from "./DrawingButtons.web";
 import { SubmitButton } from "./SubmitButton";
 import { OperationsModal } from "./OperationsModal";
-import { MapContentManager } from "../map/MapContentManager";
+import { MapContentManager } from "../map/MapContentManager.web";
 import { useSelectedGrowerAndFarm } from "../layout/topBar/selectionHooks";
 import { useGetFieldsQuery } from "../../redux/fields/fieldsApi";
 import { MapUtilButtons } from "./MapUtilButtons";
@@ -18,7 +16,7 @@ import DrawingInfoText from "./DrawingInfoText";
 
 export const DrawableMapScreen = () => {
   const dispatch = useDispatch();
-  const mapRef = useRef<MapView>(null);
+  const mapRef = useRef<MapRef>(null);
   const initialRegion = useSelector((state: RootState) => state.map.region);
   const operation = useSelector(
     (state: RootState) => state["map-drawing"].operation
@@ -27,17 +25,6 @@ export const DrawableMapScreen = () => {
     (state: RootState) => state["map-drawing"].isDrawing
   );
   const [modalVisible, setModalVisible] = useState(false);
-
-  const onPress = (event: MapPressEvent) => {
-    if (!!isDrawing) {
-      dispatch(
-        drawingSlice.actions.addPointToPolygon({
-          index: 0,
-          point: event.nativeEvent.coordinate,
-        })
-      );
-    }
-  };
 
   const { selectedGrower, selectedFarm } = useSelectedGrowerAndFarm();
   const { data: fieldResponse } = useGetFieldsQuery({
@@ -48,30 +35,42 @@ export const DrawableMapScreen = () => {
   });
   return (
     <View style={styles.container}>
-      <DrawingButtons setModalVisible={setModalVisible} />
       <MapView
-        style={styles.map}
         ref={mapRef}
-        provider={"google"}
-        // @ts-expect-error
-        googleMapsApiKey={process.env.EXPO_PUBLIC_GOOGLE_MAPS_WEB_API_KEY}
-        region={initialRegion || defaultRegion}
-        onPress={onPress}
-        mapType={"hybrid"}
-        showsUserLocation={true}
-        showsMyLocationButton={false}
-        toolbarEnabled={false}
+        reuseMaps
+        mapboxAccessToken={process.env.MAPBOX_ACCESS_TOKEN}
+        mapStyle="mapbox://styles/mapbox/satellite-v9"
+        initialViewState={initialRegion || defaultRegion}
+        attributionControl={false}
+        style={{ flex: 1 }}
+        // onClick={onPress}
       >
+        <DrawingButtons
+          mapRef={mapRef}
+          setModalVisible={setModalVisible}
+          displayControlsDefault={false}
+          onCreate={(evt) => {
+            console.log("onCreate", evt.features);
+          }}
+          onDelete={(evt) => {
+            console.log("onDelete", evt);
+          }}
+          onUpdate={(evt) => {
+            console.log("onUpdate", evt);
+          }}
+        />
         <MapContentManager mapRef={mapRef} fields={fieldResponse?.data} />
         <DrawingManager mapRef={mapRef} />
       </MapView>
       <DrawingInfoText />
+      {/* @ts-expect-error TODO: mapref error*/}
       <MapUtilButtons mapRef={mapRef} />
       <SubmitButton operation={operation} setModalVisible={setModalVisible} />
       <OperationsModal
         operation={operation}
         setModalVisible={setModalVisible}
         visible={modalVisible}
+        // @ts-expect-error TODO: mapref error
         mapRef={mapRef}
       />
     </View>
@@ -80,10 +79,7 @@ export const DrawableMapScreen = () => {
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
-    height: "100%",
-  },
-  map: {
+    // flex: 0,
     flex: 1,
     // height: "100%",
   },

@@ -64,7 +64,7 @@ export const ScoutingReportList: React.FC = () => {
   const copiedData = data?.data?.slice();
   const sortedData = copiedData?.sort((a, b) => (a.ID - b.ID) * -1);
   return (
-    <>
+    <View>
       <Tab
         value={tabIndex}
         onChange={setTabIndex}
@@ -91,32 +91,36 @@ export const ScoutingReportList: React.FC = () => {
           />
         </TabView.Item>
         <TabView.Item style={styles.container}>
-          <ScoutingReportListComponent
-            key={"scout_list_in_review"}
-            isLoading={isLoading}
-            onRefresh={onRefresh}
-            isRefreshing={isRefreshing}
-            sortedData={
-              sortedData?.filter(
-                (scoutingReport) => scoutingReport.Status === "in_review"
-              ) || []
-            }
-          />
+          {tabIndex === 1 && (
+            <ScoutingReportListComponent
+              key={"scout_list_in_review"}
+              isLoading={isLoading}
+              onRefresh={onRefresh}
+              isRefreshing={isRefreshing}
+              sortedData={
+                sortedData?.filter(
+                  (scoutingReport) => scoutingReport.Status === "in_review"
+                ) || []
+              }
+            />
+          )}
         </TabView.Item>
         <TabView.Item style={styles.container}>
-          <ScoutingReportListComponent
-            isLoading={isLoading}
-            onRefresh={onRefresh}
-            isRefreshing={isRefreshing}
-            sortedData={
-              sortedData?.filter(
-                (scoutingReport) => scoutingReport.Status === "passed_review"
-              ) || []
-            }
-          />
+          {tabIndex === 2 && (
+            <ScoutingReportListComponent
+              isLoading={isLoading}
+              onRefresh={onRefresh}
+              isRefreshing={isRefreshing}
+              sortedData={
+                sortedData?.filter(
+                  (scoutingReport) => scoutingReport.Status === "passed_review"
+                ) || []
+              }
+            />
+          )}
         </TabView.Item>
       </TabView>
-    </>
+    </View>
   );
 
   // }

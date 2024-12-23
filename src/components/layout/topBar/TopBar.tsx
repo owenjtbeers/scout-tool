@@ -178,7 +178,7 @@ const SeasonSelector = () => {
       >
         <ScrollView>
           <Dialog.Title title={"Select a Season"} />
-          {["2024", "2023"].map((season) => (
+          {["2025", "2024", "2023"].map((season) => (
             <ListItem
               onPress={() => {
                 dispatch(globalSelectionsSlice.actions.setSeason(season));

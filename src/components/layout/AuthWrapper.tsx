@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 
 import { ActivityIndicator, View } from "react-native";
 // Navigation
-import { useRouter, useRootNavigationState } from "expo-router";
+import { useRouter, useRootNavigationState, Slot } from "expo-router";
 import { LOGIN_SCREEN, HOME_MAP_SCREEN } from "../../navigation/screens";
 import { colors } from "../../constants/styles";
 import { useSelector } from "react-redux";
@@ -10,7 +10,7 @@ import { RootState } from "../../redux/store";
 import { useValidateMutation } from "../../redux/auth/authApi";
 
 // Top level Component that will navigate to the correct screen
-export default function App() {
+export default function App({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const rootNavigation = useRootNavigationState();
 
@@ -41,9 +41,13 @@ export default function App() {
     }
   }, [token, rootNavigation?.key]);
 
-  return (
-    <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
-      <ActivityIndicator size="large" color={colors.primary} />
-    </View>
-  );
+  if (!isLoggedIn) {
+    return (
+      <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
+        <ActivityIndicator size="large" color={colors.primary} />
+      </View>
+    );
+  }
+
+  return <Slot />;
 }

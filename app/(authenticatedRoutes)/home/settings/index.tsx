@@ -4,15 +4,15 @@ import { useDispatch } from "react-redux";
 
 import { View, StyleSheet } from "react-native";
 import { Button } from "@rneui/themed";
-import { userSlice } from "../../../src/redux/user/userSlice";
-import { baseApi } from "../../../src/redux/baseApi";
-import { clearState } from "../../../src/redux/rootReducer";
+import { userSlice } from "../../../../src/redux/user/userSlice";
+import { baseApi } from "../../../../src/redux/baseApi";
+import { clearState } from "../../../../src/redux/rootReducer";
 import {
   LOGIN_SCREEN,
   SETTINGS_MANAGE_CROPS_SCREEN,
   SETTINGS_MANAGE_GROWERS_SCREEN,
   SETTINGS_MANAGE_ORGANIZATION_SCREEN,
-} from "../../../src/navigation/screens";
+} from "../../../../src/navigation/screens";
 
 export default () => {
   const router = useRouter();

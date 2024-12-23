@@ -5,6 +5,7 @@ import { baseApi } from "../baseApi";
 
 interface UserState {
   currentUser: ScoutingAppUser;
+  isLoading: boolean;
   token: string | null;
   hasDismissedWelcomeScreen: boolean;
 }
@@ -12,6 +13,7 @@ interface UserState {
 const initialState: UserState = {
   // @ts-expect-error Best to turn this off here, once the user is auth'd this is always here
   currentUser: null,
+  isLoading: false,
   token: null,
   hasDismissedWelcomeScreen: false,
 };
@@ -26,6 +28,10 @@ export const userSlice = createSlice({
     },
     setToken: (state, action: PayloadAction<string>) => {
       state.token = action.payload;
+      return state;
+    },
+    setIsLoading: (state, action: PayloadAction<boolean>) => {
+      state.isLoading = action.payload;
       return state;
     },
     updateUserOrganization: (state, action: PayloadAction<Organization>) => {
@@ -49,6 +55,7 @@ export const userSlice = createSlice({
       // And if we are logged out we don't need the current user
       state.currentUser = null;
       state.token = null;
+      state.isLoading = false;
       return state;
     },
     clearState: (state) => {

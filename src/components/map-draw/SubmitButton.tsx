@@ -1,11 +1,13 @@
 import React from "react";
-import { TouchableOpacity, View, StyleSheet, Text, Alert } from "react-native";
+import { TouchableOpacity, View, StyleSheet, Text } from "react-native";
 import { Button } from "@rneui/themed";
 import { useSelector, useDispatch } from "react-redux";
 import { RootState } from "../../redux/store";
 import { DrawingOperation } from "../../redux/map/drawingSlice";
 import { colors } from "../../constants/styles";
 import { set } from "react-hook-form";
+
+import alert from "../../components/polyfill/Alert";
 
 type SubmitButtonProps = {
   operation: DrawingOperation;
@@ -28,9 +30,15 @@ export const SubmitButton: React.FC<SubmitButtonProps> = ({
   const polygons = useSelector(
     (state: RootState) => state["map-drawing"].polygons
   );
+  const tempGeoJSON = useSelector(
+    (state: RootState) => state["map-drawing"].tempGeoJSON
+  );
   const handlePress = () => {
-    if (polygons?.[0] === undefined || polygons?.[0]?.length < 3) {
-      Alert.alert("Please draw a field before proceeding");
+    if (
+      (polygons?.[0] === undefined || polygons?.[0]?.length < 3) &&
+      tempGeoJSON === null
+    ) {
+      alert("Please draw a field before proceeding", "");
       return;
     }
     if (operation === "add-field") {
@@ -44,7 +52,7 @@ export const SubmitButton: React.FC<SubmitButtonProps> = ({
   };
 
   return (
-    <View style={styles.container}>
+    <View id={"field-create-submit-button-container"} style={styles.container}>
       <Button
         containerStyle={styles.buttonContainer}
         buttonStyle={styles.buttonContainer}
@@ -59,7 +67,7 @@ export const SubmitButton: React.FC<SubmitButtonProps> = ({
 };
 
 const styles = StyleSheet.create({
-  container: { minHeight: 50 },
+  container: { minHeight: 50, width: "100%" },
   buttonContainer: {
     flex: 1,
     minHeight: 50,

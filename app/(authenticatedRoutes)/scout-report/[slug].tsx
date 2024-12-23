@@ -1,18 +1,18 @@
 import React from "react";
 import { Text } from "@rneui/themed";
 import { useLocalSearchParams } from "expo-router";
-import { CreateScoutingReportPage } from "../../src/components/scouting/CreateScoutingReportPage";
-import { useGetScoutReportDetailQuery } from "../../src/redux/scouting/scoutingApi";
+import { CreateScoutingReportPage } from "../../../src/components/scouting/CreateScoutingReportPage";
+import { useGetScoutReportDetailQuery } from "../../../src/redux/scouting/scoutingApi";
 import {
   useGetFieldDetailQuery,
   useGetFieldsQuery,
-} from "../../src/redux/fields/fieldsApi";
+} from "../../../src/redux/fields/fieldsApi";
 import { useSelector } from "react-redux";
-import { RootState } from "../../src/redux/store";
-import { GLOBAL_SELECTIONS_REDUCER_KEY } from "../../src/redux/globalSelections/globalSelectionsSlice";
-import { Field } from "../../src/redux/fields/types";
+import { RootState } from "../../../src/redux/store";
+import { GLOBAL_SELECTIONS_REDUCER_KEY } from "../../../src/redux/globalSelections/globalSelectionsSlice";
+import { Field } from "../../../src/redux/fields/types";
 import { ActivityIndicator } from "react-native";
-import { SCOUTING_SLICE_REDUCER_KEY } from "../../src/redux/scouting/scoutingSlice";
+import { SCOUTING_SLICE_REDUCER_KEY } from "../../../src/redux/scouting/scoutingSlice";
 
 // SideSheet
 // Home Page

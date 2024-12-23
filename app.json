@@ -3,7 +3,7 @@
     "name": "scout-tool",
     "slug": "scout-tool",
     "version": "1.0.6",
-    "orientation": "landscape",
+    "orientation": "default",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
     "splash": {
@@ -13,15 +13,12 @@
     },
     "jsEngine": "hermes",
     "plugins": [],
-    "assetBundlePatterns": [
-      "**/*"
-    ],
+    "assetBundlePatterns": ["**/*"],
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.owenbeers.scouttool",
       "jsEngine": "jsc",
       "buildNumber": "1",
-      "scheme": "scout-tool",
       "config": {
         "usesNonExemptEncryption": false
       }

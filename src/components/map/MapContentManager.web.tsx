@@ -8,13 +8,15 @@ import {
   featureCollection,
 } from "@turf/helpers";
 import React, { RefObject, useCallback, useEffect } from "react";
-import { Text } from "react-native";
-import MapView, { Geojson, Marker } from "react-native-maps";
+import { Platform, Text } from "react-native";
+import { Layer, Source, Marker, MapRef } from "react-map-gl";
 import { useDispatch, useSelector } from "react-redux";
+import { colors } from "../../constants/styles";
 import { useGetOrgCropsQuery } from "../../redux/crops/cropsApi";
 import {
   getColorForFieldCropSeason,
   setOpacityOnHexColor,
+  colorWithoutOpacity,
 } from "../../redux/crops/utils";
 import { Field } from "../../redux/fields/types";
 import {
@@ -26,10 +28,11 @@ import {
   convertTurfBBoxToLatLng,
   mapCoordinatesToLatLng,
 } from "../../utils/latLngConversions";
-import { fitToBoundsForMapView } from "./utils";
+import { BBox2d } from "@turf/helpers/dist/js/lib/geojson";
+import { GeojsonLayerGL } from "./components/GeojsonLayer.web";
 
 type MapContentManagerProps = {
-  mapRef: RefObject<MapView>;
+  mapRef: RefObject<MapRef>;
   fields: Field[] | undefined;
 };
 
@@ -41,36 +44,11 @@ export const MapContentManager = (props: MapContentManagerProps) => {
   const selectedSeason = useSelector(
     (state: RootState) => state[GLOBAL_SELECTIONS_REDUCER_KEY].season
   );
-  const { theme } = useTheme();
   const dispatch = useDispatch();
   const { data: orgCropsData } = useGetOrgCropsQuery("default", {
     refetchOnReconnect: true,
   });
-  const onPressFieldBoundary = useCallback(
-    (field: Field) => (geoJsonProps: any) => {
-      if (selectedField?.ID !== field.ID) {
-        // Set the selected field in the global selections
-        dispatch(globalSelectionsSlice.actions.setField(field));
-        const { coordinates } = geoJsonProps;
-        if (coordinates && mapRef.current) {
-          // TODO: Figure out how to deal with this error
-          // @ts-ignore
-          props.mapRef.current?.fitToCoordinates(coordinates, {
-            edgePadding: {
-              top: 20,
-              right: 20,
-              bottom: 20,
-              left: 20,
-            },
-            animated: true,
-          });
-        }
-      } else {
-        dispatch(globalSelectionsSlice.actions.setField(null));
-      }
-    },
-    [selectedField]
-  );
+
   const shouldZoomToBbox = useSelector((state: RootState) => {
     return state[GLOBAL_SELECTIONS_REDUCER_KEY].shouldZoomToBbox;
   });
@@ -86,9 +64,9 @@ export const MapContentManager = (props: MapContentManagerProps) => {
         return acc;
       }, [] as Feature[]);
       const fc = featureCollection(features);
-      const bboxOfFields = bbox(fc);
+      const bboxOfFields = bbox(fc) as BBox2d;
       if (bboxOfFields) {
-        fitToBoundsForMapView(mapRef, convertTurfBBoxToLatLng(bboxOfFields));
+        mapRef.current?.fitBounds(bboxOfFields, { duration: 1000 });
         dispatch(globalSelectionsSlice.actions.setShouldZoomToBbox(false));
       }
     }
@@ -117,29 +95,19 @@ export const MapContentManager = (props: MapContentManagerProps) => {
             field.FieldCrops,
             selectedSeason
           );
+          // IDEA: We concatenate all geojson for fields with the same crop / color
+          // and then render a single layer with that color, and we then have to put more data
+          // into each feature (done when concatenating) so that we can tell a field apart on click
+          // This could help with performance issues. We may have to have a layer with all the centroids
+          // as well for displaying field labels. Just leaving this here for now.
           return (
-            <React.Fragment key={`fragment-${field.ID}`}>
-              {centroidLatLng[0]?.latitude !== undefined && (
-                <Marker
-                  // key={`marker-${field.ID}`}
-                  coordinate={centroidLatLng[0]}
-                  tracksViewChanges={false}
-                >
-                  <Text key={`text-${field.ID}`}>{field.Name}</Text>
-                </Marker>
-              )}
-              {field.ActiveBoundary?.Json && (
-                <Geojson
-                  // @ts-ignore TODO: Figure out how to resolve this between the two libraries
-                  geojson={field.ActiveBoundary?.Json}
-                  strokeColor={fieldColor}
-                  fillColor={setOpacityOnHexColor(fieldColor)}
-                  tappable={true}
-                  onPress={onPressFieldBoundary(field)}
-                  key={`polygon-${field.ID}`}
-                />
-              )}
-            </React.Fragment>
+              <GeojsonLayerGL
+                geojson={featureCollection as FeatureCollection}
+                color={fieldColor}
+                ID={field.ID}
+                fillOpacity={0.5}
+                label={field.Name}
+              />
           );
         })}
     </>

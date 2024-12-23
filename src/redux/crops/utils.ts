@@ -47,3 +47,13 @@ export const setOpacityOnHexColor = (hexValue: string) => {
   }
   return hexValue;
 };
+
+/*
+  Mapbox does not support colors with opacity in the fill property
+*/
+export const colorWithoutOpacity = (hexValue: string) => {
+  if (hexValue.length === 9) {
+    return hexValue.substring(0, 7);
+  }
+  return hexValue;
+};

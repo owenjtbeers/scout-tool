@@ -14,6 +14,10 @@ import { store, persistor } from "../../../src/redux/store";
 import { ThemeProvider } from "@rneui/themed";
 import { theme } from "../../../src/constants/styles";
 
+import "mapbox-gl/dist/mapbox-gl.css";
+import "@mapbox/mapbox-gl-draw/dist/mapbox-gl-draw.css";
+import { SessionProvider } from "./AuthWrapper.web";
+
 registerTranslation("en", en);
 const App = () => {
   return (
@@ -22,7 +26,9 @@ const App = () => {
         <PersistGate loading={null} persistor={persistor}>
           <ThemeProvider theme={theme}>
             <SafeAreaProvider style={{ flex: 1 }}>
-              <Slot />
+              <SessionProvider>
+                <Slot />
+              </SessionProvider>
             </SafeAreaProvider>
           </ThemeProvider>
         </PersistGate>

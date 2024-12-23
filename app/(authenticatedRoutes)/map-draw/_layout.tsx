@@ -3,8 +3,9 @@ import { View, Text, Pressable, StyleSheet } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { Slot, useRouter } from "expo-router";
 import { useSelector } from "react-redux";
-import { RootState } from "../../src/redux/store";
-import { colors } from "../../src/constants/styles";
+import { RootState } from "../../../src/redux/store";
+import { colors } from "../../../src/constants/styles";
+import { HOME_MAP_SCREEN } from "../../../src/navigation/screens";
 
 const translationMap = {
   "add-field": "Create New Field",
@@ -15,7 +16,7 @@ const translationMap = {
 const Layout = () => {
   const router = useRouter();
   const onPressBack = () => {
-    router.back();
+    router.push(HOME_MAP_SCREEN);
   };
 
   const operation = useSelector(

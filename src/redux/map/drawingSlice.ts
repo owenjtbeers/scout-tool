@@ -71,6 +71,13 @@ export const drawingSlice = createSlice({
         polygons: newPolygons,
       };
     },
+    addPolygon: (state, action: PayloadAction<{ index: number, polygonPoints: LatLng[]}>) => {
+      const newPolygons = [...state.polygons];
+      newPolygons[action.payload.index] = action.payload.polygonPoints;
+      return {
+      ...state,
+      polygons: [...state.polygons, action.payload.polygonPoints],
+    }},
     setPointOfPolygon: (
       state,
       action: PayloadAction<{

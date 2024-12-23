@@ -1,17 +1,21 @@
 import React from "react";
 import { View, StyleSheet } from "react-native";
-import type MapView from "react-native-maps";
-import UserLocationButton from "../map/components/UserLocationButton";
+import type { MapRef } from "react-map-gl";
+import UserLocationButton from "./UserLocationButton.web";
+import FieldBoundsZoomButton from "./FieldBoundsZoomButton.web";
+import { Field } from "../../../redux/fields/types";
 
 interface Props {
-  mapRef: React.RefObject<MapView>;
+  mapRef: React.RefObject<MapRef>;
+  fields: Field[] | undefined;
 }
 export const MapUtilButtons = (props: Props) => {
-  const { mapRef } = props;
+  const { mapRef, fields } = props;
   return (
     <View style={styles.positioningContainer}>
       <View style={styles.buttonContainer}>
         <UserLocationButton mapRef={mapRef} />
+        <FieldBoundsZoomButton mapRef={mapRef} fields={fields} />
       </View>
     </View>
   );
@@ -20,7 +24,7 @@ export const MapUtilButtons = (props: Props) => {
 const styles = StyleSheet.create({
   positioningContainer: {
     position: "absolute",
-    top: "16%",
+    top: "8%",
     right: "7%",
   },
   buttonContainer: {

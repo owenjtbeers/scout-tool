@@ -127,6 +127,16 @@ const FieldCropHistoryForm = (props: FieldCropHistoryFormProps) => {
       {isAddingFieldCrop && (
         <EditingFieldCropForm
           onSave={(data: FormFieldCrop) => {
+            // Ensure that the ID is properly set on the data
+            const cropName = data.Crop.Name;
+            const maybeCrop = crops.find((crop) => crop.Name === cropName);
+            if (maybeCrop) {
+              data.CropId = maybeCrop.ID;
+              data.Crop.ID = maybeCrop.ID;
+            } else {
+              data.CropId = 0;
+              data.Crop.ID = 0;
+            }
             setValue(`fieldCrops.${editingIndex as number}`, data);
             setIsAddingFieldCrop(false);
           }}
@@ -246,6 +256,7 @@ const EditingFieldCropForm = (props: EditingFieldCropFormProps) => {
   });
 
   const getCropOptions = () => {
+    // Use just strings here and change the id later on save
     const fieldCrop = getValues("Crop");
     const orgCropNames = orgCrops.map((orgCrop) => orgCrop.Name);
     const fieldCropNames = [fieldCrop?.Name];
