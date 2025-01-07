@@ -51,12 +51,18 @@ export const CustomInput = React.forwardRef(
             </Pressable>
           }
           onPressIn={onPressIn}
+          onPress={onPressIn}
+          onFocus={onPressIn}
           ref={ref}
           inputMode="none"
           focusable={false}
           cursorColor={"transparent"}
           label={props.label}
           errorMessage={props.errorMessage}
+          style={props?.style}
+          containerStyle={props?.containerStyle}
+          inputContainerStyle={props?.inputContainerStyle}
+          inputStyle={props?.inputStyle}
         />
         <Dialog
           isVisible={dialogVisible}

@@ -1,9 +1,10 @@
 import { StyleSheet } from "react-native";
 import { createTheme } from "@rneui/themed";
 
+export const DARK_GREEN_PRIMARY = "#00342B";
 export const colors = {
   // primary: "#6B818D", // Blue green
-  primary: "#00342B", // Dark green
+  primary: DARK_GREEN_PRIMARY, // Dark green
   secondary: "#d3f0db",
   tertiary: "rgba(187, 239, 198, 0.4)",
   // tertiary: "#d3f0dbAA", // Light green with opacity???

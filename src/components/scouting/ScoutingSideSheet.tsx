@@ -7,7 +7,7 @@ interface ScoutingSideSheetProps {
   isDrawing?: boolean;
 }
 
-const MAX_SIDE_SHEET_WIDTH = 425;
+const MAX_SIDE_SHEET_WIDTH = 325;
 export const ScoutingSideSheet = (props: ScoutingSideSheetProps) => {
   const [animation] = useState(new Animated.Value(0));
   const [isSideSheetOpen, setIsSideSheetOpen] = useState(false);

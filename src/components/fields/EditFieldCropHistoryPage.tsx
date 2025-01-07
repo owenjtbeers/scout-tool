@@ -25,6 +25,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { formatDate } from "../../utils/formatting/dates";
 import { getErrorMessage } from "../../utils/errors";
 import { DialogPickerSelect } from "../../forms/components/DialogPicker";
+import { DARK_GREEN_PRIMARY } from "../../constants/styles";
 
 interface EditFieldCropHistoryPageProps {
   onClose: () => void;
@@ -126,6 +127,16 @@ const FieldCropHistoryForm = (props: FieldCropHistoryFormProps) => {
       {isAddingFieldCrop && (
         <EditingFieldCropForm
           onSave={(data: FormFieldCrop) => {
+            // Ensure that the ID is properly set on the data
+            const cropName = data.Crop.Name;
+            const maybeCrop = crops.find((crop) => crop.Name === cropName);
+            if (maybeCrop) {
+              data.CropId = maybeCrop.ID;
+              data.Crop.ID = maybeCrop.ID;
+            } else {
+              data.CropId = 0;
+              data.Crop.ID = 0;
+            }
             setValue(`fieldCrops.${editingIndex as number}`, data);
             setIsAddingFieldCrop(false);
           }}
@@ -150,7 +161,7 @@ const FieldCropHistoryForm = (props: FieldCropHistoryFormProps) => {
                 ID: 0,
                 FieldId: selectedField?.ID || 0,
                 CropId: 0,
-                Crop: { ID: 0, Name: "" },
+                Crop: { ID: 0, Name: "", Color: DARK_GREEN_PRIMARY },
                 PlantedDate: new Date(),
                 EndDate: undefined,
               });
@@ -245,9 +256,10 @@ const EditingFieldCropForm = (props: EditingFieldCropFormProps) => {
   });
 
   const getCropOptions = () => {
+    // Use just strings here and change the id later on save
     const fieldCrop = getValues("Crop");
     const orgCropNames = orgCrops.map((orgCrop) => orgCrop.Name);
-    const fieldCropNames = [fieldCrop.Name];
+    const fieldCropNames = [fieldCrop?.Name];
     const uniqueOptions = new Set([...orgCropNames, ...fieldCropNames]);
     return Array.from(uniqueOptions).map((option) => ({
       label: option,

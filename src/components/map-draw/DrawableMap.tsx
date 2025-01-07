@@ -47,35 +47,33 @@ export const DrawableMapScreen = () => {
     withCrops: true,
   });
   return (
-    <SafeAreaView style={styles.container}>
-      <View style={styles.container}>
-        <DrawingButtons setModalVisible={setModalVisible} />
-        <MapView
-          style={styles.map}
-          ref={mapRef}
-          provider={"google"}
-          googleMapsApiKey={process.env.EXPO_PUBLIC_GOOGLE_MAPS_WEB_API_KEY}
-          region={initialRegion || defaultRegion}
-          onPress={onPress}
-          mapType={"hybrid"}
-          showsUserLocation={true}
-          showsMyLocationButton={false}
-          toolbarEnabled={false}
-        >
-          <MapContentManager mapRef={mapRef} fields={fieldResponse?.data} />
-          <DrawingManager mapRef={mapRef} />
-        </MapView>
-        <DrawingInfoText />
-        <MapUtilButtons mapRef={mapRef} />
-        <SubmitButton operation={operation} setModalVisible={setModalVisible} />
-        <OperationsModal
-          operation={operation}
-          setModalVisible={setModalVisible}
-          visible={modalVisible}
-          mapRef={mapRef}
-        />
-      </View>
-    </SafeAreaView>
+    <View style={styles.container}>
+      <DrawingButtons setModalVisible={setModalVisible} />
+      <MapView
+        style={styles.map}
+        ref={mapRef}
+        // provider={"google"}
+        // googleMapsApiKey={process.env.EXPO_PUBLIC_GOOGLE_MAPS_WEB_API_KEY}
+        region={initialRegion || defaultRegion}
+        onPress={onPress}
+        mapType={"hybrid"}
+        showsUserLocation={true}
+        showsMyLocationButton={false}
+        toolbarEnabled={false}
+      >
+        <MapContentManager mapRef={mapRef} fields={fieldResponse?.data} />
+        <DrawingManager mapRef={mapRef} />
+      </MapView>
+      <DrawingInfoText />
+      <MapUtilButtons mapRef={mapRef} />
+      <SubmitButton operation={operation} setModalVisible={setModalVisible} />
+      <OperationsModal
+        operation={operation}
+        setModalVisible={setModalVisible}
+        visible={modalVisible}
+        mapRef={mapRef}
+      />
+    </View>
   );
 };
 
@@ -86,6 +84,6 @@ const styles = StyleSheet.create({
   },
   map: {
     flex: 1,
-    height: "100%",
+    // height: "100%",
   },
 });

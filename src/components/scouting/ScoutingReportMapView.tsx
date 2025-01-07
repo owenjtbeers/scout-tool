@@ -35,7 +35,6 @@ import {
   convertPestPointsToScoutingArea,
   convertScoutingAreasToPestPoints,
 } from "./utils/pestPoints";
-import { get } from "react-native/Libraries/TurboModule/TurboModuleRegistry";
 import { ScoutingArea } from "../../redux/scouting/types";
 
 interface ScoutingReportMapViewProps {
@@ -125,7 +124,6 @@ export const ScoutingReportMapView = (props: ScoutingReportMapViewProps) => {
           },
         } as Feature<LineString, Properties>;
       });
-      console.log("convertedPolylines", convertedPolylines);
       setFormValue("scoutingAreas.0.Geometry.features", convertedPolylines, {
         shouldDirty: true,
       });
@@ -239,9 +237,7 @@ export const ScoutingReportMapView = (props: ScoutingReportMapViewProps) => {
         mapType={"hybrid"}
         showsUserLocation={true}
         showsMyLocationButton={false}
-        provider={"google"}
-        // @ts-ignore
-        googleMapsApiKey={process.env.EXPO_PUBLIC_GOOGLE_MAPS_WEB_API_KEY}
+        // provider={"google"}
         toolbarEnabled={false}
         onPress={onPress}
         scrollEnabled={!isDrawing}

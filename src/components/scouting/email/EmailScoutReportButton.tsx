@@ -12,7 +12,7 @@ import type { ScoutingAppUser } from "../../../redux/user/types";
 import { generateScoutingReportHtml } from "./generateScoutingReportHtml";
 import { featureCollection, FeatureCollection } from "@turf/helpers";
 import bbox from "@turf/bbox";
-
+import alert from "../../polyfill/Alert";
 
 interface EmailButtonProps {
   mapRef: React.RefObject<MapView>;
@@ -34,7 +34,7 @@ export const EmailScoutReportButton = (props: EmailButtonProps) => {
           const fieldBoundary = getFormValues().field.ActiveBoundary
             ?.Json as FeatureCollection;
           const fc = featureCollection(fieldBoundary.features);
-          const bboxOfFields = bbox(fc);
+          // const bboxOfFields = bbox(fc);
           // mapRef.current?.fitToCoordinates(
           //   convertTurfBBoxToLatLng(bboxOfFields),
           //   {
@@ -69,13 +69,13 @@ export const EmailScoutReportButton = (props: EmailButtonProps) => {
           );
           // Generate new PDF
           const pdf = await Print.printToFileAsync({ html: reportHtml });
-
           // Rename PDF for user
           const pdfName = `${pdf.uri.slice(
             0,
             pdf.uri.lastIndexOf("/") + 1
-          )}${formValues.scoutedDate.toDateString()}_${formValues.field.Name || "Field"
-            }_scout_doc.pdf`.replaceAll(" ", "_");
+          )}${formValues.scoutedDate.toDateString()}_${
+            formValues.field.Name || "Field"
+          }_scout_doc.pdf`.replaceAll(" ", "_");
           await FileSystem.moveAsync({
             from: pdf.uri,
             to: pdfName,
@@ -83,13 +83,14 @@ export const EmailScoutReportButton = (props: EmailButtonProps) => {
           // Share the PDF via email
           const result = await MailComposer.composeAsync({
             recipients: formValues.growerEmail ? [formValues.growerEmail] : [],
-            subject: `Scouting Report - ${formValues.field.Name
-              } - ${formValues.scoutedDate.toDateString()}`,
+            subject: `Scouting Report - ${
+              formValues.field.Name
+            } - ${formValues.scoutedDate.toDateString()}`,
             body: `Attached is a scouting report, by ${user?.Organization?.Name}.\n\n\n\n Powered by Grounded Agri-Tools`,
             attachments: [pdfName],
           });
           if (result.status === "sent") {
-            // console.log("Email sent successfully");
+            // alert("Email sent successfully", "");
           }
           setIsProcessingEmail(false);
         } catch (e) {

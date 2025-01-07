@@ -37,6 +37,7 @@ import {
 } from "../utils/scoutReportUtils";
 import { scoutFormStyles } from "./styles";
 import { DialogPickerSelect } from "../../../forms/components/DialogPicker";
+import { InputWithAccessoryView } from "../../lib/InputWithAccessoryView";
 
 interface ScoutingReportSummaryContentProps {
   field: Field;
@@ -79,7 +80,7 @@ export const ScoutingReportSummaryContent = (
   const getCropOptions = () => {
     const selectedField = formGetValues("field");
     const fieldCropNames = selectedField?.FieldCrops?.map((fieldCrop) => {
-      return fieldCrop.Crop.Name;
+      return fieldCrop.Crop?.Name;
     });
     const currentCropName = formGetValues("crop.Name");
     if (currentCropName && currentCropName !== "") {
@@ -207,28 +208,15 @@ export const ScoutingReportSummaryContent = (
           <Controller
             control={formControl}
             render={({ field: { onChange, onBlur, value, name } }) => (
-              <>
-                <Input
-                  placeholder="Enter Growth Stage..."
-                  onBlur={onBlur}
-                  onChangeText={onChange}
-                  value={value}
-                  label={"Growth Stage"}
-                  inputAccessoryViewID={name}
-                // style={scoutFormStyles.largeTextInput}
-                />
-                {Platform.OS === "ios" && (
-                  <InputAccessoryView nativeID={name}>
-                    <Input
-                      placeholder="Enter Growth Stage..."
-                      onBlur={onBlur}
-                      onChangeText={onChange}
-                      value={value}
-                      label={"Growth Stage"}
-                    />
-                  </InputAccessoryView>
-                )}
-              </>
+              <InputWithAccessoryView
+                placeholder="Enter Growth Stage..."
+                onBlur={onBlur}
+                onChangeText={onChange}
+                value={value}
+                label={"Growth Stage"}
+                inputAccessoryViewID={name}
+              // style={scoutFormStyles.largeTextInput}
+              />
             )}
             name="growthStage"
             rules={{ required: false }}
@@ -337,31 +325,16 @@ export const ScoutingReportSummaryContent = (
           <Controller
             control={formControl}
             render={({ field: { onChange, onBlur, value, name } }) => (
-              <>
-                <Input
-                  placeholder="Summary here..."
-                  onBlur={onBlur}
-                  onChangeText={onChange}
-                  value={value}
-                  label={"Comments"}
-                  multiline
-                  inputAccessoryViewID={name}
-                  style={scoutFormStyles.largeTextInput}
-                />
-                {Platform.OS === "ios" && (
-                  <InputAccessoryView nativeID={name}>
-                    <Input
-                      value={value}
-                      placeholder="Summary here..."
-                      onBlur={onBlur}
-                      onChangeText={onChange}
-                      label={"Comments"}
-                      multiline
-                      style={scoutFormStyles.largeTextInput}
-                    />
-                  </InputAccessoryView>
-                )}
-              </>
+              <InputWithAccessoryView
+                placeholder="Summary here..."
+                onBlur={onBlur}
+                onChangeText={onChange}
+                value={value}
+                label={"Comments"}
+                multiline
+                inputAccessoryViewID={name}
+                style={scoutFormStyles.largeTextInput}
+              />
             )}
             name="summaryText"
             rules={{ required: false }}
@@ -372,31 +345,16 @@ export const ScoutingReportSummaryContent = (
           <Controller
             control={formControl}
             render={({ field: { onChange, onBlur, value, name } }) => (
-              <>
-                <Input
-                  placeholder="Specify recommendation text here..."
-                  onBlur={onBlur}
-                  onChangeText={onChange}
-                  value={value}
-                  label={"Recommendations"}
-                  multiline
-                  inputAccessoryViewID={name}
-                  style={scoutFormStyles.largeTextInput}
-                />
-                {Platform.OS === "ios" && (
-                  <InputAccessoryView nativeID={name}>
-                    <Input
-                      placeholder="Specify recommendation text here..."
-                      onBlur={onBlur}
-                      onChangeText={onChange}
-                      value={value}
-                      label={"Recommendations"}
-                      multiline
-                      style={scoutFormStyles.largeTextInput}
-                    />
-                  </InputAccessoryView>
-                )}
-              </>
+              <InputWithAccessoryView
+                placeholder="Specify recommendation text here..."
+                onBlur={onBlur}
+                onChangeText={onChange}
+                value={value}
+                label={"Recommendations"}
+                multiline
+                inputAccessoryViewID={name}
+                style={scoutFormStyles.largeTextInput}
+              />
             )}
             name="recommendations"
             rules={{ required: false }}

@@ -1,6 +1,6 @@
 import { baseApi } from "../baseApi";
 import type { APIResponse } from "../query";
-import type { FieldCrop, OrgCrop } from "./types";
+import type { FieldCrop, OrgCrop, Crop } from "./types";
 
 export const cropsApi = baseApi.injectEndpoints({
   endpoints: (build) => ({
@@ -9,18 +9,43 @@ export const cropsApi = baseApi.injectEndpoints({
         url: "/crops",
         method: "GET",
       }),
-      providesTags: ["Crops"],
+      providesTags: ["OrgCrops"],
+    }),
+    createOrgCrop: build.mutation<APIResponse<OrgCrop>, { Name: string }>({
+      query: (data) => ({
+        url: "/crops/org-crop",
+        method: "POST",
+        data,
+      }),
+      invalidatesTags: ["OrgCrops"],
+    }),
+    editOrgCrop: build.mutation<
+      APIResponse<OrgCrop>,
+      { ID: number; Name: string }
+    >({
+      query: (data) => ({
+        url: `/crops/org-crop/${data.ID}`,
+        method: "PUT",
+        data,
+      }),
+      invalidatesTags: ["OrgCrops"],
+    }),
+    deleteOrgCrop: build.mutation<APIResponse<void>, number>({
+      query: (cropId) => ({
+        url: `/crops/org-crop/${cropId}`,
+        method: "DELETE",
+      }),
+      invalidatesTags: ["OrgCrops"],
     }),
     updateFieldCrops: build.mutation({
       query: (args: { fieldId: number; data: FieldCrop[] }) => {
-        console.log("data", args);
         return {
           url: `/crops/${args.fieldId}/field-crop`,
           method: "POST",
           data: { FieldCrops: args.data },
         };
       },
-      invalidatesTags: ["Crops"],
+      invalidatesTags: ["OrgCrops"],
       // transformErrorResponse: (response: APIErrorResponse) => {
       //   return response.data;
       // },
@@ -30,7 +55,6 @@ export const cropsApi = baseApi.injectEndpoints({
       { fieldId: number }
     >({
       query: (params) => {
-        console.log(params);
         return {
           url: `/crops/${params.fieldId}/field-crop`,
           method: "GET",
@@ -42,7 +66,13 @@ export const cropsApi = baseApi.injectEndpoints({
         url: `/crops/field-crop/${data.ID}`,
         method: "DELETE",
       }),
-      invalidatesTags: ["Crops"],
+      invalidatesTags: ["OrgCrops"],
+    }),
+    getGenericCropList: build.query<APIResponse<Crop[]>, string>({
+      query: () => ({
+        url: "/crops/generic",
+        method: "GET",
+      }),
     }),
   }),
   // TODO: Disable this in production
@@ -51,6 +81,11 @@ export const cropsApi = baseApi.injectEndpoints({
 
 export const {
   useGetOrgCropsQuery,
+  useCreateOrgCropMutation,
+  useDeleteOrgCropMutation,
+  useEditOrgCropMutation,
+  useDeleteFieldCropMutation,
   useUpdateFieldCropsMutation,
+  useGetGenericCropListQuery,
   useGetFieldCropsForFieldQuery,
 } = cropsApi;

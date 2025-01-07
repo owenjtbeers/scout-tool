@@ -19,7 +19,7 @@ import { fieldManagementApi } from "./field-management/fieldManagementApi";
 // Redux Persist Config
 const persistConfig = {
   key: "root",
-  storage: Platform.OS === "web" ? localStorage : ExpoFileSystemStorage,
+  storage: ExpoFileSystemStorage,
   blacklist: [MAP_DRAWING_REDUCER_KEY],
   reconcile: autoMergeLevel2,
 };

@@ -46,9 +46,38 @@ export const userApi = baseApi.injectEndpoints({
       }),
       providesTags: ["User"],
     }),
+    updateTutorialProgress: builder.mutation<
+      APIResponse<ScoutingAppUser>,
+      {
+        hasSetupGrower?: boolean;
+        hasSetupCrops?: boolean;
+        hasSetupPests?: boolean;
+      }
+    >({
+      query: (data) => ({
+        url: "/organization/tutorial-progress",
+        method: "PATCH",
+        data,
+      }),
+      invalidatesTags: ["User"],
+    }),
+    postUserFeedback: builder.mutation<
+      APIResponse<any>,
+      {
+        email: string;
+        rating: number | null;
+        comments: string;
+      }
+    >({
+      query: (data) => ({
+        url: "/users/feedback",
+        method: "POST",
+        data,
+      }),
+    }),
   }),
   // TODO: Disable in production
   // overrideExisting: true,
 });
 
-export const { useGetCurrentUserQuery, useSignupUserMutation } = userApi;
+export const { useGetCurrentUserQuery, useSignupUserMutation, useUpdateTutorialProgressMutation, usePostUserFeedbackMutation } = userApi;

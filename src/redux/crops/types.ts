@@ -1,6 +1,7 @@
 export type Crop = {
   ID: number;
   Name: string;
+  DefaultColor: string;
 };
 
 export type OrgCrop = {
@@ -12,6 +13,7 @@ export type OrgCrop = {
   CreatedAt?: string;
   UpdatedAt?: string;
   Name: string;
+  Color: string;
 };
 
 export type FieldCrop = {

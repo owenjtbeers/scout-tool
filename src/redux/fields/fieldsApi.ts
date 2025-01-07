@@ -18,7 +18,7 @@ export const fieldsApi = baseApi.injectEndpoints({
         method: "GET",
         params,
       }),
-      providesTags: ["Fields", "Crops"],
+      providesTags: ["Fields", "OrgCrops"],
     }),
     createField: build.mutation<Field, Partial<Field>>({
       query: (data) => ({

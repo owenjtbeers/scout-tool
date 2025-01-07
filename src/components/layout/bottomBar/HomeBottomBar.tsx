@@ -2,41 +2,11 @@ import React from "react";
 
 import { StyleSheet, Text } from "react-native";
 import { useRouter, usePathname } from "expo-router";
-import { MapTabIcon, FieldTabIcon, SettingsTabIcon } from "./BottomButtons";
 import { Tab } from "@rneui/themed";
-import { ScreenNames } from "../../../navigation/navigation";
 import { colors } from "../../../constants/styles";
-import {
-  HOME_MAP_SCREEN,
-  HOME_SCOUT_REPORT_SCREEN,
-  HOME_SETTINGS_SCREEN,
-} from "../../../navigation/screens";
+import { TABS } from '../routeTabs'
 const FOCUSED_TAB_COLOR = colors.secondary;
 const UNFOCUSED_TAB_COLOR = "gray";
-
-type TAB = {
-  component: React.FC<{ focused: boolean; color: string }>;
-  path: ScreenNames[number];
-  name: string;
-};
-
-const TABS: Array<TAB> = [
-  {
-    component: MapTabIcon,
-    path: HOME_MAP_SCREEN,
-    name: HOME_MAP_SCREEN.split("/").pop() as string,
-  },
-  {
-    component: FieldTabIcon,
-    path: HOME_SCOUT_REPORT_SCREEN,
-    name: HOME_SCOUT_REPORT_SCREEN.split("/").pop() as string,
-  },
-  {
-    component: SettingsTabIcon,
-    path: HOME_SETTINGS_SCREEN,
-    name: HOME_SETTINGS_SCREEN.split("/").pop() as string,
-  },
-];
 
 export const BottomBar = () => {
   const router = useRouter();
@@ -76,7 +46,7 @@ export const BottomBar = () => {
               focused={isFocused}
               color={focusedColor}
             />
-            <Text style={{ color: focusedColor }}>
+            <Text numberOfLines={1} style={{ color: focusedColor }}>
               {TabInfo.name.toUpperCase()}
             </Text>
           </Tab.Item>

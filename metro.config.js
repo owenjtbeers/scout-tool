@@ -5,12 +5,17 @@ const { getDefaultConfig } = require("expo/metro-config");
 const config = getDefaultConfig(__dirname);
 const ALIASES = {
   "react-native-maps": "@teovilla/react-native-web-maps",
-  "react-native": "react-native-web",
 };
+
+config.transformer.getTransformOptions = () => ({
+  transform: {
+    experimentalImportSupport: false,
+    inlineRequires: true,
+  },
+});
 
 config.resolver.resolveRequest = (context, moduleName, platform) => {
   if (platform === "web" && ALIASES[moduleName]) {
-    console.log(moduleName);
     // The alias will only be used when bundling for the web.
     return context.resolveRequest(
       context,
@@ -25,4 +30,4 @@ config.resolver.resolveRequest = (context, moduleName, platform) => {
 config.resetCache = true;
 config.cacheVersion = process.env.APP_ENV;
 
-module.exports = config
+module.exports = config;

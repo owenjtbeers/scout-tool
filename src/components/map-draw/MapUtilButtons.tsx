@@ -12,7 +12,6 @@ export const MapUtilButtons = (props: Props) => {
     <View style={styles.positioningContainer}>
       <View style={styles.buttonContainer}>
         <UserLocationButton mapRef={mapRef} />
-        {/* <FieldBoundsZoomButton mapRef={mapRef} fields={fields} /> */}
       </View>
     </View>
   );

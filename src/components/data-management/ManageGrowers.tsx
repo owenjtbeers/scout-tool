@@ -10,13 +10,23 @@ import {
   useEditGrowerMutation,
 } from "../../redux/field-management/fieldManagementApi";
 import { useRouter } from "expo-router";
-import { ScrollView, RefreshControl, Alert } from "react-native";
+import { ScrollView, RefreshControl, View } from "react-native";
+import alert from "../polyfill/Alert";
 import { Grower, Farm } from "../../redux/field-management/types";
 import { useForm, Controller, set } from "react-hook-form";
+import { useDispatch, useSelector } from "react-redux";
+import { RootState } from "../../redux/store";
+import { HOME_SETTINGS_SCREEN } from "../../navigation/screens";
+import { userSlice } from "../../redux/user/userSlice";
+import { useUpdateTutorialProgressMutation } from "../../redux/user/userApi";
+import { ScoutingAppUser } from "../../redux/user/types";
+import { navigateToNextPhaseOfTutorial } from "../tutorial/navigation";
+import { styles } from "./styles";
 
 export const ManageGrowers: React.FC = () => {
   const router = useRouter();
   const { theme } = useTheme();
+  const currentUser = useSelector((state: RootState) => state.user.currentUser);
   const {
     data: growerData,
     error: growerError,
@@ -32,24 +42,38 @@ export const ManageGrowers: React.FC = () => {
     refetch: refetchFarms,
     isFetching: isFetchingFarms,
   } = useGetFarmsQuery("default");
-
   const [selectedGrower, setSelectedGrower] = React.useState<Grower>();
-  const [isAddingGrower, setIsAddingGrower] = React.useState(false);
+  const [isAddingGrower, setIsAddingGrower] = React.useState(
+    !currentUser?.Organization?.hasSetupGrower || growerData?.length === 0
+  );
 
   const handleBack = () => {
-    router.back();
+    if (router.canGoBack()) {
+      router.back();
+    } else {
+      router.push(HOME_SETTINGS_SCREEN);
+    }
   };
 
   return (
-    <SafeAreaView>
-      <Button title={"Back"} onPress={handleBack} />
-      <Button
-        title={"Add Grower"}
-        icon={{ name: "add", size: 24, color: theme.colors.secondary }}
-        onPress={() => {
-          setIsAddingGrower(true);
+    <SafeAreaView style={{ flex: 1 }}>
+      <View
+        style={{
+          flexDirection: "row",
+          justifyContent: "space-between",
+          padding: 16,
+          alignItems: "center",
         }}
-      />
+      >
+        <Button title={"Back"} onPress={handleBack} />
+        <Button
+          title={"Add Grower"}
+          icon={{ name: "add", size: 24, color: theme.colors.secondary }}
+          onPress={() => {
+            setIsAddingGrower(true);
+          }}
+        />
+      </View>
       <ScrollView
         refreshControl={
           <RefreshControl
@@ -77,14 +101,19 @@ export const ManageGrowers: React.FC = () => {
           <AddSingleGrowerDialog
             refetchFarms={refetchFarms}
             onClose={() => setIsAddingGrower(false)}
+            onBackdropPress={() => {
+              if (!currentUser?.Organization?.hasSetupGrower) {
+                // Disable in the case that they are in the tutorial
+                return;
+              }
+              setIsAddingGrower(false);
+            }}
           />
         )}
         {!!growerError && <Text>Error fetching growers</Text>}
         {growerData?.map((grower) => (
           <ListItem
-            containerStyle={{
-              maxHeight: 150,
-            }}
+            containerStyle={styles.managementItem}
             bottomDivider
             key={`grower-${grower.ID}`}
           >
@@ -243,7 +272,7 @@ const ManageSingleGrowerDialog = (props: ManageSingleGrowerDialogProps) => {
             } as Grower);
             const isError = result.find((r) => r.error);
             if (isError || editGrowerResponse.error) {
-              Alert.alert("Error saving grower / farms");
+              alert("Error saving grower / farms", "");
             }
             // Close Dialog
             onClose();
@@ -258,6 +287,7 @@ const ManageSingleGrowerDialog = (props: ManageSingleGrowerDialogProps) => {
 interface AddSingleGrowerDialogProps {
   onClose: () => void;
   refetchFarms: () => void;
+  onBackdropPress: () => void;
 }
 
 interface GrowerForm {
@@ -267,6 +297,13 @@ interface GrowerForm {
   Farm: { Name: string; ID: number; GrowerId: number };
 }
 const AddSingleGrowerDialog = (props: AddSingleGrowerDialogProps) => {
+  // @ts-ignore
+  const currentUser: ScoutingAppUser = useSelector(
+    (state: RootState) => state.user.currentUser
+  );
+  const [updateTutorialProgress] = useUpdateTutorialProgressMutation();
+  const router = useRouter();
+  const dispatch = useDispatch();
   const { onClose, refetchFarms } = props;
   const { theme } = useTheme();
   const defaultFormValues = {
@@ -279,17 +316,43 @@ const AddSingleGrowerDialog = (props: AddSingleGrowerDialogProps) => {
   const { handleSubmit, control } = useForm<GrowerForm>({
     defaultValues: defaultFormValues,
   });
+  const onCompleteGrowerTutorialStep = async () => {
+    // Update Organization hasSetupGrower with the server
+    const hasSetupGrowerBefore = currentUser.Organization?.hasSetupGrower;
+    const setupResponse = await updateTutorialProgress({
+      hasSetupGrower: true,
+    });
+    // Save this in local state regardless of the response
+    const newOrgData = { ...currentUser.Organization, hasSetupGrower: true };
+    dispatch(userSlice.actions.updateUserOrganization(newOrgData));
+    if (!hasSetupGrowerBefore) {
+      // We are in tutorial state, navigate the user to the next phase
+      navigateToNextPhaseOfTutorial(router, newOrgData);
+    }
+  };
   const onValidSubmit = async (data: GrowerForm) => {
     const response = await createGrower(data);
     if (response.error) {
-      Alert.alert("Error saving grower");
+      alert("Error saving grower", "");
+    } else {
+      await onCompleteGrowerTutorialStep();
     }
     refetchFarms();
     onClose();
   };
   return (
-    <Dialog isVisible={true} onBackdropPress={props.onClose}>
+    <Dialog
+      isVisible={true}
+      onBackdropPress={props.onBackdropPress}
+      overlayStyle={{ gap: 10, display: "flex" }}
+    >
       <Dialog.Title title={"Add Grower"} />
+      <Dialog.Title
+        titleStyle={{ fontWeight: 100 }}
+        title={
+          "Growers and Farms provide a way to organize your field data, scouting reports and general data. You must have a grower and a farm created to upload/create fields"
+        }
+      />
       <Controller
         control={control}
         render={({
@@ -378,6 +441,26 @@ const AddSingleGrowerDialog = (props: AddSingleGrowerDialogProps) => {
       />
       <Dialog.Actions>
         <Button title="Save" onPress={handleSubmit(onValidSubmit, () => {})} />
+        {currentUser?.Organization?.hasSetupGrower === false ? (
+          <Button
+            title="Skip"
+            onPress={() =>
+              alert(
+                "Are you sure you want to skip creating a grower and farm right now? This is not recommended",
+                "",
+                [
+                  {
+                    text: "I want to skip",
+                    onPress: async () => {
+                      await onCompleteGrowerTutorialStep();
+                    },
+                  },
+                ],
+                undefined
+              )
+            }
+          />
+        ) : null}
       </Dialog.Actions>
     </Dialog>
   );
