@@ -6,9 +6,9 @@
 
 Android `eas build --profile development --platform android`
 
-## Creating an Android APK for download ( not on app store)
-- `npm run android:apk:build`
+## Creating an Android APK for download ( not on app store )
 
+- `npm run android:apk:build`
 
 ## Using a development Build
 
@@ -17,9 +17,24 @@ ios `npx expo run:ios`
 
 For connecting to an iOS local device https://github.com/expo/expo/pull/28802
 
-## Map decision
+## Deploying for Web
 
-- Deciding to go with react-native-maps over @rnmapbox/maps for now because it is supported by expo go, and trying to get mapbox up and running is proving to be too confusing for the time being.
-- this is something I will have to circle back to in the future if we want the map experience to be a lot better
+We need to have a .env.production file with proper environment variables
+In app.json, change
 
+```
+{
+  "expo": {
+    ...,
+    "web": {
+      ...,
+      "output": "static"
+    }
+  }
+}
+```
 
+Then run `npm run web:predeploy`
+Then run `npm run web:deploy`
+
+Done :)
