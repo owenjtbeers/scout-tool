@@ -21,17 +21,34 @@ import {
 import { useCreateFieldMutation } from "../../redux/fields/fieldsApi";
 import { DialogPickerSelect } from "../../forms/components/DialogPicker";
 
+
+/*
+  Container for uploading field boundaries
+  Process is as follows:
+  1. Select a file
+  2. Parse the file, display loading indicator
+  3. Display the contents and await user confirmation to proceed
+  4. Spawn form and associate the fields to a grower and farm
+  5. Submit the fields to the server
+  6. Display the results of the submission
+*/
 const FieldUploadContainer: React.FC = () => {
   const { theme } = useTheme();
-  const [file, setFile] = React.useState<File | null>(null);
-  const [isLoading, setIsLoading] = React.useState(false);
+  // Step 1: Select a file
   const [fileEntries, setFileEntries] = React.useState<
     shp.FeatureCollectionWithFilename[] | null
   >(null);
+  // Step 2: Parse the file
+  const [isParsingFile, setIsParsingFile] = React.useState(false);
+  // Step 3: Display the contents and await user confirmation to proceed
+  // Step 4: Let Form handle associating fields to growers and farms
   const [isAssociatingFieldsToGrowers, setIsAssociatingFieldsToGrowers] =
     React.useState(false);
-  const fileInputRef = useRef<HTMLInputElement | null>(null);
+  // Step 5: Spawn form and associate the fields to a grower and farm
+  const [isSubmittingFields, setIsSubmittingFields] = React.useState(false);
 
+
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
   const handleButtonClick = () => {
     if (fileInputRef.current) {
       // Clear file entries
@@ -44,20 +61,17 @@ const FieldUploadContainer: React.FC = () => {
     event: React.ChangeEvent<HTMLInputElement>
   ) => {
     const file = event.target.files?.[0];
-    setIsLoading(true);
+    setIsParsingFile(true);
     try {
       if (file) {
-        // Handle the file upload logic here
-        setFile(file);
         // Parse the file here
         const data = await file.arrayBuffer();
         let geojson = await shp.parseZip(data);
         if (!Array.isArray(geojson)) {
           geojson = [geojson];
         }
-        console.log(geojson);
         setFileEntries(geojson);
-        setIsLoading(false);
+        setIsParsingFile(false);
         // Determine Contents
         // If file contains at least one valid .shp and .dbf file proceed to the next step and log errors
         // If file contains no valid .shp and .dbf files, log errors
@@ -65,7 +79,7 @@ const FieldUploadContainer: React.FC = () => {
     } catch (e) {
       console.error(e);
     } finally {
-      // setIsLoading(false);
+      setIsParsingFile(false);
       fileInputRef.current!.value = "";
     }
   };
@@ -74,19 +88,18 @@ const FieldUploadContainer: React.FC = () => {
     <View style={styles.container}>
       <Dialog
         isVisible={
-          isLoading || (fileEntries !== null && !isAssociatingFieldsToGrowers)
+          isParsingFile || (fileEntries !== null && !isAssociatingFieldsToGrowers)
         }
-        onDismiss={() => setIsLoading(false)}
+        onDismiss={() => setIsParsingFile(false)}
       >
         <View style={styles.dialogContentContainer}>
           <Dialog.Title
             titleStyle={{ color: theme.colors.primary }}
             title={"Processing Field Boundaries"}
           ></Dialog.Title>
-
-          {isLoading ? (
+          {isParsingFile ? (
             <ActivityIndicator
-              animating={isLoading}
+              animating={isParsingFile}
               size="large"
               color={theme.colors.primary}
             />
@@ -128,14 +141,14 @@ const FieldUploadContainer: React.FC = () => {
             <Button
               title="Cancel"
               onPress={() => {
-                setIsLoading(false);
+                setIsParsingFile(false);
                 setFileEntries(null);
               }}
             />
             <Button
-              title="Continue"
+              title="Continue to Associate Fields"
               onPress={() => {
-                setIsLoading(false);
+                setIsParsingFile(false);
                 setIsAssociatingFieldsToGrowers(true);
               }}
             />
@@ -147,27 +160,29 @@ const FieldUploadContainer: React.FC = () => {
         onDismiss={() => setIsAssociatingFieldsToGrowers(false)}
       >
         <View style={styles.dialogContentContainer}>
-          <Dialog.Title
-            titleStyle={{ color: theme.colors.primary }}
-            title={"Associate Fields to Growers"}
-          ></Dialog.Title>
-          <Text>{"Select a Grower and Farm to associate the fields to"}</Text>
-          <BulkFieldCreationForm entries={fileEntries || []} />
-          <View style={styles.buttonGroup}>
+          <BulkFieldCreationForm
+            entries={fileEntries!}
+            onSubmitForm={
+              () => {
+                setIsSubmittingFields(true);
+              }
+            }
+            onClose={() => {
+              // Reset all states
+              setIsParsingFile(false);
+              setFileEntries(null);
+              setIsSubmittingFields(false);
+              setIsAssociatingFieldsToGrowers(false);
+            }}
+          />
+          {(!isSubmittingFields) && <View style={styles.buttonGroup}>
             <Button
-              title="Back"
+              title="Back to File Selection"
               onPress={() => {
                 setIsAssociatingFieldsToGrowers(false);
               }}
             />
-            <Button
-              title="Continue"
-              onPress={() => {
-                //
-                setIsAssociatingFieldsToGrowers(false);
-              }}
-            />
-          </View>
+          </View>}
         </View>
       </Dialog>
       <FieldUploadTabIcon
@@ -216,25 +231,35 @@ const FieldUploadContainer: React.FC = () => {
     </View>
   );
 };
-
+export default FieldUploadContainer;
 interface BulkFieldCreationForm {
   newFields: Field[];
+  onClose?: () => void;
 }
+
+/*
+  Form that takes actual input from the user for associating 
+  fields to growers and farms and handles submission to the server
+  displays results of the submission
+*/
 const BulkFieldCreationForm = (props: {
   entries: shp.FeatureCollectionWithFilename[];
+  onClose?: () => void;
+  onSubmitForm?: (data: BulkFieldCreationForm) => void;
 }) => {
-  const { entries } = props;
+  const { theme } = useTheme();
+  const { entries, onClose, onSubmitForm } = props;
   const { data: growerData } = useGetGrowersQuery("default");
   const { data: farmData } = useGetFarmsQuery("default");
   const [createFields] = useCreateFieldMutation();
   const [isSyncingFieldsWithServer, setIsSyncingFieldsWithServer] =
     React.useState(false);
   const [createFieldResults, setCreateFieldResults] = React.useState<
-    { name: string; status: string }[]
+    { name: string; status: string, message?: string }[]
   >([]);
 
   const defaultFormValues: BulkFieldCreationForm = {
-    newFields: entries.map((entry) => ({
+    newFields: entries?.map((entry) => ({
       ID: 0,
       Grower: null,
       GrowerId: 0,
@@ -252,17 +277,22 @@ const BulkFieldCreationForm = (props: {
 
   const onSubmit = (data: BulkFieldCreationForm) => {
     setIsSyncingFieldsWithServer(true);
+    onSubmitForm && onSubmitForm(data);
     try {
-      const results = data.newFields.map((field) => ({
+      const results = data.newFields?.map<{ name: string, status: string, message?: string }>((field) => ({
         name: field.Name,
         status: "Pending",
       }));
       data.newFields.forEach(async (field, index) => {
         const response = await createFields(field);
+        console.log(response);
         if ("data" in response) {
           results[index] = { name: field.Name, status: "Success" };
+          console.log(response.data);
         } else {
-          results[index] = { name: field.Name, status: "Failed" };
+          // @ts-expect-error error type error
+          const message = response.error?.data?.error || ""
+          results[index] = { name: field.Name, status: "Failed", message: message };
         }
         setCreateFieldResults(results);
       });
@@ -275,146 +305,169 @@ const BulkFieldCreationForm = (props: {
 
   return (
     <ScrollView style={styles.scrollViewContent}>
-      {isSyncingFieldsWithServer && (
+      {(isSyncingFieldsWithServer || createFieldResults.length) ? (
         <>
-          <ActivityIndicator size="large" color="blue" />
-          <Text>{"Syncing Fields with Server"}</Text>
-          <Text>{`Total ${createFieldResults.length}`}</Text>
-          <Text>{`${
-            createFieldResults.filter((result) => result.status !== "Success")
-              .length
-          } Success`}</Text>
-          <Text>{`${
-            createFieldResults.filter((result) => result.status !== "Failed")
-              .length
-          } Failed`}</Text>
-          <Text>{`${
-            createFieldResults.filter((result) => result.status !== "Pending")
-              .length
-          } Pending`}</Text>
+          {isSyncingFieldsWithServer && <ActivityIndicator size="large" color="blue" />}
+          <Dialog.Title title={"Syncing Fields with Server"} />
+          <Text h3>{`Total Fields ${createFieldResults.length}`}</Text>
+          <Text>{`${createFieldResults.filter((result) => result.status === "Success")
+            .length
+            } Success`}</Text>
+          <Text>{`${createFieldResults.filter((result) => result.status === "Failed")
+            .length
+            } Failed`}</Text>
+          <Text>{`${createFieldResults.filter((result) => result.status === "Pending")
+            .length
+            } Pending`}</Text>
+          <ScrollView style={styles.scrollViewContent}>
+            {createFieldResults.filter(result => result.status === "Failed")?.map((result, index) => (
+              <ListItem key={index}>
+                <Text>{result.name}</Text>
+                <Text>{result.status}</Text>
+                {result.message && <Text>{result.message}</Text>}
+              </ListItem>
+            ))}
+          </ScrollView>
+          <Dialog.Actions>
+            <Button title="Close" onPress={() => {
+              setCreateFieldResults([])
+              onClose && onClose()
+            }} />
+          </Dialog.Actions>
         </>
-      )}
-      {!isSyncingFieldsWithServer &&
-        getValues("newFields").map((newField, index) => {
-          const geojson = newField.ActiveBoundary?.Json;
-          return (
-            <ListItem key={index} style={styles.listItemParsed}>
-              <View style={styles.doubleInputContainer}>
-                <Controller
-                  control={control}
-                  name={`newFields.${index}.FarmId`}
-                  rules={{
-                    min: { value: 1, message: "** Farm is required" },
-                  }}
-                  render={({ field: farmField, fieldState }) => {
-                    useWatch({
-                      control,
-                      name: `newFields.${index}.GrowerId`,
-                    });
-                    const filteredFarmData = farmData?.filter((farm) => {
+      ) : null}
+      {!isSyncingFieldsWithServer && !createFieldResults?.length &&
+        (<>
+          <Dialog.Title
+            titleStyle={{ color: theme.colors.primary }}
+            title={"Associate Fields to Growers"}
+          ></Dialog.Title>
+          <Text>{"Select a Grower and Farm to associate the fields to"}</Text>
+          {getValues("newFields")?.map((newField, index) => {
+            const geojson = newField.ActiveBoundary?.Json;
+            return (
+              <ListItem key={index} style={styles.listItemParsed}>
+                <View style={styles.doubleInputContainer}>
+                  <Controller
+                    control={control}
+                    name={`newFields.${index}.FarmId`}
+                    rules={{
+                      min: { value: 1, message: "** Farm is required" },
+                    }}
+                    render={({ field: farmField, fieldState }) => {
+                      useWatch({
+                        control,
+                        name: `newFields.${index}.GrowerId`,
+                      });
+                      const filteredFarmData = farmData?.filter((farm) => {
+                        return (
+                          farm.GrowerId ===
+                          getValues(`newFields.${index}.GrowerId`)
+                        );
+                      });
                       return (
-                        farm.GrowerId ===
-                        getValues(`newFields.${index}.GrowerId`)
-                      );
-                    });
-                    return (
-                      <>
-                        <DialogPickerSelect
-                          label="Farm"
-                          onChangeText={(value: string) =>
-                            farmField.onChange(Number(value))
-                          }
-                          value={String(farmField.value)}
-                          errorMessage={fieldState.error?.message}
-                          containerStyle={styles.inputSelectorStyle}
-                          inputStyle={styles.inputSelectorStyle}
-                          inputContainerStyle={styles.inputSelectorStyle}
-                          options={
-                            filteredFarmData?.map((farm) => {
-                              return {
-                                label: farm.Name,
-                                value: String(farm.ID),
-                              };
-                            }) || []
-                          }
-                        />
-                        <Controller
-                          control={control}
-                          name={`newFields.${index}.GrowerId`}
-                          rules={{
-                            min: { value: 1, message: "** Grower is required" },
-                          }}
-                          render={({ field: growerField, fieldState }) => {
-                            return (
-                              <DialogPickerSelect
-                                label="Grower"
-                                options={growerData?.map((grower) => {
-                                  return {
-                                    label: grower.Name,
-                                    value: String(grower.ID),
-                                  };
-                                })}
-                                onChangeText={(value: string) => {
-                                  const filteredFarmData = farmData?.filter(
-                                    (farm) => {
-                                      return farm.GrowerId === Number(value);
+                        <>
+                          <DialogPickerSelect
+                            label="Farm"
+                            onChangeText={(value: string) =>
+                              farmField.onChange(Number(value))
+                            }
+                            value={String(farmField.value)}
+                            errorMessage={fieldState.error?.message}
+                            containerStyle={styles.inputSelectorStyle}
+                            inputStyle={styles.inputSelectorStyle}
+                            inputContainerStyle={styles.inputSelectorStyle}
+                            options={
+                              filteredFarmData?.map((farm) => {
+                                return {
+                                  label: farm.Name,
+                                  value: String(farm.ID),
+                                };
+                              }) || []
+                            }
+                          />
+                          <Controller
+                            control={control}
+                            name={`newFields.${index}.GrowerId`}
+                            rules={{
+                              min: { value: 1, message: "** Grower is required" },
+                            }}
+                            render={({ field: growerField, fieldState }) => {
+                              return (
+                                <DialogPickerSelect
+                                  label="Grower"
+                                  options={growerData?.map((grower) => {
+                                    return {
+                                      label: grower.Name,
+                                      value: String(grower.ID),
+                                    };
+                                  })}
+                                  onChangeText={(value: string) => {
+                                    const filteredFarmData = farmData?.filter(
+                                      (farm) => {
+                                        return farm.GrowerId === Number(value);
+                                      }
+                                    );
+                                    growerField.onChange(Number(value));
+                                    if (filteredFarmData?.length === 1) {
+                                      farmField.onChange(filteredFarmData[0].ID);
+                                    } else {
+                                      farmField.onChange(0);
                                     }
-                                  );
-                                  growerField.onChange(Number(value));
-                                  if (filteredFarmData?.length === 1) {
-                                    farmField.onChange(filteredFarmData[0].ID);
-                                  } else {
-                                    farmField.onChange(0);
-                                  }
-                                }}
-                                value={String(growerField.value)}
-                                errorMessage={fieldState.error?.message}
-                                containerStyle={styles.inputSelectorStyle}
-                                inputStyle={styles.inputSelectorStyle}
-                                inputContainerStyle={styles.inputSelectorStyle}
-                              />
-                            );
-                          }}
-                        />
-                      </>
-                    );
-                  }}
-                />
-              </View>
-              <View style={styles.inputContainerStyle}>
-                <Controller
-                  control={control}
-                  name={`newFields.${index}.Name`}
-                  rules={{
-                    minLength: {
-                      value: 1,
-                      message: "** Field Name is required",
-                    },
-                  }}
-                  render={({ field }) => (
-                    <Input
-                      {...field}
-                      placeholder="Enter Field Name"
-                      label="Field Name"
-                      inputContainerStyle={styles.inputSelectorStyle}
-                      inputStyle={styles.inputSelectorStyle}
-                    />
-                  )}
-                />
-              </View>
-              {geojson && (
-                // @ts-expect-error geojson type error
-                <GeoJsonSVG geojson={geojson} width={75} height={75} />
-              )}
-              <Text>{`${FeatureCollectionArea(
-                newField.ActiveBoundary?.Json,
-                "acres",
-                0
-              )} ac`}</Text>
-            </ListItem>
-          );
-        })}
-      <Button title="Submit" onPress={handleSubmit(onSubmit)} />
+                                  }}
+                                  value={String(growerField.value)}
+                                  errorMessage={fieldState.error?.message}
+                                  containerStyle={styles.inputSelectorStyle}
+                                  inputStyle={styles.inputSelectorStyle}
+                                  inputContainerStyle={styles.inputSelectorStyle}
+                                />
+                              );
+                            }}
+                          />
+                        </>
+                      );
+                    }}
+                  />
+                </View>
+                <View style={styles.inputContainerStyle}>
+                  <Controller
+                    control={control}
+                    name={`newFields.${index}.Name`}
+                    rules={{
+                      minLength: {
+                        value: 1,
+                        message: "** Field Name is required",
+                      },
+                    }}
+                    render={({ field }) => (
+                      <Input
+                        {...field}
+                        placeholder="Enter Field Name"
+                        label="Field Name"
+                        inputContainerStyle={styles.inputSelectorStyle}
+                        inputStyle={styles.inputSelectorStyle}
+                      />
+                    )}
+                  />
+                </View>
+                {geojson && (
+                  // @ts-expect-error geojson type error
+                  <GeoJsonSVG geojson={geojson} width={75} height={75} />
+                )}
+                <Text>{`${FeatureCollectionArea(
+                  newField.ActiveBoundary?.Json,
+                  "acres",
+                  0
+                )} ac`}</Text>
+              </ListItem>
+            );
+          })}
+          <Button
+            title="Submit"
+            onPress={handleSubmit(onSubmit)}
+          />
+        </>)}
+
     </ScrollView>
   );
 };
@@ -476,4 +529,4 @@ const styles = StyleSheet.create({
     // maxWidth: 155,
   },
 });
-export default FieldUploadContainer;
+

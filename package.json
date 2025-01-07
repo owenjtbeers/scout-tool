@@ -10,6 +10,7 @@
     "android:local": "expo run:android",
     "ios:local": "expo run:ios",
     "web": "NODE_ENV=production expo start --web",
+    "web:fresh": "expo start -c --web",
     "web:predeploy": "NODE_ENV=production expo export -c -p web",
     "web:deploy": "NODE_ENV=production gh-pages --cname groundedag.com -d dist",
     "android:development:build": "eas build --profile development --platform android",
