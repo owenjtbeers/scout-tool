@@ -1,6 +1,6 @@
-import { Redirect } from "expo-router";
-import { INFO_LANDING_SCREEN } from "../src/navigation/screens";
+import React from "react";
+import PlatformRedirect from "../src/components/layout/PlatformRedirect";
 
 export default function Page() {
-  return <Redirect href={INFO_LANDING_SCREEN} />;
+  return <PlatformRedirect />
 }

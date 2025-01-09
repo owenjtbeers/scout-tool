@@ -13,6 +13,8 @@ import { DEFAULT_POLYLINE_STROKE_WIDTH } from "../../constants/constants";
 import { DrawingPestPoints } from "./pest-points/DrawingPestPoints";
 import { GeojsonLayerGL } from "../map/components/GeojsonLayer.web";
 import type { MapRef } from "react-map-gl";
+import { mapLatLngToCoordinates } from "../../utils/latLngConversions";
+import { FeatureCollection } from "@turf/helpers";
 
 /**
  * This component is responsible for rendering all the shapes drawn on the map
@@ -32,10 +34,10 @@ export const DrawingManager = (props: { mapRef: React.RefObject<MapRef> }) => {
 
   return (
     <>
-      {/* <DrawingPolygons isDrawing={isDrawing} />
-      <DrawingPoints isDrawing={isDrawing} />
+      {/* <DrawingPolygons isDrawing={isDrawing} /> */}
+      {/* <DrawingPoints isDrawing={isDrawing} /> */}
       <DrawingPolylines isDrawing={isDrawing} />
-      <DrawingPestPoints isDrawing={isDrawing} /> */}
+      {/* <DrawingPestPoints isDrawing={isDrawing} /> */}
       {tempGeoJSON !== null && (
         <GeojsonLayerGL
           key={"tempGeoJSON"}
@@ -143,12 +145,27 @@ export const DrawingPolylines = (props: { isDrawing: boolean }) => {
     return null;
   }
   return polylines.map((polyline, index) => {
+    const coordinates = mapLatLngToCoordinates(polyline.coordinates);
+    const fc = {
+      type: "FeatureCollection",
+      features: [
+        {
+          type: "Feature",
+          properties: {},
+          geometry: {
+            type: "LineString",
+            coordinates: coordinates,
+          },
+        },
+      ],
+    } as FeatureCollection;
     return (
-      <Polyline
+      <GeojsonLayerGL
         key={`Polyline-${index}`}
-        coordinates={polyline.coordinates}
-        strokeColor={polyline?.strokeColor || "black"}
-        strokeWidth={DEFAULT_POLYLINE_STROKE_WIDTH}
+        ID={index}
+        geojson={fc}
+        color={polyline?.strokeColor || "black"}
+        // strokeWidth={DEFAULT_POLYLINE_STROKE_WIDTH}
       />
     );
   });

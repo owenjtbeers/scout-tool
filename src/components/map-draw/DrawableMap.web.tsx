@@ -30,7 +30,7 @@ export const DrawableMapScreen = () => {
   const { data: fieldResponse } = useGetFieldsQuery({
     growerId: selectedGrower?.ID as number,
     farmId: selectedFarm?.ID as number,
-    withBoundaries: true,
+    withActiveBoundary: true,
     withCrops: true,
   });
   return (

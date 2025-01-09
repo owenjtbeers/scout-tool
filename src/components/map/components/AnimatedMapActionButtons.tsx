@@ -77,6 +77,7 @@ const AnimatedMapActionButtons = () => {
 
 interface SelectedFieldSpeedDialContentsProps {
   onEditCropHistory: () => void;
+  onDeleteField: () => void;
 }
 
 export const SelectedFieldSpeedDial = (
@@ -91,6 +92,7 @@ export const SelectedFieldSpeedDial = (
   return (
     <SelectedFieldSpeedDialContents
       onEditCropHistory={props.onEditCropHistory}
+      onDeleteField={props.onDeleteField}
     />
   );
 };
@@ -119,7 +121,7 @@ const SelectedFieldSpeedDialContents = (
         title="Add New Scouting Report For Single Field"
         onPress={() => {
           router.push(SCOUT_CREATE_REPORT_SCREEN);
-        }}
+      }}
         icon={<AntDesign name="addfile" size={24} />}
       />
       <SpeedDial.Action
@@ -127,6 +129,12 @@ const SelectedFieldSpeedDialContents = (
         title="Edit Crop History"
         onPress={props.onEditCropHistory}
         icon={<AntDesign name="edit" size={24} />}
+      />
+      <SpeedDial.Action
+        iconContainerStyle={styles.buttonPadding2}
+        title="Delete Field"
+        onPress={props.onDeleteField}
+        icon={<AntDesign name="delete" size={24} />}
       />
     </SpeedDial>
   );

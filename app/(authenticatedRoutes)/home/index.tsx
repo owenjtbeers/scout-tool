@@ -1,12 +1,9 @@
 import React from "react";
-import { View, Text } from "react-native";
+import { Redirect } from "expo-router";
+import { HOME_MAP_SCREEN } from "../../../src/navigation/screens";
 
 const MyComponent = () => {
-  return (
-      <View>
-        <Text>Placeholder Text</Text>
-      </View>
-  );
+  return <Redirect href={HOME_MAP_SCREEN} />;
 };
 
 export default MyComponent;

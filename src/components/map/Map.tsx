@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect } from "react";
-import { View, StyleSheet, PermissionsAndroid, Platform } from "react-native";
-import MapView, { LatLng, PROVIDER_GOOGLE, Region } from "react-native-maps";
+import { StyleSheet, PermissionsAndroid, Platform } from "react-native";
+import MapView, { LatLng, Region } from "react-native-maps";
 // TODO Revisit this on another day
 // import MapBoxGL from "@rnmapbox/maps"
 import { useSelector } from "react-redux";
@@ -15,13 +15,10 @@ import { RootState } from "../../redux/store";
 
 // Constants and Types
 import { mapSlice, MAP_REDUCER_KEY } from "../../redux/map/mapSlice";
-import AnimatedMapActionButtons, {
-  SelectedFieldSpeedDial,
-} from "./components/AnimatedMapActionButtons";
 import { defaultRegion } from "../../constants/constants";
 import { useGetFieldsQuery } from "../../redux/fields/fieldsApi";
 import { useSelectedGrowerAndFarm } from "../layout/topBar/selectionHooks";
-import { Feature, FeatureCollection, featureCollection } from "@turf/helpers";
+import { Feature, featureCollection } from "@turf/helpers";
 import bbox from "@turf/bbox";
 import { convertTurfBBoxToLatLng } from "../../utils/latLngConversions";
 import { MapUtilButtons } from "./components/MapUtilButtons";
@@ -29,15 +26,12 @@ import {
   GLOBAL_SELECTIONS_REDUCER_KEY,
   globalSelectionsSlice,
 } from "../../redux/globalSelections/globalSelectionsSlice";
-import { EditFieldCropHistoryPage } from "../fields/EditFieldCropHistoryPage";
 import { fitToBoundsForMapView } from "./utils";
 
 export const MapScreen = () => {
   const mapRef = React.useRef<MapView>(null);
   const dispatch = useAppDispatch();
 
-  const [isEditingFieldCropHistory, setIsEditingFieldCropHistory] =
-    React.useState(false);
   const [currentLocation, setCurrentLocation] = React.useState({} as LatLng);
   const onMapReady = useCallback(() => {
     if (Platform.OS === "android") {
@@ -70,7 +64,7 @@ export const MapScreen = () => {
   const { data: fieldResponse } = useGetFieldsQuery({
     growerId: selectedGrower?.ID as number,
     farmId: selectedFarm?.ID as number,
-    withBoundaries: true,
+    withActiveBoundary: true,
     withCrops: true,
   });
   const shouldZoomToBbox = useSelector((state: RootState) => {
@@ -96,7 +90,7 @@ export const MapScreen = () => {
     }
   }, [shouldZoomToBbox]);
   return (
-    <View style={styles.container}>
+    <>
       <MapView
         style={styles.map}
         // provider={PROVIDER_GOOGLE}
@@ -121,20 +115,10 @@ export const MapScreen = () => {
         <MapContentManager mapRef={mapRef} fields={fieldResponse?.data} />
       </MapView>
       <MapUtilButtons mapRef={mapRef} fields={fieldResponse?.data} />
-      <AnimatedMapActionButtons />
-      <SelectedFieldSpeedDial
-        onEditCropHistory={() => setIsEditingFieldCropHistory(true)}
-      />
-      {isEditingFieldCropHistory ? (
-        <EditFieldCropHistoryPage
-          isVisible={isEditingFieldCropHistory}
-          onClose={() => setIsEditingFieldCropHistory(false)}
-        />
-      ) : null}
-    </View>
+    </>
   );
 };
-
+export default MapScreen;
 const styles = StyleSheet.create({
   container: {
     flex: 1,

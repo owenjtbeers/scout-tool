@@ -4,7 +4,7 @@ import {
   useGetFarmsQuery,
   useGetGrowersQuery,
 } from "../../../src/redux/field-management/fieldManagementApi";
-import { MapScreen } from "../../../src/components/map/Map";
+import MapScreen from "../../../src/components/map/MapScreen";
 import { useSelectDefaultGlobalSelections } from "../../../src/components/layout/topBar/selectionHooks";
 import { useGetCurrentUserQuery } from "../../../src/redux/user/userApi";
 

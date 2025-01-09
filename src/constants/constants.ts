@@ -7,3 +7,4 @@ export const defaultRegion: Region = {
 };
 
 export const DEFAULT_POLYLINE_STROKE_WIDTH = 4;
+export const WEB_POLYLINE_STROKE_WIDTH = 2;

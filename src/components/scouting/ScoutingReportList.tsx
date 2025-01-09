@@ -53,8 +53,10 @@ export const ScoutingReportList: React.FC = () => {
     start_date: `${season}-01-01`,
     end_date: `${season}-12-31`,
   };
-  const { data, error, isLoading, refetch } =
-    useGetScoutingReportsQuery(queryParams);
+  const { data, error, isLoading, refetch } = useGetScoutingReportsQuery(
+    queryParams,
+    { refetchOnReconnect: true }
+  );
   const onRefresh = React.useCallback(() => {
     refetch();
   }, []);
@@ -64,7 +66,7 @@ export const ScoutingReportList: React.FC = () => {
   const copiedData = data?.data?.slice();
   const sortedData = copiedData?.sort((a, b) => (a.ID - b.ID) * -1);
   return (
-    <View>
+    <View style={styles.container}>
       <Tab
         value={tabIndex}
         onChange={setTabIndex}

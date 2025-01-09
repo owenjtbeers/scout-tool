@@ -13,7 +13,7 @@ import { store, persistor } from "../../../src/redux/store";
 // Styles
 import { ThemeProvider } from "@rneui/themed";
 import { theme } from "../../../src/constants/styles";
-
+import { SessionProvider } from "./AuthWrapper";
 
 registerTranslation("en", en);
 const App = () => {
@@ -23,7 +23,9 @@ const App = () => {
         <PersistGate loading={null} persistor={persistor}>
           <ThemeProvider theme={theme}>
             <SafeAreaProvider style={{ flex: 1 }}>
-              <Slot />
+              <SessionProvider>
+                <Slot />
+              </SessionProvider>
             </SafeAreaProvider>
           </ThemeProvider>
         </PersistGate>

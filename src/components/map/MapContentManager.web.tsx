@@ -30,6 +30,7 @@ import {
 } from "../../utils/latLngConversions";
 import { BBox2d } from "@turf/helpers/dist/js/lib/geojson";
 import { GeojsonLayerGL } from "./components/GeojsonLayer.web";
+import { isValidBbox } from "../../utils/turfHelpers";
 
 type MapContentManagerProps = {
   mapRef: RefObject<MapRef>;
@@ -65,9 +66,11 @@ export const MapContentManager = (props: MapContentManagerProps) => {
       }, [] as Feature[]);
       const fc = featureCollection(features);
       const bboxOfFields = bbox(fc) as BBox2d;
-      if (bboxOfFields) {
+      if (bboxOfFields && isValidBbox(bboxOfFields)) {
         mapRef.current?.fitBounds(bboxOfFields, { duration: 1000 });
         dispatch(globalSelectionsSlice.actions.setShouldZoomToBbox(false));
+      } else {
+        console.log("Invalid Bbox");
       }
     }
   }, [shouldZoomToBbox]);
@@ -101,13 +104,13 @@ export const MapContentManager = (props: MapContentManagerProps) => {
           // This could help with performance issues. We may have to have a layer with all the centroids
           // as well for displaying field labels. Just leaving this here for now.
           return (
-              <GeojsonLayerGL
-                geojson={featureCollection as FeatureCollection}
-                color={fieldColor}
-                ID={field.ID}
-                fillOpacity={0.5}
-                label={field.Name}
-              />
+            <GeojsonLayerGL
+              geojson={featureCollection as FeatureCollection}
+              color={fieldColor}
+              ID={field.ID}
+              fillOpacity={0.5}
+              label={field.Name}
+            />
           );
         })}
     </>

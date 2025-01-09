@@ -9,7 +9,7 @@ export const fieldsApi = baseApi.injectEndpoints({
       {
         growerId: number;
         farmId: number;
-        withBoundaries: boolean | undefined;
+        withActiveBoundary: boolean | undefined;
         withCrops: boolean | undefined;
       }
     >({
@@ -39,6 +39,13 @@ export const fieldsApi = baseApi.injectEndpoints({
         method: "GET",
       }),
     }),
+    deleteField: build.mutation<APIResponse<{}>, { fieldId: number }>({
+      query: (params) => ({
+        url: `/fields/${params.fieldId}`,
+        method: "DELETE",
+      }),
+      invalidatesTags: ["Fields"],
+    }),
   }),
   // TODO: Disable this in production
   // overrideExisting: true,
@@ -48,4 +55,5 @@ export const {
   useGetFieldsQuery,
   useCreateFieldMutation,
   useGetFieldDetailQuery,
+  useDeleteFieldMutation,
 } = fieldsApi;

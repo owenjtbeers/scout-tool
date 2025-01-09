@@ -6,10 +6,11 @@ import centroid from "@turf/centroid";
 
 interface GeojsonLayerGLProps {
   geojson: FeatureCollection;
-  ID: number;
+  ID: number | string;
   color: string;
   label?: string;
   fillOpacity?: number;
+  strokeWidth?: number;
 }
 export const GeojsonLayerGL = (props: GeojsonLayerGLProps) => {
   const { geojson, color, fillOpacity, ID, label } = props;
@@ -52,7 +53,7 @@ export const GeojsonLayerGL = (props: GeojsonLayerGLProps) => {
           }}
           paint={{
             "line-color": colorWithoutOpacity(color),
-            "line-width": 2, // Adjust the width as needed
+            "line-width": props.strokeWidth || 2, // Adjust the width as needed
           }}
         />
       </Source>

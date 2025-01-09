@@ -34,7 +34,6 @@ export const featureCollectionToLatLngCoordinates = (
       });
     }
   );
-  console.log("convertedPolygons", convertedPolygons.length, convertedPolygons);
   return convertedPolygons;
 };
 

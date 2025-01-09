@@ -51,8 +51,7 @@ const ServerReport = (props: CreateScoutingReportPageProps) => {
       id: Number(props.slug),
     },
     {
-      // TODO: Figure out the proper cache policy here
-      refetchOnMountOrArgChange: true,
+      refetchOnReconnect: true,
     }
   );
   if (isError) {
@@ -92,7 +91,7 @@ export default () => {
   } = useGetFieldsQuery({
     growerId: globalSelections?.grower?.ID as number,
     farmId: globalSelections?.farm?.ID as number,
-    withBoundaries: true,
+    withActiveBoundary: true,
     withCrops: true,
   });
 

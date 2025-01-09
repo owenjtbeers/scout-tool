@@ -1,4 +1,3 @@
-import { Button } from "@rneui/themed";
 import {
   Feature,
   featureCollection,
@@ -7,7 +6,7 @@ import {
 } from "@turf/helpers";
 import React, { useEffect } from "react";
 import { View } from "react-native";
-import MapView from "react-native-maps";
+import MapView, { MapRef } from "react-map-gl";
 import { useDispatch, useSelector } from "react-redux";
 import { defaultRegion } from "../../constants/constants";
 import { Field } from "../../redux/fields/types";
@@ -19,24 +18,24 @@ import {
   mapLatLngToCoordinates,
 } from "../../utils/latLngConversions";
 import DrawingInfoText from "../map-draw/DrawingInfoText";
-import { ScoutingMapContentManager } from "./ScoutingMapContentManager";
+import { ScoutingMapContentManager } from "./ScoutingMapContentManager.web";
 import { EmailScoutReportButton } from "./email/EmailScoutReportButton";
-import { ScoutingDrawingButtons } from "./scout-draw/ScoutingDrawingButtons";
-import { ScoutingDrawingManager } from "./scout-draw/ScoutingDrawingManager";
+import { ScoutingDrawingButtons } from "./scout-draw/ScoutingDrawingButtons.web";
+import { ScoutingDrawingManager } from "./scout-draw/ScoutingDrawingManager.web";
 
 import bbox from "@turf/bbox";
 import { type UseFormGetValues, type UseFormSetValue } from "react-hook-form";
 import { convertTurfBBoxToLatLng } from "../../utils/latLngConversions";
 import FreehandDrawing from "../map-draw/FreeHandDraw";
-import { MapUtilButtons } from "../map/components/MapUtilButtons";
-import { fitToBoundsForMapView } from "../map/utils";
+import { MapUtilButtons } from "../map/components/MapUtilButtons.web";
 import type { ScoutingReportForm } from "./types";
 import {
   convertPestPointsToScoutingArea,
   convertScoutingAreasToPestPoints,
 } from "./utils/pestPoints";
-import { get } from "react-native/Libraries/TurboModule/TurboModuleRegistry";
 import { ScoutingArea } from "../../redux/scouting/types";
+import { zoomToBBoxMapGL } from "../map/utilsMapbox";
+import { BBox2d } from "@turf/helpers/dist/js/lib/geojson";
 
 interface ScoutingReportMapViewProps {
   fields: Field[];
@@ -59,7 +58,7 @@ export const ScoutingReportMapView = (props: ScoutingReportMapViewProps) => {
 
   const dispatch = useDispatch();
   const initialRegion = useSelector((state: RootState) => state.map.region);
-  const mapRef = React.useRef<MapView>(null);
+  const mapRef = React.useRef<MapRef>(null);
 
   const [isProcessingEmail, setIsProcessingEmail] = React.useState(false);
 
@@ -218,8 +217,8 @@ export const ScoutingReportMapView = (props: ScoutingReportMapViewProps) => {
     const fieldBoundary = getFormValues("field.ActiveBoundary.Json");
     if (fieldBoundary && mapRef.current !== null) {
       const fc = featureCollection(fieldBoundary.features);
-      const bboxOfFields = bbox(fc);
-      fitToBoundsForMapView(mapRef, convertTurfBBoxToLatLng(bboxOfFields));
+      const bboxOfFields = bbox(fc) as BBox2d;
+      zoomToBBoxMapGL(mapRef, bboxOfFields);
     }
   }, [mapRef.current]);
 
@@ -233,18 +232,18 @@ export const ScoutingReportMapView = (props: ScoutingReportMapViewProps) => {
       />
       <MapView
         style={styles.map}
+        reuseMaps
+        mapboxAccessToken={process.env.MAPBOX_ACCESS_TOKEN}
+        mapStyle="mapbox://styles/mapbox/satellite-v9"
         ref={mapRef}
-        region={initialRegion || defaultRegion}
-        mapType={"hybrid"}
-        showsUserLocation={true}
-        showsMyLocationButton={false}
-        provider={"google"}
-        // @ts-ignore
-        googleMapsApiKey={process.env.EXPO_PUBLIC_GOOGLE_MAPS_WEB_API_KEY}
-        toolbarEnabled={false}
-        onPress={onPress}
-        scrollEnabled={!isDrawing}
-        zoomEnabled={!isDrawing}
+        initialViewState={
+          initialRegion || {
+            ...defaultRegion,
+            latitude: defaultRegion.latitude,
+            longitude: defaultRegion.longitude,
+          }
+        }
+        // onClick={onPress}
       >
         <ScoutingMapContentManager
           mapRef={mapRef}
@@ -254,11 +253,11 @@ export const ScoutingReportMapView = (props: ScoutingReportMapViewProps) => {
         <ScoutingDrawingManager mapRef={mapRef} />
       </MapView>
       <MapUtilButtons mapRef={mapRef} fields={fields} />
-      {isDrawing && drawMode === "polyline" ? (
+      {/* {isDrawing && drawMode === "polyline" ? (
         <FreehandDrawing mapRef={mapRef} />
-      ) : null}
-      <DrawingInfoText />
-      {isDrawingScoutingArea ? (
+      ) : null} */}
+      {/* <DrawingInfoText /> */}
+      {/* {isDrawingScoutingArea ? (
         <Button
           onPress={() => {
             const drawingState = drawingSlice.selectSlice(store.getState());
@@ -327,10 +326,10 @@ export const ScoutingReportMapView = (props: ScoutingReportMapViewProps) => {
           }}
           title={"Exit Drawing Mode"}
         ></Button>
-      ) : null}
-      {!isDrawing ? (
+      ) : null} */}
+      {/* {!isDrawing ? (
         <EmailScoutReportButton mapRef={mapRef} getFormValues={getFormValues} />
-      ) : null}
+      ) : null} */}
     </View>
   );
 };
