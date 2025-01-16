@@ -17,6 +17,7 @@ import {
   globalSelectionsSlice,
 } from "../../../redux/globalSelections/globalSelectionsSlice";
 import { useSelector } from "react-redux";
+import alert from "../../polyfill/Alert";
 
 const BUTTON_HEIGHT = 60;
 const BUTTON_WIDTH = 60;
@@ -64,7 +65,7 @@ const AnimatedMapActionButtons = () => {
         title="Add New Scouting Report"
         // Note: This serves to direct the user to the correct flow to add a scouting report
         onPress={() => {
-          Alert.alert(
+          alert(
             "Tap a field to add a scouting report",
             "If you have no fields, please add a field first."
           );
@@ -121,7 +122,7 @@ const SelectedFieldSpeedDialContents = (
         title="Add New Scouting Report For Single Field"
         onPress={() => {
           router.push(SCOUT_CREATE_REPORT_SCREEN);
-      }}
+        }}
         icon={<AntDesign name="addfile" size={24} />}
       />
       <SpeedDial.Action

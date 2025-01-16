@@ -8,9 +8,10 @@ import React, {
 
 import { ActivityIndicator, View } from "react-native";
 // Navigation
-import { Redirect, Slot } from "expo-router";
+import { Redirect, Slot, useRouter } from "expo-router";
 import {
   LOGIN_SCREEN,
+  VERIFICATION_EMAIL_PROMPT_SCREEN,
 } from "../../navigation/screens";
 import { colors } from "../../constants/styles";
 import { useSelector, useDispatch } from "react-redux";
@@ -25,7 +26,7 @@ interface AuthWrapperProps {
 }
 
 export default function AppLayout({ children }: AuthWrapperProps) {
-  const { session, isLoading, validate } = useSession();
+  const { session, isLoading, validate, signOut } = useSession();
 
   useEffect(() => {
     if (session) {
@@ -45,6 +46,7 @@ export default function AppLayout({ children }: AuthWrapperProps) {
 
   if (!session) {
     console.log("Redirecting to login screen");
+    signOut();
     return <Redirect href={LOGIN_SCREEN} />;
   }
 
@@ -78,8 +80,9 @@ export function useSession() {
 }
 
 export function SessionProvider({ children }: PropsWithChildren) {
-  const session = useSelector((state: RootState) => state.user.token);
+  let session = useSelector((state: RootState) => state.user.token);
   const isLoading = useSelector((state: RootState) => state.user.isLoading);
+  const router = useRouter();
   const [validate] = useValidateMutation();
   const dispatch = useDispatch();
   return (
@@ -89,12 +92,22 @@ export function SessionProvider({ children }: PropsWithChildren) {
           dispatch(userSlice.actions.setToken(token));
         },
         signOut: () => {
+          // Clear context
+          session = null;
           dispatch(userSlice.actions.logout());
         },
         validate: async () => {
           const response = await validate({});
+          console.log(response);
           if (!("data" in response)) {
             dispatch(userSlice.actions.logout());
+          } else if (
+            "error" in response &&
+            response.error.data &&
+            response.error.data?.verified === false
+          ) {
+            console.log("Redirecting to verification screen");
+            router.push(VERIFICATION_EMAIL_PROMPT_SCREEN);
           }
         },
         session,

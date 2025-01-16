@@ -20,3 +20,10 @@ export const SETTINGS_MANAGE_ORGANIZATION_SCREEN =
   "/home/settings/manage-organization";
 export const SETTINGS_MANAGE_CROPS_SCREEN = "/home/settings/manage-crops";
 export const SETTINGS_MANAGE_PESTS_SCREEN = "/home/settings/manage-pests";
+export const SETTINGS_MANAGE_WEEDS_SCREEN = "/home/settings/manage-weeds";
+export const SETTINGS_MANAGE_DISEASES_SCREEN = "/home/settings/manage-diseases";
+export const SETTINGS_MANAGE_INSECTS_SCREEN = "/home/settings/manage-insects";
+
+export const VERIFICATION_EMAIL_PROMPT_SCREEN = "/verify/prompt";
+export const VERIFICATION_EMAIL_SUCCESS_SCREEN = "/verify/success";
+export const VERIFICATION_EMAIL_FAILURE_SCREEN = "/verify/failure";

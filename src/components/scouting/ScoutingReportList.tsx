@@ -1,5 +1,13 @@
 import React from "react";
-import { Button, ListItem, Text, useTheme, Tab, TabView } from "@rneui/themed";
+import {
+  Button,
+  Dialog,
+  ListItem,
+  Text,
+  useTheme,
+  Tab,
+  TabView,
+} from "@rneui/themed";
 import { useRouter } from "expo-router";
 import {
   ActivityIndicator,
@@ -11,7 +19,10 @@ import {
 } from "react-native";
 import { useSelector } from "react-redux";
 import { GLOBAL_SELECTIONS_REDUCER_KEY } from "../../redux/globalSelections/globalSelectionsSlice";
-import { useGetScoutingReportsQuery } from "../../redux/scouting/scoutingApi";
+import {
+  useGetScoutingReportsQuery,
+  useDeleteScoutingReportMutation,
+} from "../../redux/scouting/scoutingApi";
 import { RootState } from "../../redux/store";
 import { Ionicons } from "@expo/vector-icons";
 import { useDispatch } from "react-redux";
@@ -26,6 +37,7 @@ import {
   removeDraftedReport,
 } from "../../redux/scouting/scoutingSlice";
 import { ScoutingReportForm } from "./types";
+import alert from "../polyfill/Alert";
 
 export const ScoutingReportList: React.FC = () => {
   const { theme } = useTheme();
@@ -139,6 +151,11 @@ const ScoutingReportListComponent = (
   const { isLoading, sortedData, isRefreshing, onRefresh } = props;
   const { theme } = useTheme();
   const router = useRouter();
+  const [deleteScoutingReport, { isLoading: isDeleting }] =
+    useDeleteScoutingReportMutation();
+  const [selectedScoutingReport, setSelectedScoutingReport] =
+    React.useState<APIScoutingReport | null>(null);
+  const [deleteDialogVisible, setDeleteDialogVisible] = React.useState(false);
   return (
     <ScrollView
       refreshControl={
@@ -183,10 +200,17 @@ const ScoutingReportListComponent = (
                 </ListItem.Subtitle>
               </ListItem.Content>
             </ListItem.Content>
+            <Button
+              icon={{ name: "delete", size: 34, color: theme.colors.secondary }}
+              onPress={() => {
+                setSelectedScoutingReport(scoutingReport);
+                setDeleteDialogVisible(true);
+              }}
+            />
             <ListItem.Chevron
               size={50}
               color={theme.colors.secondary}
-              backgroundColor={theme.colors.primary}
+              containerStyle={{ backgroundColor: theme.colors.primary }}
               onPress={() => {
                 router.push(
                   SCOUT_REPORT_EDIT_SCREEN.replace(
@@ -198,6 +222,34 @@ const ScoutingReportListComponent = (
             />
           </ListItem>
         ))}
+      <Dialog isVisible={deleteDialogVisible}>
+        <Dialog.Title title={"Delete Scouting Report"}></Dialog.Title>
+        {/* <Dialog.Content> */}
+        <Text style={{ display: "flex" }}>
+          {`Are you sure you want to delete Scouting Report #${selectedScoutingReport?.ID}?`}
+        </Text>
+        {/* </Dialog.Content> */}
+        <Dialog.Actions>
+          <Button
+            onPress={() => {
+              setDeleteDialogVisible(false);
+            }}
+          >
+            Cancel
+          </Button>
+          <Button
+            onPress={async () => {
+              setDeleteDialogVisible(false);
+              if (selectedScoutingReport && selectedScoutingReport.ID) {
+                await deleteScoutingReport({ id: selectedScoutingReport.ID });
+              }
+            }}
+            loading={isDeleting}
+          >
+            Delete
+          </Button>
+        </Dialog.Actions>
+      </Dialog>
       {!isLoading && !sortedData?.length && (
         <Text h4 style={styles.emptyText}>
           No scouting reports found with this status:{"\n"}
@@ -272,7 +324,7 @@ const DraftedScoutingReportListComponent = (
             <Button
               icon={{ name: "delete", size: 32, color: theme.colors.secondary }}
               onPress={() => {
-                Alert.alert(
+                alert(
                   "Delete Drafted Report",
                   "Are you sure you want to delete this drafted report?",
                   [

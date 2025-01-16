@@ -7,13 +7,18 @@ import { useDispatch } from "react-redux";
 import { useRouter } from "expo-router";
 import { Octicons, Entypo, MaterialIcons } from "@expo/vector-icons";
 import { useSignupUserMutation } from "../../../src/redux/user/userApi";
-import { HOME_MAP_SCREEN, LOGIN_SCREEN } from "../../../src/navigation/screens";
+import {
+  HOME_MAP_SCREEN,
+  LOGIN_SCREEN,
+  VERIFICATION_EMAIL_PROMPT_SCREEN,
+} from "../../../src/navigation/screens";
 import { userSlice } from "../../../src/redux/user/userSlice";
 import { Dialog } from "@rneui/themed";
 import { getErrorMessage } from "../../utils/errors";
 import { validation } from "../../forms/validationFunctions";
 import { validationRules } from "../../forms/validationRules";
 import { useTheme } from "@rneui/themed";
+import EmailVerificationSuccess from "../verification/EmailVerificationSuccess";
 
 interface FormData {
   email: string;
@@ -36,16 +41,8 @@ export const Signup = () => {
     formData.email = formData.email.toLowerCase();
     const response = await signupUser(formData);
     const { data: responseData, error } = response;
-    if (responseData && responseData.data) {
-      if (responseData.data.token) {
-        dispatch(userSlice.actions.setToken(responseData.data.token));
-        dispatch(userSlice.actions.setCurrentUser(responseData.data.user));
-        router.push(HOME_MAP_SCREEN);
-      } else {
-        setMessage(
-          "Error Creating Account: No Token Returned, Try logging in with your new account"
-        );
-      }
+    if (responseData) {
+      router.push(VERIFICATION_EMAIL_PROMPT_SCREEN);
     } else if (error) {
       const errorMessage = getErrorMessage(response);
       setMessage(`Error Creating Account: ${errorMessage}`);
@@ -68,6 +65,7 @@ export const Signup = () => {
             onChangeText={onChange}
             value={value}
             placeholder="First Name"
+            textContentType="givenName"
             errorMessage={error?.message}
             leftIcon={
               <Octicons
@@ -93,6 +91,7 @@ export const Signup = () => {
             onChangeText={onChange}
             value={value}
             placeholder="Last Name"
+            textContentType="familyName"
             // autoCapitalize="none"
             errorMessage={error?.message}
             leftIcon={
@@ -119,6 +118,7 @@ export const Signup = () => {
             onChangeText={onChange}
             value={value}
             placeholder="Email"
+            textContentType="emailAddress"
             autoCapitalize="none"
             errorMessage={error?.message}
             leftIcon={
@@ -146,6 +146,7 @@ export const Signup = () => {
             onChangeText={onChange}
             value={value}
             placeholder="Password"
+            textContentType="password"
             autoCapitalize="none"
             secureTextEntry={!showPassword}
             errorMessage={error?.message}
@@ -181,6 +182,7 @@ export const Signup = () => {
             value={value}
             placeholder="Organization Name"
             errorMessage={error?.message}
+            textContentType="organizationName"
             leftIcon={
               <Octicons
                 name="organization"

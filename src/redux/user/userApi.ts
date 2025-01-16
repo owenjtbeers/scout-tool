@@ -18,7 +18,7 @@ export const userApi = baseApi.injectEndpoints({
       providesTags: ["User"],
     }),
     signupUser: builder.mutation<
-      APIResponse<{ user: ScoutingAppUser; token: string }>,
+      APIResponse<{ message: string }>,
       {
         email: string;
         password: string;

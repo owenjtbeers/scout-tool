@@ -21,8 +21,19 @@ export const authApi = baseApi.injectEndpoints({
       }),
       invalidatesTags: ["Token"],
     }),
+    resendVerificationEmail: builder.mutation({
+      query: (email: string) => ({
+        url: "/auth/resend-verification-email",
+        method: "POST",
+        data: { email },
+      }),
+    }),
   }),
 });
 
 // Export hooks for usage in components
-export const { useLoginMutation, useValidateMutation } = authApi;
+export const {
+  useLoginMutation,
+  useValidateMutation,
+  useResendVerificationEmailMutation,
+} = authApi;

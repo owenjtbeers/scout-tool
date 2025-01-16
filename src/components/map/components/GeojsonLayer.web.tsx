@@ -3,6 +3,7 @@ import { colorWithoutOpacity } from "../../../redux/crops/utils";
 import { Source, Layer } from "react-map-gl";
 import { FeatureCollection, GeoJSONObject } from "@turf/helpers";
 import centroid from "@turf/centroid";
+import { colors } from "../../../constants/styles";
 
 interface GeojsonLayerGLProps {
   geojson: FeatureCollection;
@@ -39,9 +40,9 @@ export const GeojsonLayerGL = (props: GeojsonLayerGLProps) => {
           id={`fill-field-${ID}`}
           type={"fill"}
           paint={{
-            "fill-color": colorWithoutOpacity(color),
+            "fill-color": colorWithoutOpacity(color) || colors.primary,
             "fill-opacity": fillOpacity || 0.5,
-            "fill-outline-color": colorWithoutOpacity(color),
+            "fill-outline-color": colorWithoutOpacity(color) || colors.primary,
           }}
         />
         <Layer
@@ -52,7 +53,7 @@ export const GeojsonLayerGL = (props: GeojsonLayerGLProps) => {
             "line-join": "round",
           }}
           paint={{
-            "line-color": colorWithoutOpacity(color),
+            "line-color": colorWithoutOpacity(color) || colors.primary,
             "line-width": props.strokeWidth || 2, // Adjust the width as needed
           }}
         />

@@ -91,6 +91,24 @@ export const scoutingApi = baseApi.injectEndpoints({
         "OrgInsects",
       ],
     }),
+    deleteScoutingReport: build.mutation<
+      APIResponse<APIScoutingReport>,
+      { id: number }
+    >({
+      query: ({ id }) => ({
+        url: `/scouting/scout-report/${id}`,
+        method: "DELETE",
+      }),
+      invalidatesTags: ["ScoutingReports"],
+    }),
+    createOrgWeed: build.mutation<APIResponse<OrgWeed>, Partial<OrgWeed>>({
+      query: (data) => ({
+        url: "/scouting/org-weed",
+        method: "POST",
+        data,
+      }),
+      invalidatesTags: ["OrgWeeds"],
+    }),
   }),
 });
 
@@ -102,4 +120,6 @@ export const {
   useGetOrgWeedsQuery,
   useGetOrgDiseasesQuery,
   useGetOrgInsectsQuery,
+  useCreateOrgWeedMutation,
+  useDeleteScoutingReportMutation,
 } = scoutingApi;

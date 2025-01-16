@@ -110,6 +110,7 @@ export const MapContentManager = (props: MapContentManagerProps) => {
               ID={field.ID}
               fillOpacity={0.5}
               label={field.Name}
+              key={`field-${field.ID}`}
             />
           );
         })}

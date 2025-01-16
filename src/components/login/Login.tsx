@@ -127,7 +127,7 @@ export const Login = () => {
 
         <Button title="Login" onPress={handleSubmit(onSubmit)} />
       </View>
-      {Platform.OS !== "web" && (
+      {(Platform.OS !== "web" || true) && (
         <Link style={styles.link} href={SIGNUP_SCREEN}>
           Don't have an account? Sign up here
         </Link>

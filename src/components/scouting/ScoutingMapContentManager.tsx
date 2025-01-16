@@ -81,7 +81,7 @@ export const ScoutingMapContentManager = (props: MapContentManagerProps) => {
                     // iOS. Not sure why this is the case, but it's a workaround for now.
                     <Polyline
                       key={`fieldboundary-polygon-${index}`}
-                      coordinates={feature}
+                      coordinates={feature[0]}
                       strokeColor={"red"}
                       strokeWidth={DEFAULT_POLYLINE_STROKE_WIDTH}
                     />
