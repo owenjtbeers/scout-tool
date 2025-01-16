@@ -15,6 +15,7 @@ import { useLoginMutation } from "../../../src/redux/auth/authApi";
 import {
   HOME_MAP_SCREEN,
   SIGNUP_SCREEN,
+  VERIFICATION_EMAIL_PROMPT_SCREEN,
 } from "../../../src/navigation/screens";
 import { userSlice } from "../../../src/redux/user/userSlice";
 import { Dialog, useTheme } from "@rneui/themed";
@@ -132,6 +133,9 @@ export const Login = () => {
           Don't have an account? Sign up here
         </Link>
       )}
+      <Link style={styles.link} href={VERIFICATION_EMAIL_PROMPT_SCREEN}>
+        Problems with your verification email?
+      </Link>
       <Dialog
         onBackdropPress={() => setError(null)}
         isVisible={!!error}
