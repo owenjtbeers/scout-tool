@@ -37,6 +37,7 @@ const EmailVerificationSuccess: React.FC = () => {
           setTimeout(() => {
             setIsResendEmailButtonActive(true);
           }, 15000);
+          setIsResendEmailFormVisible(false);
         }}
         onCancel={() => {
           setIsResendEmailFormVisible(false);

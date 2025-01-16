@@ -8,7 +8,7 @@
     "android": "expo run:android",
     "ios": "expo run:ios",
     "android:local": "expo run:android",
-    "ios:local": "expo run:ios",
+    "ios:local": "expo run:ios --device",
     "web": "NODE_ENV=development expo start --web",
     "web:fresh": "expo start -c --web",
     "web:predeploy": "NODE_ENV=production expo export -c -p web",

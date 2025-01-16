@@ -16,6 +16,9 @@ Android `npx expo run:android`
 ios `npx expo run:ios`
 
 For connecting to an iOS local device https://github.com/expo/expo/pull/28802
+Look around for the switch statement, and the files linked in that pull request
+--> This will make the device show up in the list of devices in the next command
+Make sure to run `npx expo run:ios --device`
 
 ## Deploying for Web
 
