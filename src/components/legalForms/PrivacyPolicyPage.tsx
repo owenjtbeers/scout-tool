@@ -1,4 +1,5 @@
 import React from "react";
+import { ScrollView } from "react-native";
 import { Text } from "@rneui/themed";
 
 const privacyPolicyString = `Privacy Policy
@@ -95,12 +96,12 @@ Address: [Insert Mailing Address]`;
 
 const PrivacyPolicyPage = () => {
   return (
-    <div>
+    <ScrollView>
       <h1>Privacy Policy</h1>
       <p>Effective Date: Jan 16, 2025</p>
       <p>
-        Grounded Agri-Tools Inc. ("we," "our," or "us") respects your privacy and is
-        committed to protecting your personal data. This Privacy Policy
+        Grounded Agri-Tools Inc. ("we," "our," or "us") respects your privacy
+        and is committed to protecting your personal data. This Privacy Policy
         describes how we collect, use, and safeguard the information you provide
         to us through our mobile application (the "App"). By using the App, you
         agree to the terms outlined in this Privacy Policy.
@@ -194,7 +195,7 @@ const PrivacyPolicyPage = () => {
         <li>Restrict or object to certain processing activities.</li>
         <li>Withdraw your consent where processing is based on consent.</li>
       </ul>
-      <p>To exercise these rights, contact us at [Insert Contact Email].</p>
+      <p>To exercise these rights, contact us at admin@groundedag.com</p>
 
       <h2>6. Data Retention</h2>
       <p>
@@ -232,7 +233,7 @@ const PrivacyPolicyPage = () => {
       </p>
       <p>Email: admin@groundedag.com</p>
       {/* <p>Address: [Insert Mailing Address]</p> */}
-    </div>
+    </ScrollView>
   );
 };
 

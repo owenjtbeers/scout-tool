@@ -37,9 +37,8 @@
     },
     "web": {
       "favicon": "./assets/favicon.png",
-      "bundler": "metro"
+      "bundler": "metro" // ,"output": "static"
       // NOTE: This is needed to run the predeploy command
-      // "output": "static"
     },
     "experiments": {
       "baseUrl": "/"
